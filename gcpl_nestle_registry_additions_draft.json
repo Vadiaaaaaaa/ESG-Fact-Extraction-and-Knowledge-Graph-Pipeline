@@ -1,0 +1,450 @@
+[
+  {
+    "canonical_id": "ghg_emission_intensity",
+    "verdict": "LABEL_EXISTING_CANONICAL",
+    "existing_id": "ghg_emissions_intensity",
+    "action": "Add semantic labels to existing canonical - do NOT mint new.",
+    "semantic_labels": {
+      "metric_subject": "emissions",
+      "metric_role": "intensity",
+      "flow_direction": "ratio",
+      "denominator_type": "production",
+      "comparable": true,
+      "comparability_notes": "Comparable when denominator unit is consistent."
+    },
+    "external_refs": [
+      {"standard": "GRI", "id": "GRI 305-4", "label": "GHG emissions intensity"},
+      {"standard": "BRSR", "id": "Principle 6 Essential", "label": "GHG emissions intensity per unit output"}
+    ],
+    "recurrence": ["GCPL", "Nestle"],
+    "review_status": "pending_human_approval"
+  },
+  {
+    "canonical_id": "waste_diverted_from_landfill",
+    "verdict": "LABEL_EXISTING_CANONICAL",
+    "existing_id": "waste_diverted_from_landfill",
+    "action": "Add semantic labels to existing canonical.",
+    "semantic_labels": {
+      "metric_subject": "waste",
+      "metric_role": "diversion",
+      "flow_direction": "recovery",
+      "denominator_type": null,
+      "comparable": true
+    },
+    "external_refs": [
+      {"standard": "GRI", "id": "GRI 306-4", "label": "Waste diverted from disposal"},
+      {"standard": "BRSR", "id": "Principle 6 Essential", "label": "Waste diverted from landfill"}
+    ],
+    "recurrence": ["GCPL", "Nestle"],
+    "review_status": "pending_human_approval"
+  },
+  {
+    "canonical_id": "combined_scope_1_2_emissions",
+    "verdict": "LABEL_EXISTING_CANONICAL",
+    "existing_id": "combined_scope_1_2_emissions",
+    "action": "Add semantic labels. This is the absolute GHG total most companies report.",
+    "semantic_labels": {
+      "metric_subject": "emissions",
+      "metric_role": "generation",
+      "flow_direction": "output",
+      "denominator_type": null,
+      "comparable": true,
+      "comparability_notes": "Comparable in absolute terms. Scope boundary must be confirmed."
+    },
+    "external_refs": [
+      {"standard": "GRI", "id": "GRI 305-1,305-2", "label": "Scope 1 and Scope 2 GHG emissions"},
+      {"standard": "BRSR", "id": "Principle 6 Essential", "label": "Greenhouse gas emissions Scope 1+2"}
+    ],
+    "recurrence": ["GCPL", "Nestle"],
+    "review_status": "pending_human_approval"
+  },
+  {
+    "canonical_id": "nox_emissions_absolute",
+    "display_name": "NOx Emissions (Absolute)",
+    "category": "emissions",
+    "unit_family": "weight",
+    "metric_subject": "emissions",
+    "metric_role": "generation",
+    "flow_direction": "output",
+    "denominator_type": null,
+    "comparable": true,
+    "aliases": ["nox emissions", "NOx emissions", "nitrogen oxide emissions", "NOx", "oxides of nitrogen emissions"],
+    "external_refs": [
+      {"standard": "GRI", "id": "GRI 305-7", "label": "Nitrogen oxides (NOx)"},
+      {"standard": "BRSR", "id": "Principle 6 Essential", "label": "NOx emissions"}
+    ],
+    "canonical_definition": "Total nitrogen oxide (NOx) emissions from operations.",
+    "recurrence": ["GCPL"],
+    "review_status": "pending_human_approval"
+  },
+  {
+    "canonical_id": "sox_emissions_absolute",
+    "display_name": "SOx Emissions (Absolute)",
+    "category": "emissions",
+    "unit_family": "weight",
+    "metric_subject": "emissions",
+    "metric_role": "generation",
+    "flow_direction": "output",
+    "denominator_type": null,
+    "comparable": true,
+    "aliases": ["sox emissions", "SOx emissions", "sulphur oxide emissions", "SOx", "oxides of sulphur emissions", "sulphur dioxide emissions"],
+    "external_refs": [
+      {"standard": "GRI", "id": "GRI 305-7", "label": "Sulfur oxides (SOx)"},
+      {"standard": "BRSR", "id": "Principle 6 Essential", "label": "SOx emissions"}
+    ],
+    "canonical_definition": "Total sulphur oxide (SOx) emissions from operations.",
+    "recurrence": ["GCPL"],
+    "review_status": "pending_human_approval"
+  },
+  {
+    "canonical_id": "energy_saved_absolute",
+    "display_name": "Energy Saved (Absolute)",
+    "category": "energy",
+    "unit_family": "energy",
+    "metric_subject": "energy",
+    "metric_role": "conservation",
+    "flow_direction": "avoided",
+    "denominator_type": null,
+    "comparable": true,
+    "comparability_notes": "Comparable as absolute savings. Baseline methodology may differ.",
+    "aliases": ["energy saving", "energy savings", "annual energy savings", "annual energy saving", "energy consumption savings", "savings in energy consumption", "power consumption savings"],
+    "external_refs": [
+      {"standard": "GRI", "id": "GRI 302-4", "label": "Reduction of energy consumption"},
+      {"standard": "BRSR", "id": "Principle 6 Essential", "label": "Energy conservation measures"}
+    ],
+    "canonical_definition": "Total energy saved through conservation and efficiency initiatives during the reporting period.",
+    "recurrence": ["GCPL"],
+    "review_status": "pending_human_approval"
+  },
+  {
+    "canonical_id": "water_saved_absolute",
+    "display_name": "Water Saved (Absolute)",
+    "category": "water",
+    "unit_family": "volume",
+    "metric_subject": "water",
+    "metric_role": "conservation",
+    "flow_direction": "avoided",
+    "denominator_type": null,
+    "comparable": true,
+    "comparability_notes": "Comparable as absolute savings. Baseline methodology may differ.",
+    "aliases": ["water saving", "water savings", "annual water savings", "water consumption savings", "water conservation"],
+    "external_refs": [
+      {"standard": "GRI", "id": "GRI 303-5", "label": "Water consumption reduction"},
+      {"standard": "BRSR", "id": "Principle 6 Essential", "label": "Water conservation"}
+    ],
+    "canonical_definition": "Total water saved through conservation and efficiency initiatives during the reporting period.",
+    "recurrence": ["GCPL", "Nestle"],
+    "review_status": "pending_human_approval"
+  },
+  {
+    "canonical_id": "water_consumption_absolute",
+    "display_name": "Water Consumption (Absolute)",
+    "category": "water",
+    "unit_family": "volume",
+    "metric_subject": "water",
+    "metric_role": "consumption",
+    "flow_direction": "consumed",
+    "denominator_type": null,
+    "comparable": true,
+    "comparability_notes": "Distinct from water withdrawal. Consumption = withdrawal minus discharge returned to source.",
+    "aliases": ["water consumption", "total water consumption", "total volume of water consumption", "water consumed", "water use"],
+    "external_refs": [
+      {"standard": "GRI", "id": "GRI 303-5", "label": "Water consumption"},
+      {"standard": "BRSR", "id": "Principle 6 Essential", "label": "Water consumption"}
+    ],
+    "canonical_definition": "Total water consumed by operations, net of water returned to source. Distinct from water withdrawal.",
+    "recurrence": ["GCPL", "Nestle"],
+    "review_status": "pending_human_approval"
+  },
+  {
+    "canonical_id": "rainwater_harvested",
+    "display_name": "Rainwater Harvested",
+    "category": "water",
+    "unit_family": "volume",
+    "metric_subject": "water",
+    "metric_role": "harvest",
+    "flow_direction": "restoration",
+    "denominator_type": null,
+    "comparable": true,
+    "aliases": ["rainwater harvesting", "rain water harvesting", "rainwater harvested", "water harvested", "water harvesting volume"],
+    "external_refs": [
+      {"standard": "GRI", "id": "GRI 303-1", "label": "Water from rainwater harvesting"},
+      {"standard": "BRSR", "id": "Principle 6 Essential", "label": "Rainwater harvesting"}
+    ],
+    "canonical_definition": "Volume of rainwater collected and harvested through rooftop or other collection systems.",
+    "recurrence": ["GCPL"],
+    "review_status": "pending_human_approval"
+  },
+  {
+    "canonical_id": "water_conservation_investment",
+    "display_name": "Water Conservation Investment",
+    "category": "water",
+    "unit_family": "monetary",
+    "metric_subject": "water",
+    "metric_role": "investment",
+    "flow_direction": "input",
+    "denominator_type": null,
+    "comparable": false,
+    "comparability_notes": "Not comparable across companies due to different scopes and accounting.",
+    "aliases": ["water conservation capex", "water conservation investment", "water conservation initiative investment", "water conservation CAPEX"],
+    "external_refs": [
+      {"standard": "BRSR", "id": "Principle 6 Essential", "label": "Investment in water conservation"}
+    ],
+    "canonical_definition": "Capital or operating expenditure on water conservation and efficiency initiatives.",
+    "recurrence": ["GCPL"],
+    "review_status": "pending_human_approval"
+  },
+  {
+    "canonical_id": "energy_conservation_investment",
+    "display_name": "Energy Conservation Investment",
+    "category": "energy",
+    "unit_family": "monetary",
+    "metric_subject": "energy",
+    "metric_role": "investment",
+    "flow_direction": "input",
+    "denominator_type": null,
+    "comparable": false,
+    "comparability_notes": "Not comparable across companies.",
+    "aliases": ["total expense on energy savings initiatives", "capital investment energy savings", "energy conservation capex", "energy efficiency investment"],
+    "external_refs": [
+      {"standard": "BRSR", "id": "Principle 6 Essential", "label": "Investment in energy conservation"}
+    ],
+    "canonical_definition": "Capital or operating expenditure on energy conservation and efficiency initiatives.",
+    "recurrence": ["GCPL"],
+    "review_status": "pending_human_approval"
+  },
+  {
+    "canonical_id": "waste_to_landfill",
+    "display_name": "Waste to Landfill",
+    "category": "waste",
+    "unit_family": "weight",
+    "metric_subject": "waste",
+    "metric_role": "disposal",
+    "flow_direction": "output",
+    "denominator_type": null,
+    "comparable": true,
+    "aliases": ["waste to landfill", "waste sent to landfill", "waste landfilled", "landfill waste"],
+    "external_refs": [
+      {"standard": "GRI", "id": "GRI 306-5", "label": "Waste directed to disposal - landfill"},
+      {"standard": "BRSR", "id": "Principle 6 Essential", "label": "Waste to landfill"}
+    ],
+    "canonical_definition": "Total waste sent to landfill. Distinct from total waste disposed (which includes incineration).",
+    "note": "waste_disposed_by_landfill is a dimension under waste_disposed_total. This canonical is for the standalone total when reported without method breakdown.",
+    "recurrence": ["GCPL"],
+    "review_status": "pending_human_approval"
+  },
+  {
+    "canonical_id": "plastic_packaging_recyclable_share",
+    "display_name": "Recyclable Plastic Packaging Share",
+    "category": "waste",
+    "unit_family": "percentage",
+    "metric_subject": "waste",
+    "metric_role": "intensity",
+    "flow_direction": "ratio",
+    "denominator_type": null,
+    "comparable": true,
+    "comparability_notes": "Comparable when recyclability definition is consistent (design for recyclability vs certified recyclable).",
+    "aliases": ["recyclable plastic share", "percentage of recyclable plastic", "plastic recyclability", "plastic used to be recyclable", "recyclable plastic", "recyclable plastic packaging", "plastic packaging recyclable"],
+    "external_refs": [
+      {"standard": "GRI", "id": "GRI 306-2", "label": "Recyclable packaging"},
+      {"standard": "BRSR", "id": "Principle 2 EPR", "label": "Recyclable plastic packaging share"}
+    ],
+    "canonical_definition": "Percentage of plastic packaging that is designed to be recyclable.",
+    "recurrence": ["GCPL"],
+    "review_status": "pending_human_approval"
+  },
+  {
+    "canonical_id": "plastic_packaging_consumed",
+    "display_name": "Plastic Packaging Consumed",
+    "category": "waste",
+    "unit_family": "weight",
+    "metric_subject": "waste",
+    "metric_role": "consumption",
+    "flow_direction": "input",
+    "denominator_type": null,
+    "comparable": true,
+    "aliases": ["plastic packaging consumption", "plastic packaging footprint", "plastic packaging consumed", "plastic packaging used", "total plastic packaging", "plastic packaging managed"],
+    "external_refs": [
+      {"standard": "GRI", "id": "GRI 301-1", "label": "Materials used - plastic packaging"},
+      {"standard": "BRSR", "id": "Principle 2 EPR", "label": "Plastic packaging consumed"}
+    ],
+    "canonical_definition": "Total weight of plastic packaging material consumed or used in products.",
+    "recurrence": ["GCPL", "Nestle"],
+    "review_status": "pending_human_approval"
+  },
+  {
+    "canonical_id": "plastic_packaging_intensity",
+    "display_name": "Plastic Packaging Intensity",
+    "category": "waste",
+    "unit_family": "ratio",
+    "metric_subject": "waste",
+    "metric_role": "intensity",
+    "flow_direction": "ratio",
+    "denominator_type": "production",
+    "comparable": true,
+    "comparability_notes": "Comparable when denominator unit is consistent.",
+    "aliases": ["plastic intensity", "plastic packaging intensity", "plastic intensity reduction", "plastic per unit", "plastic per tonne"],
+    "external_refs": [
+      {"standard": "GRI", "id": "GRI 301-1", "label": "Material intensity - plastic"},
+      {"standard": "BRSR", "id": "Principle 2 EPR", "label": "Plastic packaging intensity"}
+    ],
+    "canonical_definition": "Plastic packaging used per unit of physical production output.",
+    "recurrence": ["GCPL"],
+    "review_status": "pending_human_approval"
+  },
+  {
+    "canonical_id": "plastic_recycled_total",
+    "display_name": "Total Plastic Recycled (Pre and Post Consumer)",
+    "category": "waste",
+    "unit_family": "weight",
+    "metric_subject": "waste",
+    "metric_role": "recovery",
+    "flow_direction": "recovery",
+    "denominator_type": null,
+    "comparable": true,
+    "aliases": ["pre and post-consumer plastic recycling", "total plastic recycled", "plastic recycled", "pre post consumer plastic recycling"],
+    "external_refs": [
+      {"standard": "GRI", "id": "GRI 306-4", "label": "Waste diverted from disposal - recycled"},
+      {"standard": "BRSR", "id": "Principle 2 EPR", "label": "Total plastic recycled"}
+    ],
+    "canonical_definition": "Total plastic waste recycled including both pre-consumer (manufacturing) and post-consumer sources.",
+    "note": "Distinct from post_consumer_plastic_recycled which covers only post-consumer. Use this when the company reports a combined figure.",
+    "recurrence": ["GCPL"],
+    "review_status": "pending_human_approval"
+  },
+  {
+    "canonical_id": "water_withdrawal_high_stress",
+    "display_name": "Water Withdrawal from High Water-Stress Areas",
+    "category": "water",
+    "unit_family": "percentage",
+    "metric_subject": "water",
+    "metric_role": "withdrawal",
+    "flow_direction": "input",
+    "denominator_type": null,
+    "comparable": true,
+    "comparability_notes": "Comparable when stress area classification (WRI Aqueduct or equivalent) is consistent.",
+    "aliases": ["water withdrawal from high water-stress areas", "water withdrawal high stress", "water from stressed areas", "water withdrawal stress areas"],
+    "external_refs": [
+      {"standard": "GRI", "id": "GRI 303-1", "label": "Water withdrawal in water-stressed areas"},
+      {"standard": "BRSR", "id": "Principle 6 Essential", "label": "Water withdrawal from stressed areas"}
+    ],
+    "canonical_definition": "Share or volume of water withdrawn from locations identified as high or extremely high water-stressed areas.",
+    "recurrence": ["GCPL"],
+    "review_status": "pending_human_approval"
+  },
+  {
+    "canonical_id": "scope_3_emissions_absolute",
+    "display_name": "Scope 3 GHG Emissions (Absolute)",
+    "category": "emissions",
+    "unit_family": "weight",
+    "metric_subject": "emissions",
+    "metric_role": "generation",
+    "flow_direction": "output",
+    "denominator_type": null,
+    "comparable": false,
+    "comparability_notes": "Not directly comparable. Scope 3 boundary and category coverage varies significantly by company.",
+    "aliases": ["total scope 3 emissions", "scope 3 emissions", "Scope 3 GHG emissions", "indirect emissions scope 3", "value chain emissions"],
+    "external_refs": [
+      {"standard": "GRI", "id": "GRI 305-3", "label": "Other indirect (Scope 3) GHG emissions"},
+      {"standard": "BRSR", "id": "Principle 6 Leadership", "label": "Scope 3 emissions"}
+    ],
+    "canonical_definition": "Total indirect greenhouse gas emissions from value chain activities (Scope 3), covering categories reported by the company.",
+    "recurrence": ["Nestle"],
+    "review_status": "pending_human_approval"
+  },
+  {
+    "canonical_id": "e_waste_generated",
+    "display_name": "E-Waste Generated",
+    "category": "waste",
+    "unit_family": "weight",
+    "metric_subject": "waste",
+    "metric_role": "generation",
+    "flow_direction": "output",
+    "denominator_type": null,
+    "comparable": true,
+    "aliases": ["e-waste", "ewaste", "e-waste generated", "electronic waste", "E-waste", "e waste generated"],
+    "external_refs": [
+      {"standard": "GRI", "id": "GRI 306-3", "label": "Waste generated - electronic"},
+      {"standard": "BRSR", "id": "Principle 6 Essential", "label": "E-waste generated"}
+    ],
+    "canonical_definition": "Total electronic waste generated from operations.",
+    "recurrence": ["Nestle"],
+    "review_status": "pending_human_approval"
+  },
+  {
+    "canonical_id": "water_discharged_surface_treated",
+    "display_name": "Water Discharged to Surface Water (Treated)",
+    "category": "water",
+    "unit_family": "volume",
+    "metric_subject": "water",
+    "metric_role": "discharge",
+    "flow_direction": "output",
+    "denominator_type": null,
+    "comparable": true,
+    "aliases": ["water discharge to surface water with treatment", "treated water discharged to surface", "water discharged surface treated"],
+    "external_refs": [
+      {"standard": "GRI", "id": "GRI 303-3", "label": "Water discharged - surface water, with treatment"},
+      {"standard": "BRSR", "id": "Principle 6 Essential", "label": "Water discharged with treatment"}
+    ],
+    "canonical_definition": "Volume of water discharged to surface water bodies after treatment.",
+    "note": "Dimensional breakdown of water_discharged_total (destination=surface_water, treatment=yes).",
+    "recurrence": ["Nestle"],
+    "review_status": "pending_human_approval"
+  },
+  {
+    "canonical_id": "construction_demolition_waste",
+    "display_name": "Construction and Demolition Waste",
+    "category": "waste",
+    "unit_family": "weight",
+    "metric_subject": "waste",
+    "metric_role": "generation",
+    "flow_direction": "output",
+    "denominator_type": null,
+    "comparable": true,
+    "aliases": ["construction and demolition waste", "C&D waste", "construction demolition waste", "building waste"],
+    "external_refs": [
+      {"standard": "GRI", "id": "GRI 306-3", "label": "Waste generated - construction and demolition"}
+    ],
+    "canonical_definition": "Total construction and demolition waste generated from operations.",
+    "recurrence": ["Nestle"],
+    "review_status": "pending_human_approval"
+  },
+  {
+    "canonical_id": "pre_consumer_plastic_recycling_rate",
+    "display_name": "Pre-Consumer Plastic Recycling Rate",
+    "category": "waste",
+    "unit_family": "percentage",
+    "metric_subject": "waste",
+    "metric_role": "recovery",
+    "flow_direction": "ratio",
+    "denominator_type": null,
+    "comparable": true,
+    "aliases": ["pre-consumer plastic packaging waste recycling rate", "pre consumer plastic recycling rate", "pre-consumer plastic recycling"],
+    "external_refs": [
+      {"standard": "BRSR", "id": "Principle 2 EPR", "label": "Pre-consumer plastic recycling rate"},
+      {"standard": "GRI", "id": "GRI 306-4", "label": "Waste diverted - pre-consumer recycling"}
+    ],
+    "canonical_definition": "Percentage of pre-consumer (manufacturing scrap) plastic packaging waste that is recycled.",
+    "recurrence": ["Nestle"],
+    "review_status": "pending_human_approval"
+  },
+  {
+    "canonical_id": "virgin_plastic_eliminated",
+    "display_name": "Virgin Plastic Eliminated",
+    "category": "waste",
+    "unit_family": "weight",
+    "metric_subject": "waste",
+    "metric_role": "reduction",
+    "flow_direction": "avoided",
+    "denominator_type": null,
+    "comparable": true,
+    "aliases": ["virgin plastic eliminated", "virgin plastic reduction", "virgin plastic removed", "virgin plastic avoided"],
+    "external_refs": [
+      {"standard": "GRI", "id": "GRI 301-2", "label": "Recycled input materials used"},
+      {"standard": "BRSR", "id": "Principle 2 EPR", "label": "Virgin plastic reduction"}
+    ],
+    "canonical_definition": "Total weight of virgin plastic eliminated through use of recycled content or material substitution.",
+    "recurrence": ["Nestle"],
+    "review_status": "pending_human_approval"
+  }
+]

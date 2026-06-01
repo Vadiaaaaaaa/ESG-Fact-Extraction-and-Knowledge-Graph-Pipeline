@@ -1,0 +1,125 @@
+[
+  {
+    "dimension_type": "geography",
+    "description": "Country, region, or geographic market breakdown.",
+    "example_members": [
+      "United States",
+      "North America",
+      "Europe",
+      "Latin America"
+    ],
+    "source_basis": [
+      "cross_company_reports_v1"
+    ]
+  },
+  {
+    "dimension_type": "segment",
+    "description": "Management or reporting segment breakdown.",
+    "example_members": [
+      "North America Beverages",
+      "Europe",
+      "NIKE Brand Geographies"
+    ],
+    "source_basis": [
+      "cross_company_reports_v1"
+    ]
+  },
+  {
+    "dimension_type": "channel",
+    "description": "Route-to-market or sales channel.",
+    "example_members": [
+      "Direct-to-Consumer",
+      "Wholesale",
+      "Foodservice",
+      "E-commerce"
+    ],
+    "source_basis": [
+      "cross_company_reports_v1"
+    ]
+  },
+  {
+    "dimension_type": "brand",
+    "description": "Brand-level breakdown.",
+    "example_members": [
+      "NIKE",
+      "Jordan",
+      "Pepsi",
+      "Oreo"
+    ],
+    "source_basis": [
+      "cross_company_reports_v1"
+    ]
+  },
+  {
+    "dimension_type": "category",
+    "description": "Product category or merchandise family.",
+    "example_members": [
+      "Snacking",
+      "Beverages",
+      "Beauty",
+      "Apparel"
+    ],
+    "source_basis": [
+      "cross_company_reports_v1"
+    ]
+  },
+  {
+    "dimension_type": "market_type",
+    "description": "Market grouping such as developed and emerging markets.",
+    "example_members": [
+      "Developed Markets",
+      "Emerging Markets"
+    ],
+    "source_basis": [
+      "cross_company_reports_v1"
+    ]
+  },
+  {
+    "dimension_type": "store_format",
+    "description": "Retail store type or format.",
+    "example_members": [
+      "Large-format",
+      "Small-format",
+      "Owned Stores"
+    ],
+    "source_basis": [
+      "cross_company_reports_v1"
+    ]
+  },
+  {
+    "dimension_type": "customer_type",
+    "description": "Customer class or counterparty grouping.",
+    "example_members": [
+      "Retailers",
+      "Distributors",
+      "Foodservice Customers"
+    ],
+    "source_basis": [
+      "cross_company_reports_v1"
+    ]
+  },
+  {
+    "dimension_type": "route_to_market",
+    "description": "Operating distribution route or fulfillment model.",
+    "example_members": [
+      "Owned Distribution",
+      "Third-Party Distribution",
+      "Omnichannel"
+    ],
+    "source_basis": [
+      "cross_company_reports_v1"
+    ]
+  },
+  {
+    "dimension_type": "time_basis",
+    "description": "Alternate reporting basis such as constant currency or comparable basis.",
+    "example_members": [
+      "Reported Basis",
+      "Constant Currency",
+      "Comparable Basis"
+    ],
+    "source_basis": [
+      "cross_company_reports_v1"
+    ]
+  }
+]

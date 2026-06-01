@@ -1,0 +1,89 @@
+[
+  {
+    "dimension_type": "geography",
+    "description": "Country, region, or geographic market breakdown.",
+    "example_members": [
+      "United States",
+      "North America",
+      "Europe",
+      "Latin America"
+    ],
+    "source_basis": [
+      "cross_company_reports"
+    ]
+  },
+  {
+    "dimension_type": "segment",
+    "description": "Management or reporting segment breakdown.",
+    "example_members": [
+      "Europe Segment",
+      "Beverages North America",
+      "NIKE Brand Geographies"
+    ],
+    "source_basis": [
+      "cross_company_reports"
+    ]
+  },
+  {
+    "dimension_type": "channel",
+    "description": "Route-to-market or sales channel breakdown.",
+    "example_members": [
+      "Direct-to-Consumer",
+      "Wholesale",
+      "Foodservice",
+      "E-commerce"
+    ],
+    "source_basis": [
+      "cross_company_reports"
+    ]
+  },
+  {
+    "dimension_type": "brand",
+    "description": "Brand-level performance breakdown.",
+    "example_members": [
+      "NIKE",
+      "Jordan",
+      "Lay's",
+      "Pepsi"
+    ],
+    "source_basis": [
+      "cross_company_reports"
+    ]
+  },
+  {
+    "dimension_type": "category",
+    "description": "Product category or merchandise family breakdown.",
+    "example_members": [
+      "Nonalcoholic Beverages",
+      "Convenient Foods",
+      "Beauty",
+      "Apparel"
+    ],
+    "source_basis": [
+      "cross_company_reports"
+    ]
+  },
+  {
+    "dimension_type": "market_type",
+    "description": "Market or consumer grouping such as developed/emerging or enterprise-defined market clusters.",
+    "example_members": [
+      "Developed Markets",
+      "Emerging Markets"
+    ],
+    "source_basis": [
+      "cross_company_reports"
+    ]
+  },
+  {
+    "dimension_type": "store_format",
+    "description": "Retail format or store-type breakdown.",
+    "example_members": [
+      "Large-format",
+      "Small-format",
+      "Owned Stores"
+    ],
+    "source_basis": [
+      "cross_company_reports"
+    ]
+  }
+]

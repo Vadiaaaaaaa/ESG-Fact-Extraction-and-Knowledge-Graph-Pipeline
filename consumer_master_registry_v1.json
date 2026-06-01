@@ -1,0 +1,1149 @@
+[
+  {
+    "canonical_id": "total_revenue",
+    "display_name": "Total Revenue",
+    "category": "financial_backbone",
+    "unit": "monetary",
+    "fact_type": "financial_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated",
+      "segment",
+      "geography",
+      "brand",
+      "category",
+      "channel"
+    ],
+    "source_basis": [
+      "cross_company_reports_v1"
+    ],
+    "notes": "Net revenue or net sales at company or segment scope."
+  },
+  {
+    "canonical_id": "net_sales",
+    "display_name": "Net Sales",
+    "category": "financial_backbone",
+    "unit": "monetary",
+    "fact_type": "financial_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated",
+      "segment",
+      "geography",
+      "brand",
+      "category",
+      "channel"
+    ],
+    "source_basis": [
+      "cross_company_reports_v1"
+    ],
+    "notes": "Use where filings explicitly use net sales rather than total revenue."
+  },
+  {
+    "canonical_id": "gross_profit",
+    "display_name": "Gross Profit",
+    "category": "financial_backbone",
+    "unit": "monetary",
+    "fact_type": "financial_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated",
+      "segment",
+      "geography",
+      "brand",
+      "category",
+      "channel"
+    ],
+    "source_basis": [
+      "cross_company_reports_v1"
+    ],
+    "notes": "Revenue minus cost of sales or cost of revenue."
+  },
+  {
+    "canonical_id": "gross_margin",
+    "display_name": "Gross Margin",
+    "category": "financial_backbone",
+    "unit": "percentage",
+    "fact_type": "financial_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated",
+      "segment",
+      "geography",
+      "brand",
+      "category",
+      "channel"
+    ],
+    "source_basis": [
+      "cross_company_reports_v1"
+    ],
+    "notes": "Gross profit as a percentage of revenue."
+  },
+  {
+    "canonical_id": "operating_income",
+    "display_name": "Operating Income",
+    "category": "financial_backbone",
+    "unit": "monetary",
+    "fact_type": "financial_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated",
+      "segment",
+      "geography",
+      "brand",
+      "category",
+      "channel"
+    ],
+    "source_basis": [
+      "cross_company_reports_v1"
+    ],
+    "notes": "Operating income line item."
+  },
+  {
+    "canonical_id": "operating_profit",
+    "display_name": "Operating Profit",
+    "category": "financial_backbone",
+    "unit": "monetary",
+    "fact_type": "financial_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated",
+      "segment",
+      "geography",
+      "brand",
+      "category",
+      "channel"
+    ],
+    "source_basis": [
+      "cross_company_reports_v1"
+    ],
+    "notes": "Operating profit line item."
+  },
+  {
+    "canonical_id": "operating_margin",
+    "display_name": "Operating Margin",
+    "category": "profitability_and_margin",
+    "unit": "percentage",
+    "fact_type": "financial_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated",
+      "segment",
+      "geography",
+      "brand",
+      "category",
+      "channel"
+    ],
+    "source_basis": [
+      "cross_company_reports_v1"
+    ],
+    "notes": "Operating income or profit as a percentage of revenue."
+  },
+  {
+    "canonical_id": "segment_operating_profit",
+    "display_name": "Segment Operating Profit",
+    "category": "profitability_and_margin",
+    "unit": "monetary",
+    "fact_type": "operational_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated",
+      "segment",
+      "geography",
+      "brand",
+      "category",
+      "channel"
+    ],
+    "source_basis": [
+      "cross_company_reports_v1"
+    ],
+    "notes": "Segment-level operating profit or core segment operating profit."
+  },
+  {
+    "canonical_id": "ebit",
+    "display_name": "EBIT",
+    "category": "profitability_and_margin",
+    "unit": "monetary",
+    "fact_type": "financial_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated",
+      "segment",
+      "geography",
+      "brand",
+      "category",
+      "channel"
+    ],
+    "source_basis": [
+      "cross_company_reports_v1"
+    ],
+    "notes": "Earnings before interest and taxes."
+  },
+  {
+    "canonical_id": "ebitda",
+    "display_name": "EBITDA",
+    "category": "profitability_and_margin",
+    "unit": "monetary",
+    "fact_type": "financial_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated",
+      "segment",
+      "geography",
+      "brand",
+      "category",
+      "channel"
+    ],
+    "source_basis": [
+      "cross_company_reports_v1"
+    ],
+    "notes": "Earnings before interest, taxes, depreciation, and amortization."
+  },
+  {
+    "canonical_id": "adjusted_ebitda",
+    "display_name": "Adjusted EBITDA",
+    "category": "profitability_and_margin",
+    "unit": "monetary",
+    "fact_type": "financial_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated",
+      "segment",
+      "geography",
+      "brand",
+      "category",
+      "channel"
+    ],
+    "source_basis": [
+      "cross_company_reports_v1"
+    ],
+    "notes": "Management-adjusted EBITDA or core EBITDA."
+  },
+  {
+    "canonical_id": "net_income",
+    "display_name": "Net Income",
+    "category": "financial_backbone",
+    "unit": "monetary",
+    "fact_type": "financial_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated",
+      "segment",
+      "geography",
+      "brand",
+      "category",
+      "channel"
+    ],
+    "source_basis": [
+      "cross_company_reports_v1"
+    ],
+    "notes": "Net income attributable to the company or consolidated entity."
+  },
+  {
+    "canonical_id": "earnings_per_share",
+    "display_name": "Earnings Per Share",
+    "category": "financial_backbone",
+    "unit": "ratio",
+    "fact_type": "financial_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated"
+    ],
+    "source_basis": [
+      "cross_company_reports_v1"
+    ],
+    "notes": "Parent family for EPS concepts."
+  },
+  {
+    "canonical_id": "basic_eps",
+    "display_name": "Basic EPS",
+    "category": "financial_backbone",
+    "unit": "ratio",
+    "fact_type": "financial_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated"
+    ],
+    "source_basis": [
+      "cross_company_reports_v1"
+    ],
+    "notes": "Basic earnings per share."
+  },
+  {
+    "canonical_id": "diluted_eps",
+    "display_name": "Diluted EPS",
+    "category": "financial_backbone",
+    "unit": "ratio",
+    "fact_type": "financial_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated"
+    ],
+    "source_basis": [
+      "cross_company_reports_v1"
+    ],
+    "notes": "Diluted earnings per share."
+  },
+  {
+    "canonical_id": "cash_flow",
+    "display_name": "Cash Flow",
+    "category": "cash_and_capital",
+    "unit": "monetary",
+    "fact_type": "financial_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated",
+      "segment",
+      "geography",
+      "brand",
+      "category",
+      "channel"
+    ],
+    "source_basis": [
+      "cross_company_reports_v1"
+    ],
+    "notes": "Parent family for cash flow concepts."
+  },
+  {
+    "canonical_id": "operating_cash_flow",
+    "display_name": "Operating Cash Flow",
+    "category": "cash_and_capital",
+    "unit": "monetary",
+    "fact_type": "financial_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated",
+      "segment",
+      "geography",
+      "brand",
+      "category",
+      "channel"
+    ],
+    "source_basis": [
+      "cross_company_reports_v1"
+    ],
+    "notes": "Cash provided by operating activities."
+  },
+  {
+    "canonical_id": "free_cash_flow",
+    "display_name": "Free Cash Flow",
+    "category": "cash_and_capital",
+    "unit": "monetary",
+    "fact_type": "financial_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated",
+      "segment",
+      "geography",
+      "brand",
+      "category",
+      "channel"
+    ],
+    "source_basis": [
+      "cross_company_reports_v1"
+    ],
+    "notes": "Free cash flow or analogous management measure."
+  },
+  {
+    "canonical_id": "capex",
+    "display_name": "Capital Expenditures",
+    "category": "cash_and_capital",
+    "unit": "monetary",
+    "fact_type": "financial_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated",
+      "segment",
+      "geography",
+      "brand",
+      "category",
+      "channel"
+    ],
+    "source_basis": [
+      "cross_company_reports_v1"
+    ],
+    "notes": "Capital spending or purchases of property, plant and equipment."
+  },
+  {
+    "canonical_id": "inventory",
+    "display_name": "Inventory",
+    "category": "inventory_and_supply_chain",
+    "unit": "monetary",
+    "fact_type": "financial_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated",
+      "segment",
+      "geography",
+      "brand",
+      "category",
+      "channel"
+    ],
+    "source_basis": [
+      "cross_company_reports_v1"
+    ],
+    "notes": "Inventory balance."
+  },
+  {
+    "canonical_id": "inventory_turnover",
+    "display_name": "Inventory Turnover",
+    "category": "inventory_and_supply_chain",
+    "unit": "ratio",
+    "fact_type": "operational_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated",
+      "segment",
+      "geography",
+      "brand",
+      "category",
+      "channel"
+    ],
+    "source_basis": [
+      "cross_company_reports_v1"
+    ],
+    "notes": "Inventory efficiency measure when disclosed."
+  },
+  {
+    "canonical_id": "accounts_receivable",
+    "display_name": "Accounts Receivable",
+    "category": "financial_backbone",
+    "unit": "monetary",
+    "fact_type": "financial_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated",
+      "segment",
+      "geography",
+      "brand",
+      "category",
+      "channel"
+    ],
+    "source_basis": [
+      "cross_company_reports_v1"
+    ],
+    "notes": "Trade or other receivables."
+  },
+  {
+    "canonical_id": "accounts_payable",
+    "display_name": "Accounts Payable",
+    "category": "financial_backbone",
+    "unit": "monetary",
+    "fact_type": "financial_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated",
+      "segment",
+      "geography",
+      "brand",
+      "category",
+      "channel"
+    ],
+    "source_basis": [
+      "cross_company_reports_v1"
+    ],
+    "notes": "Trade payables and related supplier liabilities."
+  },
+  {
+    "canonical_id": "working_capital",
+    "display_name": "Working Capital",
+    "category": "cash_and_capital",
+    "unit": "monetary",
+    "fact_type": "financial_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated",
+      "segment",
+      "geography",
+      "brand",
+      "category",
+      "channel"
+    ],
+    "source_basis": [
+      "cross_company_reports_v1"
+    ],
+    "notes": "Working capital or working capital management measure."
+  },
+  {
+    "canonical_id": "total_debt",
+    "display_name": "Total Debt",
+    "category": "cash_and_capital",
+    "unit": "monetary",
+    "fact_type": "financial_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated",
+      "segment",
+      "geography",
+      "brand",
+      "category",
+      "channel"
+    ],
+    "source_basis": [
+      "cross_company_reports_v1"
+    ],
+    "notes": "Short and long-term debt obligations."
+  },
+  {
+    "canonical_id": "cash_and_equivalents",
+    "display_name": "Cash and Equivalents",
+    "category": "cash_and_capital",
+    "unit": "monetary",
+    "fact_type": "financial_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated",
+      "segment",
+      "geography",
+      "brand",
+      "category",
+      "channel"
+    ],
+    "source_basis": [
+      "cross_company_reports_v1"
+    ],
+    "notes": "Cash and cash equivalents balance."
+  },
+  {
+    "canonical_id": "organic_revenue_growth",
+    "display_name": "Organic Revenue Growth",
+    "category": "operational_performance",
+    "unit": "percentage",
+    "fact_type": "operational_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated",
+      "segment",
+      "geography",
+      "brand",
+      "category",
+      "channel"
+    ],
+    "source_basis": [
+      "cross_company_reports_v1"
+    ],
+    "notes": "Organic or constant-currency revenue growth."
+  },
+  {
+    "canonical_id": "comparable_sales_growth",
+    "display_name": "Comparable Sales Growth",
+    "category": "operational_performance",
+    "unit": "percentage",
+    "fact_type": "operational_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated",
+      "segment",
+      "geography",
+      "brand",
+      "category",
+      "channel"
+    ],
+    "source_basis": [
+      "cross_company_reports_v1"
+    ],
+    "notes": "Comparable sales, comp sales, or same-store sales growth."
+  },
+  {
+    "canonical_id": "pricing_impact",
+    "display_name": "Pricing Impact",
+    "category": "operational_performance",
+    "unit": "percentage",
+    "fact_type": "operational_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated",
+      "segment",
+      "geography",
+      "brand",
+      "category",
+      "channel"
+    ],
+    "source_basis": [
+      "cross_company_reports_v1"
+    ],
+    "notes": "Pricing contribution to growth or change."
+  },
+  {
+    "canonical_id": "volume_impact",
+    "display_name": "Volume Impact",
+    "category": "operational_performance",
+    "unit": "percentage",
+    "fact_type": "operational_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated",
+      "segment",
+      "geography",
+      "brand",
+      "category",
+      "channel"
+    ],
+    "source_basis": [
+      "cross_company_reports_v1"
+    ],
+    "notes": "Volume contribution to growth or change."
+  },
+  {
+    "canonical_id": "mix_impact",
+    "display_name": "Mix Impact",
+    "category": "operational_performance",
+    "unit": "percentage",
+    "fact_type": "operational_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated",
+      "segment",
+      "geography",
+      "brand",
+      "category",
+      "channel"
+    ],
+    "source_basis": [
+      "cross_company_reports_v1"
+    ],
+    "notes": "Mix contribution to growth or change."
+  },
+  {
+    "canonical_id": "market_share",
+    "display_name": "Market Share",
+    "category": "operational_performance",
+    "unit": "percentage",
+    "fact_type": "operational_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated",
+      "segment",
+      "geography",
+      "brand",
+      "category",
+      "channel"
+    ],
+    "source_basis": [
+      "cross_company_reports_v1"
+    ],
+    "notes": "Market share or share movement when explicitly disclosed."
+  },
+  {
+    "canonical_id": "digital_sales",
+    "display_name": "Digital Sales",
+    "category": "channel_and_route_to_market",
+    "unit": "monetary",
+    "fact_type": "operational_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated",
+      "segment",
+      "geography",
+      "brand",
+      "category",
+      "channel"
+    ],
+    "source_basis": [
+      "cross_company_reports_v1"
+    ],
+    "notes": "Digital or online sales."
+  },
+  {
+    "canonical_id": "ecommerce_sales",
+    "display_name": "E-commerce Sales",
+    "category": "channel_and_route_to_market",
+    "unit": "monetary",
+    "fact_type": "operational_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated",
+      "segment",
+      "channel"
+    ],
+    "source_basis": [
+      "cross_company_reports_v1"
+    ],
+    "notes": "Explicit e-commerce sales or growth."
+  },
+  {
+    "canonical_id": "direct_to_consumer_revenue",
+    "display_name": "Direct-to-Consumer Revenue",
+    "category": "channel_and_route_to_market",
+    "unit": "monetary",
+    "fact_type": "operational_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated",
+      "segment",
+      "channel"
+    ],
+    "source_basis": [
+      "cross_company_reports_v1"
+    ],
+    "notes": "DTC or NIKE Direct-style revenue."
+  },
+  {
+    "canonical_id": "wholesale_revenue",
+    "display_name": "Wholesale Revenue",
+    "category": "channel_and_route_to_market",
+    "unit": "monetary",
+    "fact_type": "operational_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated",
+      "segment",
+      "channel"
+    ],
+    "source_basis": [
+      "cross_company_reports_v1"
+    ],
+    "notes": "Wholesale channel revenue."
+  },
+  {
+    "canonical_id": "store_traffic",
+    "display_name": "Store Traffic",
+    "category": "channel_and_route_to_market",
+    "unit": "count_or_index",
+    "fact_type": "operational_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated",
+      "geography",
+      "store_format"
+    ],
+    "source_basis": [
+      "cross_company_reports_v1"
+    ],
+    "notes": "Traffic or visits in store-based retail models."
+  },
+  {
+    "canonical_id": "store_count",
+    "display_name": "Store Count",
+    "category": "channel_and_route_to_market",
+    "unit": "count",
+    "fact_type": "operational_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated",
+      "geography",
+      "store_format"
+    ],
+    "source_basis": [
+      "cross_company_reports_v1"
+    ],
+    "notes": "Number of owned, operated, or comparable stores."
+  },
+  {
+    "canonical_id": "unit_case_volume",
+    "display_name": "Unit Case Volume",
+    "category": "operational_performance",
+    "unit": "count_or_index",
+    "fact_type": "operational_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated",
+      "geography",
+      "category",
+      "segment"
+    ],
+    "source_basis": [
+      "cross_company_reports_v1"
+    ],
+    "notes": "Beverage/CPG-style physical volume metric."
+  },
+  {
+    "canonical_id": "brand_performance",
+    "display_name": "Brand Performance",
+    "category": "brand_category_segment",
+    "unit": "monetary_or_percentage",
+    "fact_type": "operational_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated",
+      "segment",
+      "geography",
+      "brand",
+      "category",
+      "channel"
+    ],
+    "source_basis": [
+      "cross_company_reports_v1"
+    ],
+    "notes": "Parent family for brand-level growth, revenue, or share."
+  },
+  {
+    "canonical_id": "category_performance",
+    "display_name": "Category Performance",
+    "category": "brand_category_segment",
+    "unit": "monetary_or_percentage",
+    "fact_type": "operational_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated",
+      "segment",
+      "geography",
+      "brand",
+      "category",
+      "channel"
+    ],
+    "source_basis": [
+      "cross_company_reports_v1"
+    ],
+    "notes": "Category-level growth, revenue, or contribution."
+  },
+  {
+    "canonical_id": "innovation_pipeline",
+    "display_name": "Innovation Pipeline",
+    "category": "brand_category_segment",
+    "unit": "qualitative_or_count",
+    "fact_type": "operational_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated",
+      "segment",
+      "geography",
+      "brand",
+      "category",
+      "channel"
+    ],
+    "source_basis": [
+      "cross_company_reports_v1"
+    ],
+    "notes": "Innovation, launches, or pipeline activity."
+  },
+  {
+    "canonical_id": "productivity_savings",
+    "display_name": "Productivity Savings",
+    "category": "inventory_and_supply_chain",
+    "unit": "monetary_or_percentage",
+    "fact_type": "operational_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated",
+      "segment",
+      "geography",
+      "brand",
+      "category",
+      "channel"
+    ],
+    "source_basis": [
+      "cross_company_reports_v1"
+    ],
+    "notes": "Savings or benefits from productivity programs."
+  },
+  {
+    "canonical_id": "inventory_management",
+    "display_name": "Inventory Management",
+    "category": "inventory_and_supply_chain",
+    "unit": "qualitative_or_ratio",
+    "fact_type": "operational_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated",
+      "segment",
+      "geography",
+      "brand",
+      "category",
+      "channel"
+    ],
+    "source_basis": [
+      "cross_company_reports_v1"
+    ],
+    "notes": "Inventory actions, turns, markdown discipline, or replenishment improvements."
+  },
+  {
+    "canonical_id": "distribution_reach",
+    "display_name": "Distribution Reach",
+    "aliases": [
+      "network reach",
+      "distribution network reach",
+      "retail network reach",
+      "outlet network reach"
+    ],
+    "category": "channel_and_route_to_market",
+    "unit": "count_or_percentage",
+    "fact_type": "operational_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated",
+      "segment",
+      "geography",
+      "brand",
+      "category",
+      "channel"
+    ],
+    "source_basis": [
+      "cross_company_reports_v1"
+    ],
+    "notes": "Distribution breadth or points of distribution."
+  },
+  {
+    "canonical_id": "marketing_spend",
+    "display_name": "Marketing Spend",
+    "category": "brand_category_segment",
+    "unit": "monetary",
+    "fact_type": "operational_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated",
+      "segment",
+      "geography",
+      "brand",
+      "category",
+      "channel"
+    ],
+    "source_basis": [
+      "cross_company_reports_v1"
+    ],
+    "notes": "Advertising, media, or consumer marketing spend."
+  },
+  {
+    "canonical_id": "consumer_engagement",
+    "display_name": "Consumer Engagement",
+    "category": "brand_category_segment",
+    "unit": "count_or_index",
+    "fact_type": "operational_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated",
+      "segment",
+      "geography",
+      "brand",
+      "category",
+      "channel"
+    ],
+    "source_basis": [
+      "cross_company_reports_v1"
+    ],
+    "notes": "Engagement or active user style consumer metrics."
+  },
+  {
+    "canonical_id": "fulfillment_efficiency",
+    "display_name": "Fulfillment Efficiency",
+    "category": "inventory_and_supply_chain",
+    "unit": "ratio_or_percentage",
+    "fact_type": "operational_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated",
+      "segment",
+      "geography",
+      "brand",
+      "category",
+      "channel"
+    ],
+    "source_basis": [
+      "cross_company_reports_v1"
+    ],
+    "notes": "Supply chain and fulfillment performance measures."
+  },
+  {
+    "canonical_id": "financial_income",
+    "display_name": "Financial Income",
+    "category": "financial_backbone",
+    "unit": "monetary",
+    "fact_type": "financial_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated",
+      "segment",
+      "geography",
+      "brand",
+      "category",
+      "channel"
+    ],
+    "source_basis": [
+      "cross_company_reports_v1"
+    ],
+    "notes": "Income from financial activities."
+  },
+  {
+    "canonical_id": "financial_expense",
+    "display_name": "Financial Expense",
+    "category": "financial_backbone",
+    "unit": "monetary",
+    "fact_type": "financial_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated",
+      "segment",
+      "geography",
+      "brand",
+      "category",
+      "channel"
+    ],
+    "source_basis": [
+      "cross_company_reports_v1"
+    ],
+    "notes": "Expense from financing and related activities."
+  },
+  {
+    "canonical_id": "foreign_currency_impact",
+    "display_name": "Foreign Currency Impact",
+    "category": "operational_performance",
+    "unit": "percentage_or_monetary",
+    "fact_type": "operational_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated",
+      "segment",
+      "geography",
+      "brand",
+      "category",
+      "channel"
+    ],
+    "source_basis": [
+      "cross_company_reports_v1"
+    ],
+    "notes": "FX or foreign currency translation effect when reported as an operational bridge component."
+  }
+]

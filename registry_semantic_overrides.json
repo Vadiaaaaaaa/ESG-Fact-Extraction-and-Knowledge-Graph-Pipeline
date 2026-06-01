@@ -1,0 +1,468 @@
+[
+  {
+    "canonical_id": "renewable_energy_mix",
+    "metric_subject": "energy",
+    "metric_role": "intensity",
+    "flow_direction": "ratio",
+    "denominator_type": "energy",
+    "impact_polarity": "resource_use"
+  },
+  {
+    "canonical_id": "store_count",
+    "metric_subject": "distribution",
+    "metric_role": "count",
+    "flow_direction": "unknown"
+  },
+  {
+    "canonical_id": "water_withdrawal",
+    "metric_subject": "water",
+    "metric_role": "withdrawal",
+    "flow_direction": "input",
+    "impact_polarity": "resource_use"
+  },
+  {
+    "canonical_id": "employee_headcount",
+    "metric_subject": "employee",
+    "metric_role": "count",
+    "flow_direction": "unknown"
+  },
+  {
+    "canonical_id": "market_share",
+    "metric_subject": "product",
+    "metric_role": "coverage",
+    "flow_direction": "unknown"
+  },
+  {
+    "canonical_id": "absolute_energy_consumption",
+    "metric_subject": "energy",
+    "metric_role": "consumption",
+    "flow_direction": "consumed",
+    "impact_polarity": "resource_use"
+  },
+  {
+    "canonical_id": "employee_training_coverage",
+    "metric_subject": "employee",
+    "metric_role": "coverage",
+    "flow_direction": "unknown"
+  },
+  {
+    "canonical_id": "waste_generated",
+    "metric_subject": "waste",
+    "metric_role": "generation",
+    "flow_direction": "output",
+    "impact_polarity": "negative",
+    "aliases": [
+      "waste generated",
+      "total waste",
+      "manufacturing waste",
+      "factory waste",
+      "solid waste generated",
+      "total waste generated"
+    ]
+  },
+  {
+    "canonical_id": "capex",
+    "flow_direction": "unknown"
+  },
+  {
+    "canonical_id": "combined_scope_1_2_emissions_intensity",
+    "metric_subject": "emissions",
+    "metric_role": "intensity",
+    "flow_direction": "ratio",
+    "denominator_type": "production"
+  },
+  {
+    "canonical_id": "consumer_complaints",
+    "metric_subject": "product",
+    "metric_role": "count",
+    "flow_direction": "unknown"
+  },
+  {
+    "canonical_id": "direct_distribution_reach",
+    "metric_subject": "distribution",
+    "metric_role": "coverage",
+    "flow_direction": "unknown"
+  },
+  {
+    "canonical_id": "lost_time_injury_frequency_rate",
+    "metric_subject": "safety",
+    "metric_role": "intensity",
+    "flow_direction": "ratio"
+  },
+  {
+    "canonical_id": "safety_fatalities",
+    "metric_subject": "safety",
+    "metric_role": "count",
+    "flow_direction": "unknown"
+  },
+  {
+    "canonical_id": "scope_1_emissions",
+    "metric_subject": "emissions",
+    "metric_role": "generation",
+    "flow_direction": "output",
+    "impact_polarity": "negative"
+  },
+  {
+    "canonical_id": "transactions_growth",
+    "metric_role": "coverage",
+    "flow_direction": "unknown",
+    "comparability_warning": true,
+    "comparability_notes": "Growth rate metric. role=coverage is a proxy — no growth role defined. Accept for now but note cross-company comparison is unsafe (growth base differs)."
+  },
+  {
+    "canonical_id": "average_basket_size",
+    "metric_role": "coverage",
+    "flow_direction": "unknown"
+  },
+  {
+    "canonical_id": "average_ticket",
+    "flow_direction": "unknown"
+  },
+  {
+    "canonical_id": "combined_scope_1_2_emissions",
+    "metric_subject": "emissions",
+    "metric_role": "generation",
+    "flow_direction": "output",
+    "denominator_type": null,
+    "comparable": true,
+    "comparability_notes": "Comparable in absolute terms. Scope boundary must be confirmed.",
+    "external_refs": [
+      {
+        "standard": "GRI",
+        "id": "GRI 305-1,305-2",
+        "label": "Scope 1 and Scope 2 GHG emissions"
+      },
+      {
+        "standard": "BRSR",
+        "id": "Principle 6 Essential",
+        "label": "Greenhouse gas emissions Scope 1+2"
+      }
+    ],
+    "recurrence": [
+      "GCPL",
+      "Nestle"
+    ],
+    "review_status": "approved"
+  },
+  {
+    "canonical_id": "commodity_certification_share",
+    "metric_subject": "sourcing",
+    "metric_role": "coverage",
+    "flow_direction": "unknown"
+  },
+  {
+    "canonical_id": "comparable_sales_growth",
+    "metric_subject": "distribution",
+    "metric_role": "coverage",
+    "flow_direction": "unknown"
+  },
+  {
+    "canonical_id": "ebitda",
+    "flow_direction": "unknown"
+  },
+  {
+    "canonical_id": "ebitda_margin",
+    "metric_role": "coverage",
+    "flow_direction": "unknown"
+  },
+  {
+    "canonical_id": "epr_compliance_rate",
+    "metric_subject": "waste",
+    "metric_role": "coverage",
+    "flow_direction": "unknown"
+  },
+  {
+    "canonical_id": "farmer_reach",
+    "metric_subject": "distribution",
+    "metric_role": "coverage",
+    "flow_direction": "unknown"
+  },
+  {
+    "canonical_id": "innovation_revenue_share",
+    "metric_subject": "product",
+    "metric_role": "coverage",
+    "flow_direction": "unknown"
+  },
+  {
+    "canonical_id": "inventory_turnover",
+    "flow_direction": "unknown"
+  },
+  {
+    "canonical_id": "manufacturing_cluster_count",
+    "metric_role": "count",
+    "flow_direction": "unknown"
+  },
+  {
+    "canonical_id": "market_share_change",
+    "metric_role": "coverage",
+    "flow_direction": "unknown"
+  },
+  {
+    "canonical_id": "new_product_launches",
+    "metric_subject": "product",
+    "metric_role": "count",
+    "flow_direction": "unknown"
+  },
+  {
+    "canonical_id": "packaging_recyclability",
+    "metric_subject": "waste",
+    "metric_role": "intensity",
+    "flow_direction": "ratio",
+    "impact_polarity": "resource_use"
+  },
+  {
+    "canonical_id": "product_recall_count",
+    "metric_subject": "safety",
+    "metric_role": "count",
+    "flow_direction": "unknown"
+  },
+  {
+    "canonical_id": "retail_touchpoint_count",
+    "metric_subject": "distribution",
+    "metric_role": "count",
+    "flow_direction": "unknown"
+  },
+  {
+    "canonical_id": "scope_2_emissions",
+    "metric_subject": "emissions",
+    "metric_role": "generation",
+    "flow_direction": "output"
+  },
+  {
+    "canonical_id": "sell_through_rate",
+    "metric_subject": "product",
+    "metric_role": "coverage",
+    "flow_direction": "unknown"
+  },
+  {
+    "canonical_id": "total_recordable_injury_rate",
+    "metric_subject": "safety",
+    "flow_direction": "unknown",
+    "comparability_warning": true,
+    "comparability_notes": "Rate metric (incidents per hours worked). role=NaN needs to be intensity. No good fit in current role vocab — assign role=intensity, flow=ratio."
+  },
+  {
+    "canonical_id": "unit_volume_growth",
+    "metric_role": "coverage",
+    "flow_direction": "unknown",
+    "comparability_warning": true,
+    "comparability_notes": "Same as transactions_growth — growth rate. role=coverage is a proxy. Accept with same caveat."
+  },
+  {
+    "canonical_id": "water_consumption_intensity",
+    "metric_subject": "water",
+    "metric_role": "consumption",
+    "flow_direction": "ratio",
+    "denominator_type": "production",
+    "impact_polarity": "resource_use"
+  },
+  {
+    "canonical_id": "worker_headcount",
+    "metric_subject": "employee",
+    "metric_role": "count",
+    "flow_direction": "unknown"
+  },
+  {
+    "canonical_id": "ghg_emissions_intensity",
+    "metric_subject": "emissions",
+    "metric_role": "intensity",
+    "flow_direction": "ratio",
+    "denominator_type": "production",
+    "comparable": true,
+    "comparability_notes": "Comparable when denominator unit is consistent.",
+    "external_refs": [
+      {
+        "standard": "GRI",
+        "id": "GRI 305-4",
+        "label": "GHG emissions intensity"
+      },
+      {
+        "standard": "BRSR",
+        "id": "Principle 6 Essential",
+        "label": "GHG emissions intensity per unit output"
+      }
+    ],
+    "recurrence": [
+      "GCPL",
+      "Nestle"
+    ],
+    "review_status": "approved"
+  },
+  {
+    "canonical_id": "waste_diverted_from_landfill",
+    "metric_subject": "waste",
+    "metric_role": "diversion",
+    "flow_direction": "recovery",
+    "denominator_type": null,
+    "comparable": true,
+    "external_refs": [
+      {
+        "standard": "GRI",
+        "id": "GRI 306-4",
+        "label": "Waste diverted from disposal"
+      },
+      {
+        "standard": "BRSR",
+        "id": "Principle 6 Essential",
+        "label": "Waste diverted from landfill"
+      }
+    ],
+    "recurrence": [
+      "GCPL",
+      "Nestle"
+    ],
+    "review_status": "approved"
+  },
+  {
+    "canonical_id": "energy_intensity_physical_output",
+    "metric_subject": "energy",
+    "metric_role": "intensity",
+    "flow_direction": "ratio",
+    "denominator_type": "production",
+    "comparable": true,
+    "comparability_notes": "Comparable when denominator unit is consistent.",
+    "external_refs": [
+      {
+        "standard": "GRI",
+        "id": "GRI 302-3",
+        "label": "Energy intensity"
+      },
+      {
+        "standard": "BRSR",
+        "id": "Principle 6 Essential",
+        "label": "Energy intensity in terms of physical output"
+      }
+    ],
+    "recurrence": [
+      "Tata",
+      "Nestle",
+      "ITC"
+    ],
+    "review_status": "approved",
+    "aliases": [
+      "energy intensity physical output",
+      "energy intensity production",
+      "energy per tonne",
+      "energy intensity in terms of physical output",
+      "energy intensity terms physical output",
+      "specific energy consumption reduction"
+    ],
+    "allowed_unit_families": [
+      "ratio",
+      "energy",
+      "per_unit"
+    ]
+  },
+  {
+    "canonical_id": "waste_intensity_physical_output",
+    "metric_subject": "waste",
+    "metric_role": "intensity",
+    "flow_direction": "ratio",
+    "denominator_type": "production",
+    "comparable": true,
+    "comparability_notes": "Comparable when denominator unit is consistent.",
+    "external_refs": [
+      {
+        "standard": "GRI",
+        "id": "GRI 306-3/306-4",
+        "label": "Waste intensity"
+      },
+      {
+        "standard": "BRSR",
+        "id": "Principle 6 Essential",
+        "label": "Waste intensity in terms of physical output"
+      }
+    ],
+    "recurrence": [
+      "Tata",
+      "Nestle",
+      "ITC"
+    ],
+    "review_status": "approved",
+    "aliases": [
+      "waste intensity physical output",
+      "waste intensity production",
+      "waste per tonne",
+      "waste intensity in terms of physical output",
+      "waste intensity terms physical output",
+      "Waste intensity"
+    ],
+    "allowed_unit_families": [
+      "ratio",
+      "weight",
+      "per_unit"
+    ]
+  },
+  {
+    "canonical_id": "water_saved_absolute",
+    "aliases": [
+      "water saving",
+      "water savings",
+      "annual water savings",
+      "water consumption savings",
+      "water conservation"
+    ],
+    "recurrence": [
+      "GCPL",
+      "Nestle",
+      "ITC"
+    ]
+  },
+  {
+    "canonical_id": "water_consumption_absolute",
+    "aliases": [
+      "water consumption",
+      "total water consumption",
+      "total volume of water consumption",
+      "water consumed",
+      "water use"
+    ],
+    "recurrence": [
+      "GCPL",
+      "Nestle",
+      "ITC"
+    ]
+  },
+  {
+    "canonical_id": "recycled_plastic_content_share",
+    "display_name": "Recycled Plastic Content in Packaging",
+    "category": "waste",
+    "unit_family": "percentage",
+    "metric_subject": "waste",
+    "metric_role": "intensity",
+    "flow_direction": "ratio",
+    "denominator_type": null,
+    "comparable": true,
+    "comparability_notes": "Comparable when denominator (total plastic packaging) is consistent.",
+    "aliases": [
+      "recycled plastic content share",
+      "recycled plastics by volume",
+      "recycled plastics LDPE by volume",
+      "recycled plastics PET by volume",
+      "PCR content",
+      "post consumer recycled content",
+      "recycled plastic PCR",
+      "recycled plastic content used in packaging",
+      "recycled plastic content",
+      "recycled content in plastic",
+      "post-consumer recycled plastic content"
+    ],
+    "external_refs": [
+      {
+        "standard": "GRI",
+        "id": "GRI 301-2",
+        "label": "Recycled input materials used"
+      },
+      {
+        "standard": "BRSR",
+        "id": "Principle 2 EPR",
+        "label": "Recycled plastic content"
+      }
+    ],
+    "canonical_definition": "Share of plastic packaging made from recycled content.",
+    "recurrence": [
+      "ITC"
+    ],
+    "review_status": "approved"
+  }
+]

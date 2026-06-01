@@ -1,0 +1,132 @@
+[
+  {
+    "driver_id": "pricing",
+    "display_name": "Pricing",
+    "driver_family": "commercial",
+    "example_phrases": [
+      "pricing",
+      "price realization",
+      "price increases"
+    ],
+    "source_basis": [
+      "cross_company_reports"
+    ]
+  },
+  {
+    "driver_id": "volume",
+    "display_name": "Volume",
+    "driver_family": "commercial",
+    "example_phrases": [
+      "volume",
+      "case volume",
+      "sales volume"
+    ],
+    "source_basis": [
+      "cross_company_reports"
+    ]
+  },
+  {
+    "driver_id": "mix",
+    "display_name": "Mix",
+    "driver_family": "commercial",
+    "example_phrases": [
+      "mix",
+      "product mix",
+      "channel mix"
+    ],
+    "source_basis": [
+      "cross_company_reports"
+    ]
+  },
+  {
+    "driver_id": "demand",
+    "display_name": "Demand",
+    "driver_family": "market",
+    "example_phrases": [
+      "consumer demand",
+      "weaker demand",
+      "strong demand"
+    ],
+    "source_basis": [
+      "cross_company_reports"
+    ]
+  },
+  {
+    "driver_id": "inflation",
+    "display_name": "Inflation",
+    "driver_family": "cost",
+    "example_phrases": [
+      "inflation",
+      "inflationary pressures",
+      "cost inflation"
+    ],
+    "source_basis": [
+      "cross_company_reports"
+    ]
+  },
+  {
+    "driver_id": "commodity_cost",
+    "display_name": "Commodity Cost",
+    "driver_family": "cost",
+    "example_phrases": [
+      "commodity",
+      "raw materials",
+      "input costs"
+    ],
+    "source_basis": [
+      "cross_company_reports"
+    ]
+  },
+  {
+    "driver_id": "tariff",
+    "display_name": "Tariff",
+    "driver_family": "policy",
+    "example_phrases": [
+      "tariff",
+      "trade policy",
+      "duties"
+    ],
+    "source_basis": [
+      "cross_company_reports"
+    ]
+  },
+  {
+    "driver_id": "digital_shift",
+    "display_name": "Digital Shift",
+    "driver_family": "channel",
+    "example_phrases": [
+      "digital channels",
+      "omnichannel",
+      "e-commerce growth"
+    ],
+    "source_basis": [
+      "cross_company_reports"
+    ]
+  },
+  {
+    "driver_id": "inventory_actions",
+    "display_name": "Inventory Actions",
+    "driver_family": "operations",
+    "example_phrases": [
+      "inventory management",
+      "inventory actions",
+      "markdowns"
+    ],
+    "source_basis": [
+      "cross_company_reports"
+    ]
+  },
+  {
+    "driver_id": "productivity",
+    "display_name": "Productivity",
+    "driver_family": "operations",
+    "example_phrases": [
+      "productivity",
+      "efficiency",
+      "cost savings"
+    ],
+    "source_basis": [
+      "cross_company_reports"
+    ]
+  }
+]

@@ -1,0 +1,379 @@
+[
+  {
+    "canonical_id": "water_recharged",
+    "display_name": "Water Recharged",
+    "category": "water",
+    "unit_family": "volume",
+    "metric_subject": "water",
+    "metric_role": "recharge",
+    "flow_direction": "restoration",
+    "denominator_type": null,
+    "comparable": true,
+    "comparability_notes": "Comparable in absolute volume. Methods vary (rooftop harvesting, check dams, etc.).",
+    "aliases": [
+      "water recharged",
+      "groundwater recharged",
+      "water recharge volume",
+      "groundwater recharge"
+    ],
+    "external_refs": [
+      {
+        "standard": "GRI",
+        "id": "GRI 303-3",
+        "label": "Water discharged / recharged"
+      },
+      {
+        "standard": "BRSR",
+        "id": "Principle 6 Essential",
+        "label": "Water recharge"
+      }
+    ],
+    "canonical_definition": "Volume of water recharged to groundwater or surface water sources through conservation and harvesting initiatives.",
+    "review_status": "pending_human_approval"
+  },
+  {
+    "canonical_id": "water_discharged_total",
+    "display_name": "Total Water Discharged",
+    "category": "water",
+    "unit_family": "volume",
+    "metric_subject": "water",
+    "metric_role": "discharge",
+    "flow_direction": "output",
+    "denominator_type": null,
+    "comparable": true,
+    "aliases": [
+      "total water discharged",
+      "water discharge",
+      "water discharged",
+      "effluent discharged"
+    ],
+    "external_refs": [
+      {
+        "standard": "GRI",
+        "id": "GRI 303-3",
+        "label": "Water discharged"
+      },
+      {
+        "standard": "BRSR",
+        "id": "Principle 6 Essential",
+        "label": "Water discharge"
+      }
+    ],
+    "canonical_definition": "Total volume of water discharged from operations to all destinations including surface water, groundwater, seawater, and third parties.",
+    "review_status": "pending_human_approval"
+  },
+  {
+    "canonical_id": "bio_based_fuel_share",
+    "display_name": "Bio-Based Fuel Share of Energy",
+    "category": "energy",
+    "unit_family": "percentage",
+    "metric_subject": "energy",
+    "metric_role": "intensity",
+    "flow_direction": "ratio",
+    "denominator_type": "energy",
+    "comparable": true,
+    "comparability_notes": "Comparable as share of total energy. Bio-based fuel types may differ by company.",
+    "aliases": [
+      "bio-based fuels share",
+      "bio based fuel share",
+      "biomass fuel share",
+      "share of bio-based fuels",
+      "direct energy from bio-based fuels",
+      "bio based fuels percentage"
+    ],
+    "external_refs": [
+      {
+        "standard": "GRI",
+        "id": "GRI 302-1",
+        "label": "Energy consumption from renewable sources (bio-based)"
+      },
+      {
+        "standard": "BRSR",
+        "id": "Principle 6 Essential",
+        "label": "Energy mix \u2014 bio-based"
+      }
+    ],
+    "canonical_definition": "Share of total energy consumption sourced from bio-based or biomass fuels.",
+    "review_status": "pending_human_approval"
+  },
+  {
+    "canonical_id": "renewable_energy_consumption_absolute",
+    "display_name": "Renewable Energy Consumption (Absolute)",
+    "category": "energy",
+    "unit_family": "energy",
+    "metric_subject": "energy",
+    "metric_role": "consumption",
+    "flow_direction": "consumed",
+    "denominator_type": null,
+    "comparable": true,
+    "aliases": [
+      "total energy from renewable sources",
+      "renewable energy consumed",
+      "energy from renewables",
+      "energy consumption renewables",
+      "total renewable energy consumed"
+    ],
+    "external_refs": [
+      {
+        "standard": "GRI",
+        "id": "GRI 302-1",
+        "label": "Energy consumption from renewable sources"
+      },
+      {
+        "standard": "BRSR",
+        "id": "Principle 6 Essential",
+        "label": "Energy from renewable sources"
+      }
+    ],
+    "canonical_definition": "Total absolute energy consumed from renewable sources including solar, wind, hydro, and biomass.",
+    "review_status": "pending_human_approval"
+  },
+  {
+    "canonical_id": "non_renewable_energy_consumption_absolute",
+    "display_name": "Non-Renewable Energy Consumption (Absolute)",
+    "category": "energy",
+    "unit_family": "energy",
+    "metric_subject": "energy",
+    "metric_role": "consumption",
+    "flow_direction": "consumed",
+    "denominator_type": null,
+    "comparable": true,
+    "aliases": [
+      "total energy from non-renewable sources",
+      "non-renewable energy consumed",
+      "fossil energy consumption",
+      "energy from non-renewables",
+      "total non-renewable energy consumed"
+    ],
+    "external_refs": [
+      {
+        "standard": "GRI",
+        "id": "GRI 302-1",
+        "label": "Energy consumption from non-renewable sources"
+      },
+      {
+        "standard": "BRSR",
+        "id": "Principle 6 Essential",
+        "label": "Energy from non-renewable sources"
+      }
+    ],
+    "canonical_definition": "Total absolute energy consumed from non-renewable sources including coal, oil, natural gas, and grid electricity from fossil fuel generation.",
+    "review_status": "pending_human_approval"
+  },
+  {
+    "canonical_id": "energy_intensity_physical_output",
+    "display_name": "Energy Intensity per Physical Output",
+    "category": "energy",
+    "unit_family": "ratio",
+    "metric_subject": "energy",
+    "metric_role": "intensity",
+    "flow_direction": "ratio",
+    "denominator_type": "production",
+    "comparable": true,
+    "comparability_notes": "Comparable only when denominator unit (tonne, kg, litre, case) is stated and consistent. Cross-company comparison requires normalisation.",
+    "aliases": [
+      "energy intensity physical output",
+      "energy intensity production",
+      "energy per tonne",
+      "energy intensity in terms of physical output",
+      "energy intensity terms physical output"
+    ],
+    "external_refs": [
+      {
+        "standard": "GRI",
+        "id": "GRI 302-3",
+        "label": "Energy intensity"
+      },
+      {
+        "standard": "BRSR",
+        "id": "Principle 6 Essential",
+        "label": "Energy intensity per unit of physical output"
+      }
+    ],
+    "canonical_definition": "Energy consumed per unit of physical production output, e.g. GJ per tonne produced.",
+    "review_status": "pending_human_approval"
+  },
+  {
+    "canonical_id": "rooftop_solar_installed_capacity",
+    "display_name": "Rooftop Solar Installed Capacity",
+    "category": "energy",
+    "unit_family": "power",
+    "metric_subject": "energy",
+    "metric_role": "generation",
+    "flow_direction": "output",
+    "denominator_type": null,
+    "comparable": true,
+    "aliases": [
+      "rooftop solar capacity",
+      "rooftop solar power plants capacity",
+      "solar rooftop capacity",
+      "solar pv rooftop capacity",
+      "rooftop solar installed"
+    ],
+    "external_refs": [
+      {
+        "standard": "GRI",
+        "id": "GRI 302-1",
+        "label": "Renewable energy capacity"
+      },
+      {
+        "standard": "BRSR",
+        "id": "Principle 6 Essential",
+        "label": "Renewable energy installed capacity"
+      }
+    ],
+    "canonical_definition": "Installed capacity of rooftop solar photovoltaic plants across company facilities, typically in KWp or MW.",
+    "review_status": "pending_human_approval"
+  },
+  {
+    "canonical_id": "post_consumer_plastic_recycled",
+    "display_name": "Post-Consumer Plastic Waste Recycled",
+    "category": "waste",
+    "unit_family": "weight",
+    "metric_subject": "waste",
+    "metric_role": "recovery",
+    "flow_direction": "recovery",
+    "denominator_type": null,
+    "comparable": true,
+    "aliases": [
+      "post consumer plastic waste recycled",
+      "post-consumer plastic recycled",
+      "epr plastic recycled",
+      "plastic waste recycled post-consumer",
+      "post consumer plastic collected and recycled"
+    ],
+    "external_refs": [
+      {
+        "standard": "GRI",
+        "id": "GRI 306-4",
+        "label": "Waste diverted from disposal \u2014 recycled"
+      },
+      {
+        "standard": "BRSR",
+        "id": "Principle 2 EPR",
+        "label": "Post-consumer plastic waste recycled"
+      }
+    ],
+    "canonical_definition": "Weight of post-consumer plastic waste collected and recycled under extended producer responsibility (EPR) or voluntary schemes.",
+    "review_status": "pending_human_approval"
+  },
+  {
+    "canonical_id": "plastic_waste_generated",
+    "display_name": "Plastic Waste Generated",
+    "category": "waste",
+    "unit_family": "weight",
+    "metric_subject": "waste",
+    "metric_role": "generation",
+    "flow_direction": "output",
+    "denominator_type": null,
+    "comparable": true,
+    "aliases": [
+      "plastic waste",
+      "plastic waste generated",
+      "total plastic waste",
+      "plastic waste from operations"
+    ],
+    "external_refs": [
+      {
+        "standard": "GRI",
+        "id": "GRI 306-3",
+        "label": "Waste generated \u2014 plastic"
+      },
+      {
+        "standard": "BRSR",
+        "id": "Principle 2 EPR",
+        "label": "Plastic waste generated"
+      }
+    ],
+    "canonical_definition": "Total plastic waste generated from operations.",
+    "review_status": "pending_human_approval"
+  },
+  {
+    "canonical_id": "waste_intensity_physical_output",
+    "display_name": "Waste Intensity per Physical Output",
+    "category": "waste",
+    "unit_family": "ratio",
+    "metric_subject": "waste",
+    "metric_role": "intensity",
+    "flow_direction": "ratio",
+    "denominator_type": "production",
+    "comparable": true,
+    "comparability_notes": "Comparable only when denominator unit is consistent.",
+    "aliases": [
+      "waste intensity physical output",
+      "waste intensity production",
+      "waste per tonne",
+      "waste intensity in terms of physical output",
+      "waste intensity terms physical output"
+    ],
+    "external_refs": [
+      {
+        "standard": "GRI",
+        "id": "GRI 306-3",
+        "label": "Waste intensity"
+      },
+      {
+        "standard": "BRSR",
+        "id": "Principle 6 Essential",
+        "label": "Waste intensity per unit of physical output"
+      }
+    ],
+    "canonical_definition": "Total waste generated per unit of physical production output.",
+    "review_status": "pending_human_approval"
+  },
+  {
+    "canonical_id": "waste_recovered_total",
+    "display_name": "Total Waste Recovered",
+    "category": "waste",
+    "unit_family": "weight",
+    "metric_subject": "waste",
+    "metric_role": "recovery",
+    "flow_direction": "recovery",
+    "denominator_type": null,
+    "comparable": true,
+    "aliases": [
+      "total recovered waste",
+      "waste recovered",
+      "waste diverted",
+      "waste diverted from disposal",
+      "total waste recovered"
+    ],
+    "external_refs": [
+      {
+        "standard": "GRI",
+        "id": "GRI 306-4",
+        "label": "Waste diverted from disposal"
+      }
+    ],
+    "canonical_definition": "Total waste diverted from disposal through recycling, reuse, and other recovery operations. Recycled / Re-used / Other recovery are dimensional breakdowns (recovery_method dimension).",
+    "dimension_note": "Add dimension recovery_method: recycled | reused | other_recovery",
+    "review_status": "pending_human_approval"
+  },
+  {
+    "canonical_id": "waste_disposed_total",
+    "display_name": "Total Waste Disposed",
+    "category": "waste",
+    "unit_family": "weight",
+    "metric_subject": "waste",
+    "metric_role": "disposal",
+    "flow_direction": "output",
+    "denominator_type": null,
+    "comparable": true,
+    "aliases": [
+      "total disposed waste",
+      "waste disposed",
+      "waste directed to disposal",
+      "total waste disposed"
+    ],
+    "external_refs": [
+      {
+        "standard": "GRI",
+        "id": "GRI 306-5",
+        "label": "Waste directed to disposal"
+      }
+    ],
+    "canonical_definition": "Total waste directed to disposal including landfill and incineration. Incineration / Landfilling are dimensional breakdowns (disposal_method dimension).",
+    "dimension_note": "Add dimension disposal_method: incineration | landfilling | other_disposal",
+    "review_status": "pending_human_approval"
+  }
+]

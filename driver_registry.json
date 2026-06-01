@@ -1,0 +1,306 @@
+[
+  {
+    "canonical_id": "volume_growth",
+    "display_name": "Volume Growth",
+    "category": "VOLUME",
+    "description": "Increase in units sold, traffic, or active customers",
+    "direction_default": "positive",
+    "notes": "Includes unit case volume, transaction count, active customer growth."
+  },
+  {
+    "canonical_id": "volume_decline",
+    "display_name": "Volume Decline",
+    "category": "VOLUME",
+    "description": "Decrease in units sold, traffic, or active customers",
+    "direction_default": "negative",
+    "notes": "Includes volume deleverage, lower unit sales, traffic declines."
+  },
+  {
+    "canonical_id": "comparable_sales_growth",
+    "display_name": "Comparable / Same-Store Sales Growth",
+    "category": "VOLUME",
+    "description": "Growth in sales from stores or units open for a full comparable period",
+    "direction_default": "positive",
+    "notes": "Comp sales, same-store sales, like-for-like growth."
+  },
+  {
+    "canonical_id": "new_customer_growth",
+    "display_name": "New Customer Growth",
+    "category": "VOLUME",
+    "description": "Net new active customers, members, or subscribers added",
+    "direction_default": "positive",
+    "notes": "Loyalty sign-ups, new account growth, subscriber additions."
+  },
+  {
+    "canonical_id": "price_increase",
+    "display_name": "Price Increase",
+    "category": "PRICE",
+    "description": "Higher average selling price, pricing actions, or improved pricing mix",
+    "direction_default": "positive",
+    "notes": "ASP increase, list price increases, reduced discounting."
+  },
+  {
+    "canonical_id": "price_decrease",
+    "display_name": "Price Decrease",
+    "category": "PRICE",
+    "description": "Lower average selling price, promotional pricing, or ASP decline",
+    "direction_default": "negative",
+    "notes": "Price investment, promotional pricing, ASP compression."
+  },
+  {
+    "canonical_id": "product_mix_favorable",
+    "display_name": "Favorable Product Mix",
+    "category": "MIX",
+    "description": "Shift in sales composition toward higher-margin products or categories",
+    "direction_default": "positive",
+    "notes": "Premiumization, trading up, higher-margin SKU growth."
+  },
+  {
+    "canonical_id": "product_mix_unfavorable",
+    "display_name": "Unfavorable Product Mix",
+    "category": "MIX",
+    "description": "Shift in sales composition toward lower-margin products or categories",
+    "direction_default": "negative",
+    "notes": "Trading down, value-tier growth outpacing premium."
+  },
+  {
+    "canonical_id": "channel_mix_favorable",
+    "display_name": "Favorable Channel Mix",
+    "category": "MIX",
+    "description": "Shift toward higher-margin channels such as DTC, e-commerce, or own retail",
+    "direction_default": "positive",
+    "notes": "DTC growth, direct channel expansion, away-from-home channel recovery."
+  },
+  {
+    "canonical_id": "channel_mix_unfavorable",
+    "display_name": "Unfavorable Channel Mix",
+    "category": "MIX",
+    "description": "Shift toward lower-margin channels such as off-trade or mass retail",
+    "direction_default": "negative",
+    "notes": "Wholesale shift, mass channel growth, distributor-led sales increase."
+  },
+  {
+    "canonical_id": "geographic_mix",
+    "display_name": "Geographic Mix Shift",
+    "category": "MIX",
+    "description": "Change in regional or country composition of revenue affecting margins",
+    "direction_default": "neutral",
+    "notes": "Can be positive or negative. Emerging market mix, developed market share shift."
+  },
+  {
+    "canonical_id": "input_cost_increase",
+    "display_name": "Input Cost Increase",
+    "category": "COST",
+    "description": "Higher commodity, raw material, or ingredient costs",
+    "direction_default": "negative",
+    "notes": "Commodity inflation, packaging cost pressure, ingredient cost headwind."
+  },
+  {
+    "canonical_id": "input_cost_decrease",
+    "display_name": "Input Cost Decrease",
+    "category": "COST",
+    "description": "Lower commodity, raw material, or ingredient costs",
+    "direction_default": "positive",
+    "notes": "Commodity tailwind, raw material deflation, input cost relief."
+  },
+  {
+    "canonical_id": "freight_cost_increase",
+    "display_name": "Freight Cost Increase",
+    "category": "COST",
+    "description": "Higher shipping, logistics, or carrier rates",
+    "direction_default": "negative",
+    "notes": "Elevated freight, logistics inflation, carrier rate increases, supply chain costs."
+  },
+  {
+    "canonical_id": "freight_cost_decrease",
+    "display_name": "Freight Cost Decrease",
+    "category": "COST",
+    "description": "Lower shipping, logistics, or carrier rates",
+    "direction_default": "positive",
+    "notes": "Freight tailwind, normalizing logistics costs, carrier rate relief."
+  },
+  {
+    "canonical_id": "labor_cost_increase",
+    "display_name": "Labor Cost Increase",
+    "category": "COST",
+    "description": "Higher wage, headcount, or employee benefits costs",
+    "direction_default": "negative",
+    "notes": "Wage inflation, minimum wage increases, headcount growth costs, benefits expense."
+  },
+  {
+    "canonical_id": "labor_cost_decrease",
+    "display_name": "Labor Cost Decrease",
+    "category": "COST",
+    "description": "Lower labor costs from restructuring, automation, or headcount reduction",
+    "direction_default": "positive",
+    "notes": "Restructuring savings, automation benefit, workforce optimization."
+  },
+  {
+    "canonical_id": "promotion_increase",
+    "display_name": "Increased Promotional Spend",
+    "category": "COST",
+    "description": "Higher markdowns, trade promotion, or promotional investment",
+    "direction_default": "negative",
+    "notes": "Higher markdowns, elevated promotions, trade spend increase, promotional intensity."
+  },
+  {
+    "canonical_id": "promotion_decrease",
+    "display_name": "Reduced Promotional Spend",
+    "category": "COST",
+    "description": "Lower markdowns, cleaner inventory, or reduced trade promotion",
+    "direction_default": "positive",
+    "notes": "Reduced markdowns, leaner inventory, lower promotional intensity, cleaner sell-through."
+  },
+  {
+    "canonical_id": "productivity_savings",
+    "display_name": "Productivity and Efficiency Savings",
+    "category": "COST",
+    "description": "Cost savings from operational efficiency, lean programs, or procurement",
+    "direction_default": "positive",
+    "notes": "Procurement savings, operational leverage, efficiency programs, cost discipline."
+  },
+  {
+    "canonical_id": "fx_translation",
+    "display_name": "Foreign Currency Translation",
+    "category": "FX",
+    "description": "Impact of translating foreign currency results into reporting currency",
+    "direction_default": "neutral",
+    "notes": "Can be positive or negative depending on currency moves and exposure."
+  },
+  {
+    "canonical_id": "fx_headwind",
+    "display_name": "FX Headwind",
+    "category": "FX",
+    "description": "Adverse foreign exchange impact on reported results",
+    "direction_default": "negative",
+    "notes": "Unfavorable FX, currency headwind, adverse translation impact."
+  },
+  {
+    "canonical_id": "fx_tailwind",
+    "display_name": "FX Tailwind",
+    "category": "FX",
+    "description": "Favorable foreign exchange impact on reported results",
+    "direction_default": "positive",
+    "notes": "Favorable FX, currency tailwind, positive translation impact."
+  },
+  {
+    "canonical_id": "dtc_growth",
+    "display_name": "Direct-to-Consumer Growth",
+    "category": "CHANNEL",
+    "description": "Expansion of direct-to-consumer sales channel",
+    "direction_default": "positive",
+    "notes": "DTC expansion, own retail growth, brand.com growth, direct sales increase."
+  },
+  {
+    "canonical_id": "ecommerce_growth",
+    "display_name": "E-commerce Growth",
+    "category": "CHANNEL",
+    "description": "Growth in online and digital sales channel",
+    "direction_default": "positive",
+    "notes": "Online channel growth, digital sales increase, omnichannel expansion."
+  },
+  {
+    "canonical_id": "wholesale_shift",
+    "display_name": "Wholesale Channel Shift",
+    "category": "CHANNEL",
+    "description": "Change in mix between wholesale and direct retail channels",
+    "direction_default": "neutral",
+    "notes": "Can be positive or negative. Wholesale expansion or contraction."
+  },
+  {
+    "canonical_id": "physical_expansion",
+    "display_name": "Physical Store Expansion",
+    "category": "CHANNEL",
+    "description": "Net new store or door openings contributing to revenue",
+    "direction_default": "positive",
+    "notes": "New store openings, net new doors, retail footprint expansion."
+  },
+  {
+    "canonical_id": "organic_growth",
+    "display_name": "Organic Growth",
+    "category": "EXPANSION",
+    "description": "Internally driven revenue growth excluding acquisitions and FX",
+    "direction_default": "positive",
+    "notes": "Organic sales growth, underlying growth, constant currency organic growth."
+  },
+  {
+    "canonical_id": "acquisition_contribution",
+    "display_name": "Acquisition Contribution",
+    "category": "EXPANSION",
+    "description": "Revenue or profit contribution from acquired businesses",
+    "direction_default": "positive",
+    "notes": "M&A contribution, inorganic growth, acquired revenue."
+  },
+  {
+    "canonical_id": "divestiture_impact",
+    "display_name": "Divestiture Impact",
+    "category": "EXPANSION",
+    "description": "Revenue or profit lost from divested businesses",
+    "direction_default": "negative",
+    "notes": "Disposed businesses, sold brands, portfolio pruning impact."
+  },
+  {
+    "canonical_id": "new_door_openings",
+    "display_name": "New Door / Distribution Openings",
+    "category": "EXPANSION",
+    "description": "Net new retail distribution points added in the period",
+    "direction_default": "positive",
+    "notes": "New doors, distribution expansion, retail placement gains."
+  },
+  {
+    "canonical_id": "market_expansion",
+    "display_name": "Market Expansion",
+    "category": "EXPANSION",
+    "description": "Entry into new geographies or product categories",
+    "direction_default": "positive",
+    "notes": "New market entry, category expansion, geographic diversification."
+  },
+  {
+    "canonical_id": "impairment",
+    "display_name": "Asset Impairment",
+    "category": "ONE_OFF",
+    "description": "Non-cash write-down of goodwill, intangibles, or other assets",
+    "direction_default": "negative",
+    "notes": "Goodwill impairment, brand impairment, asset write-down."
+  },
+  {
+    "canonical_id": "restructuring",
+    "display_name": "Restructuring",
+    "category": "ONE_OFF",
+    "description": "Restructuring charges or savings from transformation programs",
+    "direction_default": "neutral",
+    "notes": "Can be a charge (negative) or savings benefit (positive). Label direction explicitly."
+  },
+  {
+    "canonical_id": "litigation",
+    "display_name": "Litigation Settlement",
+    "category": "ONE_OFF",
+    "description": "Legal settlement charge or recovery",
+    "direction_default": "negative",
+    "notes": "Legal charge, settlement cost, litigation provision."
+  },
+  {
+    "canonical_id": "weather_impact",
+    "display_name": "Weather or Macro Disruption",
+    "category": "ONE_OFF",
+    "description": "Adverse weather, natural disaster, or macro disruption impact",
+    "direction_default": "negative",
+    "notes": "Weather disruption, natural disaster impact, macro shock."
+  },
+  {
+    "canonical_id": "inventory_adjustment",
+    "display_name": "Inventory Adjustment",
+    "category": "ONE_OFF",
+    "description": "Excess inventory, obsolescence charges, or inventory destocking",
+    "direction_default": "negative",
+    "notes": "Inventory write-down, excess inventory, destocking headwind, obsolescence charge."
+  },
+  {
+    "canonical_id": "inflation_impact",
+    "display_name": "Broad Inflation Impact",
+    "category": "ONE_OFF",
+    "description": "General inflationary pressure across multiple cost lines",
+    "direction_default": "negative",
+    "notes": "Use when inflation is cited broadly rather than tied to a specific cost driver."
+  }
+]

@@ -1,0 +1,1968 @@
+{
+  "version": "review_memory_v1",
+  "source_review_csvs": [
+    "marico_provisional_review_action_queue_reviewed.csv",
+    "marico_review_memory.json",
+    "mondelez_provisional_review_action_queue_reviewed.csv",
+    "mondelez_review_memory.json"
+  ],
+  "decisions": {
+    "raw_name:basic eps": {
+      "raw_name": "Basic EPS",
+      "metric_core": "basic_eps",
+      "review_status": "route_financial",
+      "review_notes": "Valid financial metric; should be handled by financial registry, not operational registry.",
+      "action": "route_financial",
+      "canonical_id": "basic_eps",
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "metric_core:basic eps": {
+      "raw_name": "Basic EPS",
+      "metric_core": "basic_eps",
+      "review_status": "route_financial",
+      "review_notes": "Valid financial metric; should be handled by financial registry, not operational registry.",
+      "action": "route_financial",
+      "canonical_id": "basic_eps",
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "raw_name:r d spend invested in improving environment and social impact": {
+      "raw_name": "R&D spend invested in improving environment and social impact",
+      "metric_core": "r_d_spend_invested_improving",
+      "review_status": "approve_mapping_or_add_alias",
+      "review_notes": "R&D spend share should map to R&D investment intensity, not recycled content.",
+      "action": "accept",
+      "canonical_id": "rnd_investment_intensity",
+      "dimension": null,
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "metric_core:r d spend invested improving": {
+      "raw_name": "R&D spend invested in improving environment and social impact",
+      "metric_core": "r_d_spend_invested_improving",
+      "review_status": "approve_mapping_or_add_alias",
+      "review_notes": "R&D spend share should map to R&D investment intensity, not recycled content.",
+      "action": "accept",
+      "canonical_id": "rnd_investment_intensity",
+      "dimension": null,
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "raw_name:patents": {
+      "raw_name": "patents",
+      "metric_core": "patents",
+      "review_status": "approve_mapping",
+      "review_notes": "Correct mapping; add alias/definition feedback if it remains below floor or margin.",
+      "action": "accept",
+      "canonical_id": "patent_count",
+      "dimension": null,
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "metric_core:patents": {
+      "raw_name": "patents",
+      "metric_core": "patents",
+      "review_status": "approve_mapping",
+      "review_notes": "Correct mapping; add alias/definition feedback if it remains below floor or margin.",
+      "action": "accept",
+      "canonical_id": "patent_count",
+      "dimension": null,
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "raw_name:customer satisfaction index": {
+      "raw_name": "Customer Satisfaction Index",
+      "metric_core": "customer_satisfaction_index",
+      "review_status": "fix_registry_unit_family",
+      "review_notes": "Canonical exists but unit compatibility is too narrow; allow percentage/index/ratio style units.",
+      "action": "accept",
+      "canonical_id": "customer_satisfaction_score",
+      "dimension": null,
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "metric_core:customer satisfaction index": {
+      "raw_name": "Customer Satisfaction Index",
+      "metric_core": "customer_satisfaction_index",
+      "review_status": "fix_registry_unit_family",
+      "review_notes": "Canonical exists but unit compatibility is too narrow; allow percentage/index/ratio style units.",
+      "action": "accept",
+      "canonical_id": "customer_satisfaction_score",
+      "dimension": null,
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "raw_name:operating margin": {
+      "raw_name": "operating margin",
+      "metric_core": "operating_margin",
+      "review_status": "route_financial",
+      "review_notes": "Valid financial metric; should be handled by financial registry, not operational registry.",
+      "action": "route_financial",
+      "canonical_id": "operating_margin",
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "metric_core:operating margin": {
+      "raw_name": "operating margin",
+      "metric_core": "operating_margin",
+      "review_status": "route_financial",
+      "review_notes": "Valid financial metric; should be handled by financial registry, not operational registry.",
+      "action": "route_financial",
+      "canonical_id": "operating_margin",
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "raw_name:debt ebitda": {
+      "raw_name": "Debt/EBITDA",
+      "metric_core": "debt_to_ebitda",
+      "review_status": "route_financial",
+      "review_notes": "Valid financial metric; should be handled by financial registry, not operational registry.",
+      "action": "route_financial",
+      "canonical_id": "net_debt_to_ebitda",
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "metric_core:debt to ebitda": {
+      "raw_name": "Debt/EBITDA",
+      "metric_core": "debt_to_ebitda",
+      "review_status": "route_financial",
+      "review_notes": "Valid financial metric; should be handled by financial registry, not operational registry.",
+      "action": "route_financial",
+      "canonical_id": "net_debt_to_ebitda",
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "raw_name:investment in brand building asp to sales": {
+      "raw_name": "investment in brand building - ASP to Sales",
+      "metric_core": "investment_brand_building_asp_sales",
+      "review_status": "approve_mapping_or_add_alias",
+      "review_notes": "Brand building as percent of sales should map to marketing investment intensity.",
+      "action": "accept",
+      "canonical_id": "marketing_investment_intensity",
+      "dimension": null,
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "metric_core:investment brand building asp sales": {
+      "raw_name": "investment in brand building - ASP to Sales",
+      "metric_core": "investment_brand_building_asp_sales",
+      "review_status": "approve_mapping_or_add_alias",
+      "review_notes": "Brand building as percent of sales should map to marketing investment intensity.",
+      "action": "accept",
+      "canonical_id": "marketing_investment_intensity",
+      "dimension": null,
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "raw_name:ebitda": {
+      "raw_name": "EBITDA",
+      "metric_core": "ebitda",
+      "review_status": "route_financial",
+      "review_notes": "Valid financial metric; should be handled by financial registry, not operational registry.",
+      "action": "route_financial",
+      "canonical_id": "ebitda",
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "metric_core:ebitda": {
+      "raw_name": "EBITDA",
+      "metric_core": "ebitda",
+      "review_status": "route_financial",
+      "review_notes": "Valid financial metric; should be handled by financial registry, not operational registry.",
+      "action": "route_financial",
+      "canonical_id": "ebitda",
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "raw_name:absolute energy consumption": {
+      "raw_name": "Absolute energy consumption",
+      "metric_core": "energy_consumption",
+      "review_status": "add_canonical",
+      "review_notes": "Universal ESG metric; add absolute level canonical distinct from intensity/per-unit energy.",
+      "action": "accept",
+      "canonical_id": "absolute_energy_consumption",
+      "dimension": null,
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "metric_core:energy consumption": {
+      "raw_name": "Absolute energy consumption",
+      "metric_core": "energy_consumption",
+      "review_status": "add_canonical",
+      "review_notes": "Universal ESG metric; add absolute level canonical distinct from intensity/per-unit energy.",
+      "action": "accept",
+      "canonical_id": "absolute_energy_consumption",
+      "dimension": null,
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "raw_name:ghg emission intensity scope 1 2": {
+      "raw_name": "GHG emission intensity (Scope 1+2)",
+      "metric_core": "ghg_emission_intensity_scope_1_2",
+      "review_status": "approve_mapping",
+      "review_notes": "Correct mapping; add alias/definition feedback if it remains below floor or margin.",
+      "action": "accept",
+      "canonical_id": "combined_scope_1_2_emissions_intensity",
+      "dimension": null,
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "metric_core:ghg emission intensity scope 1 2": {
+      "raw_name": "Scope 1 & Scope 2 GHG Emission Intensity FY24",
+      "metric_core": "ghg_emission_intensity_scope_1_2",
+      "review_status": "approve_mapping",
+      "review_notes": "Correct mapping; add alias/definition feedback if it remains below floor or margin.",
+      "action": "accept",
+      "canonical_id": "combined_scope_1_2_emissions_intensity",
+      "dimension": null,
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "raw_name:absolute direct emissions reduction": {
+      "raw_name": "Absolute direct emissions reduction",
+      "metric_core": "absolute_direct_emissions_reduction",
+      "review_status": "fix_matcher_preference",
+      "review_notes": "Baseline GHG reduction should prefer ghg_reduction_vs_baseline; preserve transport/scope detail as scope/sub_category.",
+      "action": "accept",
+      "canonical_id": "ghg_reduction_vs_baseline",
+      "dimension": null,
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "metric_core:absolute direct emissions reduction": {
+      "raw_name": "Absolute direct emissions reduction",
+      "metric_core": "absolute_direct_emissions_reduction",
+      "review_status": "fix_matcher_preference",
+      "review_notes": "Baseline GHG reduction should prefer ghg_reduction_vs_baseline; preserve transport/scope detail as scope/sub_category.",
+      "action": "accept",
+      "canonical_id": "ghg_reduction_vs_baseline",
+      "dimension": null,
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "raw_name:scope 1 scope 2 ghg emission intensity fy24": {
+      "raw_name": "Scope 1 & Scope 2 GHG Emission Intensity FY24",
+      "metric_core": "ghg_emission_intensity_scope_1_2",
+      "review_status": "approve_mapping",
+      "review_notes": "Correct mapping; add alias/definition feedback if it remains below floor or margin.",
+      "action": "accept",
+      "canonical_id": "combined_scope_1_2_emissions_intensity",
+      "dimension": null,
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "raw_name:reduction in upstream transport emissions": {
+      "raw_name": "Reduction in upstream transport emissions",
+      "metric_core": "upstream_transport_emissions_reduction",
+      "review_status": "fix_matcher_preference",
+      "review_notes": "Baseline GHG reduction should prefer ghg_reduction_vs_baseline; preserve transport/scope detail as scope/sub_category.",
+      "action": "accept",
+      "canonical_id": "ghg_reduction_vs_baseline",
+      "dimension": null,
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "metric_core:upstream transport emissions reduction": {
+      "raw_name": "Reduction in upstream transport emissions",
+      "metric_core": "upstream_transport_emissions_reduction",
+      "review_status": "fix_matcher_preference",
+      "review_notes": "Baseline GHG reduction should prefer ghg_reduction_vs_baseline; preserve transport/scope detail as scope/sub_category.",
+      "action": "accept",
+      "canonical_id": "ghg_reduction_vs_baseline",
+      "dimension": null,
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "raw_name:energy intensity": {
+      "raw_name": "Energy intensity",
+      "metric_core": "energy_intensity",
+      "review_status": "fix_registry_or_unit_gate",
+      "review_notes": "Correct family exists but score/gates are not landing it.",
+      "action": "accept",
+      "canonical_id": "energy_intensity",
+      "dimension": null,
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "metric_core:energy intensity": {
+      "raw_name": "Energy intensity",
+      "metric_core": "energy_intensity",
+      "review_status": "fix_registry_or_unit_gate",
+      "review_notes": "Correct family exists but score/gates are not landing it.",
+      "action": "accept",
+      "canonical_id": "energy_intensity",
+      "dimension": null,
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "raw_name:energy intensity reduction": {
+      "raw_name": "Energy intensity reduction",
+      "metric_core": "energy_intensity_reduction",
+      "review_status": "approve_mapping",
+      "review_notes": "Correct mapping; add alias/definition feedback if it remains below floor or margin.",
+      "action": "accept",
+      "canonical_id": "energy_reduction_vs_baseline",
+      "dimension": null,
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "metric_core:energy intensity reduction": {
+      "raw_name": "Energy intensity reduction",
+      "metric_core": "energy_intensity_reduction",
+      "review_status": "approve_mapping",
+      "review_notes": "Correct mapping; add alias/definition feedback if it remains below floor or margin.",
+      "action": "accept",
+      "canonical_id": "energy_reduction_vs_baseline",
+      "dimension": null,
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "raw_name:water consumption intensity": {
+      "raw_name": "Water Consumption Intensity",
+      "metric_core": "water_consumption_intensity",
+      "review_status": "fix_registry_or_unit_gate",
+      "review_notes": "Correct family exists but is losing to water_conservation_potential; likely unit/definition alignment issue.",
+      "action": "accept",
+      "canonical_id": "water_consumption_intensity",
+      "dimension": null,
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "metric_core:water consumption intensity": {
+      "raw_name": "Water Consumption Intensity",
+      "metric_core": "water_consumption_intensity",
+      "review_status": "fix_registry_or_unit_gate",
+      "review_notes": "Correct family exists but is losing to water_conservation_potential; likely unit/definition alignment issue.",
+      "action": "accept",
+      "canonical_id": "water_consumption_intensity",
+      "dimension": null,
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "raw_name:operational water consumption intensity reduction": {
+      "raw_name": "Operational water consumption intensity reduction",
+      "metric_core": "operational_water_consumption_intensity_reduction",
+      "review_status": "approve_mapping",
+      "review_notes": "Correct mapping; add alias/definition feedback if it remains below floor or margin.",
+      "action": "accept",
+      "canonical_id": "water_reduction_vs_baseline",
+      "dimension": null,
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "metric_core:operational water consumption intensity reduction": {
+      "raw_name": "Operational water consumption intensity reduction",
+      "metric_core": "operational_water_consumption_intensity_reduction",
+      "review_status": "approve_mapping",
+      "review_notes": "Correct mapping; add alias/definition feedback if it remains below floor or margin.",
+      "action": "accept",
+      "canonical_id": "water_reduction_vs_baseline",
+      "dimension": null,
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "raw_name:water capacity created in fy24": {
+      "raw_name": "Water capacity created in FY24",
+      "metric_core": "water_capacity_created",
+      "review_status": "fix_definition",
+      "review_notes": "Definition drifted toward manufacturing capacity; extractor/Define should frame this as water conservation capacity.",
+      "action": "accept",
+      "canonical_id": "water_conservation_potential",
+      "dimension": null,
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "metric_core:water capacity created": {
+      "raw_name": "Water capacity created in FY24",
+      "metric_core": "water_capacity_created",
+      "review_status": "fix_definition",
+      "review_notes": "Definition drifted toward manufacturing capacity; extractor/Define should frame this as water conservation capacity.",
+      "action": "accept",
+      "canonical_id": "water_conservation_potential",
+      "dimension": null,
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "raw_name:cumulative water conservation potential created": {
+      "raw_name": "Cumulative water conservation potential created",
+      "metric_core": "cumulative_water_conservation_potential",
+      "review_status": "approve_mapping",
+      "review_notes": "Correct mapping; add alias/definition feedback if it remains below floor or margin.",
+      "action": "accept",
+      "canonical_id": "water_conservation_potential",
+      "dimension": null,
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "metric_core:cumulative water conservation potential": {
+      "raw_name": "Cumulative water conservation potential created",
+      "metric_core": "cumulative_water_conservation_potential",
+      "review_status": "approve_mapping",
+      "review_notes": "Correct mapping; add alias/definition feedback if it remains below floor or margin.",
+      "action": "accept",
+      "canonical_id": "water_conservation_potential",
+      "dimension": null,
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "raw_name:farm ponds created": {
+      "raw_name": "Farm ponds created",
+      "metric_core": "farm_ponds_created",
+      "review_status": "company_specific_or_add_canonical",
+      "review_notes": "Could be water stewardship asset count; add only if recurring across companies.",
+      "action": "keep_provisional",
+      "canonical_id": "water_stewardship_asset_count",
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "metric_core:farm ponds created": {
+      "raw_name": "Farm ponds created",
+      "metric_core": "farm_ponds_created",
+      "review_status": "company_specific_or_add_canonical",
+      "review_notes": "Could be water stewardship asset count; add only if recurring across companies.",
+      "action": "keep_provisional",
+      "canonical_id": "water_stewardship_asset_count",
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "raw_name:farm ponds constructed in fy24": {
+      "raw_name": "Farm ponds constructed in FY24",
+      "metric_core": "farm_ponds_constructed",
+      "review_status": "company_specific_or_add_canonical",
+      "review_notes": "Could be water stewardship asset count; add only if recurring across companies.",
+      "action": "keep_provisional",
+      "canonical_id": "water_stewardship_asset_count",
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "metric_core:farm ponds constructed": {
+      "raw_name": "Farm ponds constructed in FY24",
+      "metric_core": "farm_ponds_constructed",
+      "review_status": "company_specific_or_add_canonical",
+      "review_notes": "Could be water stewardship asset count; add only if recurring across companies.",
+      "action": "keep_provisional",
+      "canonical_id": "water_stewardship_asset_count",
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "raw_name:water conservation potential for community usage": {
+      "raw_name": "Water conservation potential for community usage",
+      "metric_core": "water_conservation_potential_community_usage",
+      "review_status": "approve_mapping",
+      "review_notes": "Correct family; improve definition/aliases if still below floor.",
+      "action": "accept",
+      "canonical_id": "water_conservation_potential",
+      "dimension": null,
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "metric_core:water conservation potential community usage": {
+      "raw_name": "Water conservation potential for community usage",
+      "metric_core": "water_conservation_potential_community_usage",
+      "review_status": "approve_mapping",
+      "review_notes": "Correct family; improve definition/aliases if still below floor.",
+      "action": "accept",
+      "canonical_id": "water_conservation_potential",
+      "dimension": null,
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "raw_name:water conservation at puducherry unit": {
+      "raw_name": "Water conservation at Puducherry unit",
+      "metric_core": "water_conservation_puducherry_unit",
+      "review_status": "approve_mapping",
+      "review_notes": "Correct mapping; add alias/definition feedback if it remains below floor or margin.",
+      "action": "accept",
+      "canonical_id": "water_reduction_vs_baseline",
+      "dimension": null,
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "metric_core:water conservation puducherry unit": {
+      "raw_name": "Water conservation at Puducherry unit",
+      "metric_core": "water_conservation_puducherry_unit",
+      "review_status": "approve_mapping",
+      "review_notes": "Correct mapping; add alias/definition feedback if it remains below floor or margin.",
+      "action": "accept",
+      "canonical_id": "water_reduction_vs_baseline",
+      "dimension": null,
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "raw_name:zero hazardous waste to landfill zhwl principle": {
+      "raw_name": "Zero Hazardous Waste to Landfill (ZHWL) principle",
+      "metric_core": "zero_hazardous_waste_to_landfill",
+      "review_status": "do_not_auto_accept",
+      "review_notes": "Qualitative policy/principle disclosure, not a numeric facility-count fact.",
+      "action": "do_not_auto_accept",
+      "canonical_id": "",
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "metric_core:zero hazardous waste to landfill": {
+      "raw_name": "Zero Hazardous Waste to Landfill (ZHWL) principle",
+      "metric_core": "zero_hazardous_waste_to_landfill",
+      "review_status": "do_not_auto_accept",
+      "review_notes": "Qualitative policy/principle disclosure, not a numeric facility-count fact.",
+      "action": "do_not_auto_accept",
+      "canonical_id": "",
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "raw_name:100 effluents treated within plant boundaries": {
+      "raw_name": "100% effluents treated within plant boundaries",
+      "metric_core": "effluents_treated_within_plant_boundaries",
+      "review_status": "add_canonical",
+      "review_notes": "Universal water/wastewater compliance metric; not EPR.",
+      "action": "accept",
+      "canonical_id": "effluent_treatment_compliance_rate",
+      "dimension": null,
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "metric_core:effluents treated within plant boundaries": {
+      "raw_name": "100% effluents treated within plant boundaries",
+      "metric_core": "effluents_treated_within_plant_boundaries",
+      "review_status": "add_canonical",
+      "review_notes": "Universal water/wastewater compliance metric; not EPR.",
+      "action": "accept",
+      "canonical_id": "effluent_treatment_compliance_rate",
+      "dimension": null,
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "raw_name:post consumer plastic waste collected and recycled": {
+      "raw_name": "Post-consumer plastic waste collected and recycled",
+      "metric_core": "plastic_waste_collected_recycled",
+      "review_status": "approve_mapping",
+      "review_notes": "Correct mapping; add alias/definition feedback if it remains below floor or margin.",
+      "action": "accept",
+      "canonical_id": "plastic_waste_collected",
+      "dimension": null,
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "metric_core:plastic waste collected recycled": {
+      "raw_name": "Post-consumer plastic waste collected and recycled",
+      "metric_core": "plastic_waste_collected_recycled",
+      "review_status": "approve_mapping",
+      "review_notes": "Correct mapping; add alias/definition feedback if it remains below floor or margin.",
+      "action": "accept",
+      "canonical_id": "plastic_waste_collected",
+      "dimension": null,
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "raw_name:category 1 rigids": {
+      "raw_name": "Category 1 Rigids",
+      "metric_core": "post_consumer_plastic_waste_rigids",
+      "review_status": "approve_mapping",
+      "review_notes": "Correct mapping; add alias/definition feedback if it remains below floor or margin.",
+      "action": "accept",
+      "canonical_id": "plastic_waste_collected",
+      "dimension": {
+        "dimension_type": "packaging_type",
+        "dimension_member": "rigids"
+      },
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "metric_core:post consumer plastic waste rigids": {
+      "raw_name": "Category 1 Rigids",
+      "metric_core": "post_consumer_plastic_waste_rigids",
+      "review_status": "approve_mapping",
+      "review_notes": "Correct mapping; add alias/definition feedback if it remains below floor or margin.",
+      "action": "accept",
+      "canonical_id": "plastic_waste_collected",
+      "dimension": {
+        "dimension_type": "packaging_type",
+        "dimension_member": "rigids"
+      },
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "raw_name:category 2 flexibles": {
+      "raw_name": "Category 2 Flexibles",
+      "metric_core": "post_consumer_plastic_waste_flexibles",
+      "review_status": "approve_mapping",
+      "review_notes": "Correct mapping; add alias/definition feedback if it remains below floor or margin.",
+      "action": "accept",
+      "canonical_id": "plastic_waste_collected",
+      "dimension": {
+        "dimension_type": "packaging_type",
+        "dimension_member": "flexibles"
+      },
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "metric_core:post consumer plastic waste flexibles": {
+      "raw_name": "Category 2 Flexibles",
+      "metric_core": "post_consumer_plastic_waste_flexibles",
+      "review_status": "approve_mapping",
+      "review_notes": "Correct mapping; add alias/definition feedback if it remains below floor or margin.",
+      "action": "accept",
+      "canonical_id": "plastic_waste_collected",
+      "dimension": {
+        "dimension_type": "packaging_type",
+        "dimension_member": "flexibles"
+      },
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "raw_name:recyclable packaging material share": {
+      "raw_name": "Recyclable packaging material share",
+      "metric_core": "recyclable_packaging_material_share",
+      "review_status": "fix_matcher_preference",
+      "review_notes": "Should map to packaging recyclability, not recycled content.",
+      "action": "accept",
+      "canonical_id": "packaging_recyclability",
+      "dimension": null,
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "metric_core:recyclable packaging material share": {
+      "raw_name": "Recyclable packaging material share",
+      "metric_core": "recyclable_packaging_material_share",
+      "review_status": "fix_matcher_preference",
+      "review_notes": "Should map to packaging recyclability, not recycled content.",
+      "action": "accept",
+      "canonical_id": "packaging_recyclability",
+      "dimension": null,
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "raw_name:recycled plastic pcr": {
+      "raw_name": "Recycled plastic (PCR)",
+      "metric_core": "recycled_plastic_pcr",
+      "review_status": "approve_mapping",
+      "review_notes": "Correct mapping; add alias/definition feedback if it remains below floor or margin.",
+      "action": "accept",
+      "canonical_id": "recycled_plastic_content_share",
+      "dimension": null,
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "metric_core:recycled plastic pcr": {
+      "raw_name": "Recycled plastic (PCR)",
+      "metric_core": "recycled_plastic_pcr",
+      "review_status": "approve_mapping",
+      "review_notes": "Correct mapping; add alias/definition feedback if it remains below floor or margin.",
+      "action": "accept",
+      "canonical_id": "recycled_plastic_content_share",
+      "dimension": null,
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "raw_name:more than 30 000 trees developed in miyawaki forests": {
+      "raw_name": "More than 30,000 trees developed in Miyawaki forests",
+      "metric_core": "miyawaki_forests_tree_count",
+      "review_status": "add_canonical_optional",
+      "review_notes": "Reusable ESG metric, but optional depending whether biodiversity metrics are in scope.",
+      "action": "candidate_canonical",
+      "canonical_id": "biodiversity_tree_count",
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "metric_core:miyawaki forests tree count": {
+      "raw_name": "More than 30,000 trees developed in Miyawaki forests",
+      "metric_core": "miyawaki_forests_tree_count",
+      "review_status": "add_canonical_optional",
+      "review_notes": "Reusable ESG metric, but optional depending whether biodiversity metrics are in scope.",
+      "action": "candidate_canonical",
+      "canonical_id": "biodiversity_tree_count",
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "raw_name:ghg emissions scope 1 2 in bangladesh": {
+      "raw_name": "GHG Emissions (Scope 1+2) in Bangladesh",
+      "metric_core": "ghg_emissions_scope_1_2_bangladesh",
+      "review_status": "needs_manual_review",
+      "review_notes": "No confident review decision from current rules.",
+      "action": "keep_provisional",
+      "canonical_id": "combined_scope_1_2_emissions",
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "metric_core:ghg emissions scope 1 2 bangladesh": {
+      "raw_name": "GHG Emissions (Scope 1+2) in Bangladesh",
+      "metric_core": "ghg_emissions_scope_1_2_bangladesh",
+      "review_status": "needs_manual_review",
+      "review_notes": "No confident review decision from current rules.",
+      "action": "keep_provisional",
+      "canonical_id": "combined_scope_1_2_emissions",
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "raw_name:ghg emissions in vietnam": {
+      "raw_name": "GHG Emissions in Vietnam",
+      "metric_core": "ghg_emissions_vietnam",
+      "review_status": "fix_scope_unknown_emissions",
+      "review_notes": "Do not map generic country GHG emissions to Scope 1 without explicit scope.",
+      "action": "do_not_auto_accept",
+      "canonical_id": "ghg_emissions",
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "metric_core:ghg emissions vietnam": {
+      "raw_name": "GHG Emissions in Vietnam",
+      "metric_core": "ghg_emissions_vietnam",
+      "review_status": "fix_scope_unknown_emissions",
+      "review_notes": "Do not map generic country GHG emissions to Scope 1 without explicit scope.",
+      "action": "do_not_auto_accept",
+      "canonical_id": "ghg_emissions",
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "raw_name:water in vietnam": {
+      "raw_name": "Water in Vietnam",
+      "metric_core": "water_vietnam",
+      "review_status": "approve_mapping",
+      "review_notes": "Correct mapping; add alias/definition feedback if it remains below floor or margin.",
+      "action": "accept",
+      "canonical_id": "water_withdrawal",
+      "dimension": {
+        "dimension_type": "geography",
+        "dimension_member": "Vietnam"
+      },
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "metric_core:water vietnam": {
+      "raw_name": "Water in Vietnam",
+      "metric_core": "water_vietnam",
+      "review_status": "approve_mapping",
+      "review_notes": "Correct mapping; add alias/definition feedback if it remains below floor or margin.",
+      "action": "accept",
+      "canonical_id": "water_withdrawal",
+      "dimension": {
+        "dimension_type": "geography",
+        "dimension_member": "Vietnam"
+      },
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "raw_name:ghg emissions in egypt": {
+      "raw_name": "GHG Emissions in Egypt",
+      "metric_core": "ghg_emissions_egypt",
+      "review_status": "fix_scope_unknown_emissions",
+      "review_notes": "Do not map generic country GHG emissions to Scope 1 without explicit scope.",
+      "action": "do_not_auto_accept",
+      "canonical_id": "ghg_emissions",
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "metric_core:ghg emissions egypt": {
+      "raw_name": "GHG Emissions in Egypt",
+      "metric_core": "ghg_emissions_egypt",
+      "review_status": "fix_scope_unknown_emissions",
+      "review_notes": "Do not map generic country GHG emissions to Scope 1 without explicit scope.",
+      "action": "do_not_auto_accept",
+      "canonical_id": "ghg_emissions",
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "raw_name:water in egypt": {
+      "raw_name": "Water in Egypt",
+      "metric_core": "water_egypt",
+      "review_status": "approve_mapping",
+      "review_notes": "Correct mapping; add alias/definition feedback if it remains below floor or margin.",
+      "action": "accept",
+      "canonical_id": "water_withdrawal",
+      "dimension": {
+        "dimension_type": "geography",
+        "dimension_member": "Egypt"
+      },
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "metric_core:water egypt": {
+      "raw_name": "Water in Egypt",
+      "metric_core": "water_egypt",
+      "review_status": "approve_mapping",
+      "review_notes": "Correct mapping; add alias/definition feedback if it remains below floor or margin.",
+      "action": "accept",
+      "canonical_id": "water_withdrawal",
+      "dimension": {
+        "dimension_type": "geography",
+        "dimension_member": "Egypt"
+      },
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "raw_name:food value growth": {
+      "raw_name": "food value growth",
+      "metric_core": "food_value_growth",
+      "review_status": "approve_financial_or_market_mapping",
+      "review_notes": "Value growth is not unit volume growth; current provisional is correct. Route to market/financial growth if in scope.",
+      "action": "route_financial",
+      "canonical_id": "comparable_sales_growth",
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "metric_core:food value growth": {
+      "raw_name": "food value growth",
+      "metric_core": "food_value_growth",
+      "review_status": "approve_financial_or_market_mapping",
+      "review_notes": "Value growth is not unit volume growth; current provisional is correct. Route to market/financial growth if in scope.",
+      "action": "route_financial",
+      "canonical_id": "comparable_sales_growth",
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "raw_name:return on net worth": {
+      "raw_name": "return on net worth",
+      "metric_core": "return_on_net_worth",
+      "review_status": "route_financial",
+      "review_notes": "Valid financial metric; should be handled by financial registry, not operational registry.",
+      "action": "route_financial",
+      "canonical_id": "return_on_equity",
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "metric_core:return on net worth": {
+      "raw_name": "return on net worth",
+      "metric_core": "return_on_net_worth",
+      "review_status": "route_financial",
+      "review_notes": "Valid financial metric; should be handled by financial registry, not operational registry.",
+      "action": "route_financial",
+      "canonical_id": "return_on_equity",
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "raw_name:inventory turnover": {
+      "raw_name": "inventory turnover",
+      "metric_core": "inventory_turnover",
+      "review_status": "fix_registry_duplicate_or_alias",
+      "review_notes": "Should map to inventory_turnover, not inventory.",
+      "action": "accept",
+      "canonical_id": "inventory_turnover",
+      "dimension": null,
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "metric_core:inventory turnover": {
+      "raw_name": "inventory turnover",
+      "metric_core": "inventory_turnover",
+      "review_status": "fix_registry_duplicate_or_alias",
+      "review_notes": "Should map to inventory_turnover, not inventory.",
+      "action": "accept",
+      "canonical_id": "inventory_turnover",
+      "dimension": null,
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "raw_name:cash generated from operations": {
+      "raw_name": "cash generated from operations",
+      "metric_core": "cash_generated_from_operations",
+      "review_status": "route_financial",
+      "review_notes": "Valid financial metric; should be handled by financial registry, not operational registry.",
+      "action": "route_financial",
+      "canonical_id": "operating_cash_flow",
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "metric_core:cash generated from operations": {
+      "raw_name": "cash generated from operations",
+      "metric_core": "cash_generated_from_operations",
+      "review_status": "route_financial",
+      "review_notes": "Valid financial metric; should be handled by financial registry, not operational registry.",
+      "action": "route_financial",
+      "canonical_id": "operating_cash_flow",
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "raw_name:advertisement and sales promotion": {
+      "raw_name": "advertisement and sales promotion",
+      "metric_core": "advertisement_and_sales_promotion",
+      "review_status": "route_financial",
+      "review_notes": "Valid financial metric; should be handled by financial registry, not operational registry.",
+      "action": "route_financial",
+      "canonical_id": "advertising_spend",
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "metric_core:advertisement and sales promotion": {
+      "raw_name": "advertisement and sales promotion",
+      "metric_core": "advertisement_and_sales_promotion",
+      "review_status": "route_financial",
+      "review_notes": "Valid financial metric; should be handled by financial registry, not operational registry.",
+      "action": "route_financial",
+      "canonical_id": "advertising_spend",
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "raw_name:network reach": {
+      "raw_name": "network reach",
+      "metric_core": "network_reach",
+      "review_status": "approve_mapping",
+      "review_notes": "Correct mapping; add alias/definition feedback if it remains below floor or margin.",
+      "action": "accept",
+      "canonical_id": "distribution_reach",
+      "dimension": null,
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "metric_core:network reach": {
+      "raw_name": "network reach",
+      "metric_core": "network_reach",
+      "review_status": "approve_mapping",
+      "review_notes": "Correct mapping; add alias/definition feedback if it remains below floor or margin.",
+      "action": "accept",
+      "canonical_id": "distribution_reach",
+      "dimension": null,
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "raw_name:number of farmers enrolled": {
+      "raw_name": "number of farmers enrolled",
+      "metric_core": "number_of_farmers_enrolled",
+      "review_status": "approve_mapping",
+      "review_notes": "Correct existing family; add aliases/definition feedback.",
+      "action": "accept",
+      "canonical_id": "farmer_reach",
+      "dimension": null,
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "metric_core:number of farmers enrolled": {
+      "raw_name": "number of farmers enrolled",
+      "metric_core": "number_of_farmers_enrolled",
+      "review_status": "approve_mapping",
+      "review_notes": "Correct existing family; add aliases/definition feedback.",
+      "action": "accept",
+      "canonical_id": "farmer_reach",
+      "dimension": null,
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "raw_name:total permanent employees": {
+      "raw_name": "total permanent employees",
+      "metric_core": "total_permanent_employees",
+      "review_status": "approve_mapping",
+      "review_notes": "Correct mapping; add alias/definition feedback if it remains below floor or margin.",
+      "action": "accept",
+      "canonical_id": "employee_headcount",
+      "dimension": null,
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "metric_core:total permanent employees": {
+      "raw_name": "total permanent employees",
+      "metric_core": "total_permanent_employees",
+      "review_status": "approve_mapping",
+      "review_notes": "Correct mapping; add alias/definition feedback if it remains below floor or margin.",
+      "action": "accept",
+      "canonical_id": "employee_headcount",
+      "dimension": null,
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "raw_name:male employees": {
+      "raw_name": "male employees",
+      "metric_core": "male_employees",
+      "review_status": "fix_dimension_mapping",
+      "review_notes": "This is a count with gender dimension.",
+      "action": "accept",
+      "canonical_id": "employee_headcount",
+      "dimension": {
+        "dimension_type": "gender",
+        "dimension_member": "male"
+      },
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "metric_core:male employees": {
+      "raw_name": "male employees",
+      "metric_core": "male_employees",
+      "review_status": "fix_dimension_mapping",
+      "review_notes": "This is a count with gender dimension.",
+      "action": "accept",
+      "canonical_id": "employee_headcount",
+      "dimension": {
+        "dimension_type": "gender",
+        "dimension_member": "male"
+      },
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "raw_name:female employees": {
+      "raw_name": "female employees",
+      "metric_core": "female_employees",
+      "review_status": "fix_dimension_mapping",
+      "review_notes": "This is a count with gender dimension, not female_workforce_share unless expressed as a percentage.",
+      "action": "accept",
+      "canonical_id": "employee_headcount",
+      "dimension": {
+        "dimension_type": "gender",
+        "dimension_member": "female"
+      },
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "metric_core:female employees": {
+      "raw_name": "female employees",
+      "metric_core": "female_employees",
+      "review_status": "fix_dimension_mapping",
+      "review_notes": "This is a count with gender dimension, not female_workforce_share unless expressed as a percentage.",
+      "action": "accept",
+      "canonical_id": "employee_headcount",
+      "dimension": {
+        "dimension_type": "gender",
+        "dimension_member": "female"
+      },
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "raw_name:constant currency growth": {
+      "raw_name": "constant currency growth",
+      "metric_core": "constant_currency_growth",
+      "review_status": "route_financial_or_market",
+      "review_notes": "Growth metric, not manufacturing productivity.",
+      "action": "route_financial",
+      "canonical_id": "",
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "metric_core:constant currency growth": {
+      "raw_name": "constant currency growth",
+      "metric_core": "constant_currency_growth",
+      "review_status": "route_financial_or_market",
+      "review_notes": "Growth metric, not manufacturing productivity.",
+      "action": "route_financial",
+      "canonical_id": "",
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "raw_name:employee turnover rate": {
+      "raw_name": "employee turnover rate",
+      "metric_core": "employee_turnover_rate",
+      "review_status": "approve_mapping",
+      "review_notes": "Correct mapping; add alias/definition feedback if it remains below floor or margin.",
+      "action": "accept",
+      "canonical_id": "employee_turnover_rate",
+      "dimension": null,
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "metric_core:employee turnover rate": {
+      "raw_name": "employee turnover rate",
+      "metric_core": "employee_turnover_rate",
+      "review_status": "approve_mapping",
+      "review_notes": "Correct mapping; add alias/definition feedback if it remains below floor or margin.",
+      "action": "accept",
+      "canonical_id": "employee_turnover_rate",
+      "dimension": null,
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "raw_name:operating profit": {
+      "raw_name": "operating profit",
+      "metric_core": "operating_profit",
+      "review_status": "route_financial",
+      "review_notes": "Valid financial metric; should be handled by financial registry, not operational registry.",
+      "action": "route_financial",
+      "canonical_id": "operating_profit",
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "metric_core:operating profit": {
+      "raw_name": "operating profit",
+      "metric_core": "operating_profit",
+      "review_status": "route_financial",
+      "review_notes": "Valid financial metric; should be handled by financial registry, not operational registry.",
+      "action": "route_financial",
+      "canonical_id": "operating_profit",
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "raw_name:coconut oil volume market share": {
+      "raw_name": "coconut oil volume market share",
+      "metric_core": "coconut_oil_volume_market_share",
+      "review_status": "approve_mapping",
+      "review_notes": "Correct mapping; add alias/definition feedback if it remains below floor or margin.",
+      "action": "accept",
+      "canonical_id": "market_share",
+      "dimension": null,
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "metric_core:coconut oil volume market share": {
+      "raw_name": "coconut oil volume market share",
+      "metric_core": "coconut_oil_volume_market_share",
+      "review_status": "approve_mapping",
+      "review_notes": "Correct mapping; add alias/definition feedback if it remains below floor or margin.",
+      "action": "accept",
+      "canonical_id": "market_share",
+      "dimension": null,
+      "memory_sources": [
+        "marico_provisional_review_action_queue_reviewed.csv",
+        "marico_review_memory.json"
+      ]
+    },
+    "raw_name:net revenues": {
+      "raw_name": "net revenues",
+      "metric_core": "net_revenues",
+      "review_status": "route_financial",
+      "review_notes": "Financial revenue metric; route to financial registry, not operational registry.",
+      "action": "route_financial",
+      "canonical_id": "total_revenue",
+      "memory_sources": [
+        "mondelez_provisional_review_action_queue_reviewed.csv",
+        "mondelez_review_memory.json"
+      ]
+    },
+    "metric_core:net revenues": {
+      "raw_name": "net revenues",
+      "metric_core": "net_revenues",
+      "review_status": "route_financial",
+      "review_notes": "Financial revenue metric; route to financial registry, not operational registry.",
+      "action": "route_financial",
+      "canonical_id": "total_revenue",
+      "memory_sources": [
+        "mondelez_provisional_review_action_queue_reviewed.csv",
+        "mondelez_review_memory.json"
+      ]
+    },
+    "raw_name:net revenues from continuing operations": {
+      "raw_name": "net revenues from continuing operations",
+      "metric_core": "net_revenues",
+      "review_status": "route_financial",
+      "review_notes": "Financial/customer concentration disclosure; route to financial or risk registry.",
+      "action": "route_financial",
+      "canonical_id": "total_revenue",
+      "memory_sources": [
+        "mondelez_provisional_review_action_queue_reviewed.csv",
+        "mondelez_review_memory.json"
+      ]
+    },
+    "raw_name:u s employees": {
+      "raw_name": "U.S. employees",
+      "metric_core": "u_s_workforce_size",
+      "review_status": "fix_dimension_mapping",
+      "review_notes": "Employee count with geography dimension: United States.",
+      "action": "accept",
+      "canonical_id": "employee_headcount",
+      "dimension": {
+        "dimension_type": "geography",
+        "dimension_member": "United States"
+      },
+      "memory_sources": [
+        "mondelez_provisional_review_action_queue_reviewed.csv",
+        "mondelez_review_memory.json"
+      ]
+    },
+    "metric_core:workforce": {
+      "raw_name": "U.S. employees",
+      "metric_core": "workforce",
+      "review_status": "fix_dimension_mapping",
+      "review_notes": "Employee count with geography dimension: United States.",
+      "action": "accept",
+      "canonical_id": "employee_headcount",
+      "dimension": {
+        "dimension_type": "geography",
+        "dimension_member": "United States"
+      },
+      "memory_sources": [
+        "mondelez_provisional_review_action_queue_reviewed.csv",
+        "mondelez_review_memory.json"
+      ]
+    },
+    "raw_name:employees": {
+      "raw_name": "employees",
+      "metric_core": "employee_count",
+      "review_status": "approve_mapping",
+      "review_notes": "Employee count; existing employee_headcount family is correct.",
+      "action": "accept",
+      "canonical_id": "employee_headcount",
+      "dimension": null,
+      "memory_sources": [
+        "mondelez_provisional_review_action_queue_reviewed.csv",
+        "mondelez_review_memory.json"
+      ]
+    },
+    "metric_core:workforce size": {
+      "raw_name": "employees",
+      "metric_core": "workforce_size",
+      "review_status": "approve_mapping",
+      "review_notes": "Total workforce/headcount; existing employee_headcount family is correct.",
+      "action": "accept",
+      "canonical_id": "employee_headcount",
+      "dimension": null,
+      "memory_sources": [
+        "mondelez_provisional_review_action_queue_reviewed.csv",
+        "mondelez_review_memory.json"
+      ]
+    },
+    "metric_core:u s workforce size": {
+      "raw_name": "U.S. employees",
+      "metric_core": "u_s_workforce_size",
+      "review_status": "fix_dimension_mapping",
+      "review_notes": "Employee count with geography dimension: United States.",
+      "action": "accept",
+      "canonical_id": "employee_headcount",
+      "dimension": {
+        "dimension_type": "geography",
+        "dimension_member": "United States"
+      },
+      "memory_sources": [
+        "mondelez_provisional_review_action_queue_reviewed.csv",
+        "mondelez_review_memory.json"
+      ]
+    },
+    "raw_name:employees outside the united states": {
+      "raw_name": "employees outside the United States",
+      "metric_core": "international_workforce_size",
+      "review_status": "fix_dimension_mapping",
+      "review_notes": "Employee count with geography dimension: outside United States.",
+      "action": "accept",
+      "canonical_id": "employee_headcount",
+      "dimension": {
+        "dimension_type": "geography",
+        "dimension_member": "Outside United States"
+      },
+      "memory_sources": [
+        "mondelez_provisional_review_action_queue_reviewed.csv",
+        "mondelez_review_memory.json"
+      ]
+    },
+    "metric_core:international workforce size": {
+      "raw_name": "employees outside the United States",
+      "metric_core": "international_workforce_size",
+      "review_status": "fix_dimension_mapping",
+      "review_notes": "Employee count with geography dimension: outside United States.",
+      "action": "accept",
+      "canonical_id": "employee_headcount",
+      "dimension": {
+        "dimension_type": "geography",
+        "dimension_member": "Outside United States"
+      },
+      "memory_sources": [
+        "mondelez_provisional_review_action_queue_reviewed.csv",
+        "mondelez_review_memory.json"
+      ]
+    },
+    "raw_name:u s employees represented by labor unions or workers councils": {
+      "raw_name": "U.S. employees represented by labor unions or workers' councils",
+      "metric_core": "union_represented_u_s_employees",
+      "review_status": "add_canonical",
+      "review_notes": "Universal human-capital metric: share of workforce represented by unions/workers councils; geography dimension: United States.",
+      "action": "accept",
+      "canonical_id": "union_representation_rate",
+      "dimension": {
+        "dimension_type": "geography",
+        "dimension_member": "United States"
+      },
+      "memory_sources": [
+        "mondelez_provisional_review_action_queue_reviewed.csv",
+        "mondelez_review_memory.json"
+      ]
+    },
+    "metric_core:union represented u s employees": {
+      "raw_name": "U.S. employees represented by labor unions or workers' councils",
+      "metric_core": "union_represented_u_s_employees",
+      "review_status": "add_canonical",
+      "review_notes": "Universal human-capital metric: share of workforce represented by unions/workers councils; geography dimension: United States.",
+      "action": "accept",
+      "canonical_id": "union_representation_rate",
+      "dimension": {
+        "dimension_type": "geography",
+        "dimension_member": "United States"
+      },
+      "memory_sources": [
+        "mondelez_provisional_review_action_queue_reviewed.csv",
+        "mondelez_review_memory.json"
+      ]
+    },
+    "raw_name:employees outside the united states represented by labor unions or workers councils": {
+      "raw_name": "employees outside the United States represented by labor unions or workers' councils",
+      "metric_core": "union_represented_international_employees",
+      "review_status": "add_canonical",
+      "review_notes": "Universal human-capital metric: share of workforce represented by unions/workers councils; geography dimension: outside United States.",
+      "action": "accept",
+      "canonical_id": "union_representation_rate",
+      "dimension": {
+        "dimension_type": "geography",
+        "dimension_member": "Outside United States"
+      },
+      "memory_sources": [
+        "mondelez_provisional_review_action_queue_reviewed.csv",
+        "mondelez_review_memory.json"
+      ]
+    },
+    "metric_core:union represented international employees": {
+      "raw_name": "employees outside the United States represented by labor unions or workers' councils",
+      "metric_core": "union_represented_international_employees",
+      "review_status": "add_canonical",
+      "review_notes": "Universal human-capital metric: share of workforce represented by unions/workers councils; geography dimension: outside United States.",
+      "action": "accept",
+      "canonical_id": "union_representation_rate",
+      "dimension": {
+        "dimension_type": "geography",
+        "dimension_member": "Outside United States"
+      },
+      "memory_sources": [
+        "mondelez_provisional_review_action_queue_reviewed.csv",
+        "mondelez_review_memory.json"
+      ]
+    },
+    "raw_name:number of countries": {
+      "raw_name": "number of countries",
+      "metric_core": "number_of_countries",
+      "review_status": "do_not_auto_accept",
+      "review_notes": "This is pay-equity analysis coverage, not a stable operational footprint metric.",
+      "action": "do_not_auto_accept",
+      "canonical_id": "",
+      "memory_sources": [
+        "mondelez_provisional_review_action_queue_reviewed.csv",
+        "mondelez_review_memory.json"
+      ]
+    },
+    "metric_core:number of countries": {
+      "raw_name": "number of countries",
+      "metric_core": "number_of_countries",
+      "review_status": "do_not_auto_accept",
+      "review_notes": "This is pay-equity analysis coverage, not a stable operational footprint metric.",
+      "action": "do_not_auto_accept",
+      "canonical_id": "",
+      "memory_sources": [
+        "mondelez_provisional_review_action_queue_reviewed.csv",
+        "mondelez_review_memory.json"
+      ]
+    },
+    "raw_name:number of employees": {
+      "raw_name": "number of employees",
+      "metric_core": "number_of_employees",
+      "review_status": "do_not_auto_accept",
+      "review_notes": "This is employee coverage within a pay-equity analysis, not total employee headcount.",
+      "action": "do_not_auto_accept",
+      "canonical_id": "",
+      "memory_sources": [
+        "mondelez_provisional_review_action_queue_reviewed.csv",
+        "mondelez_review_memory.json"
+      ]
+    },
+    "metric_core:number of employees": {
+      "raw_name": "number of employees",
+      "metric_core": "number_of_employees",
+      "review_status": "do_not_auto_accept",
+      "review_notes": "This is employee coverage within a pay-equity analysis, not total employee headcount.",
+      "action": "do_not_auto_accept",
+      "canonical_id": "",
+      "memory_sources": [
+        "mondelez_provisional_review_action_queue_reviewed.csv",
+        "mondelez_review_memory.json"
+      ]
+    },
+    "raw_name:pay gap between male and female employees": {
+      "raw_name": "pay gap between male and female employees",
+      "metric_core": "pay_gap",
+      "review_status": "add_canonical",
+      "review_notes": "Universal human-capital metric: compensation gap between male and female employees.",
+      "action": "accept",
+      "canonical_id": "gender_pay_gap",
+      "dimension": {
+        "dimension_type": "gender",
+        "dimension_member": "female"
+      },
+      "memory_sources": [
+        "mondelez_provisional_review_action_queue_reviewed.csv",
+        "mondelez_review_memory.json"
+      ]
+    },
+    "metric_core:pay gap": {
+      "raw_name": "pay gap between male and female employees",
+      "metric_core": "pay_gap",
+      "review_status": "add_canonical",
+      "review_notes": "Universal human-capital metric: compensation gap between male and female employees.",
+      "action": "accept",
+      "canonical_id": "gender_pay_gap",
+      "dimension": {
+        "dimension_type": "gender",
+        "dimension_member": "female"
+      },
+      "memory_sources": [
+        "mondelez_provisional_review_action_queue_reviewed.csv",
+        "mondelez_review_memory.json"
+      ]
+    },
+    "raw_name:manufacturing and processing facilities": {
+      "raw_name": "manufacturing and processing facilities",
+      "metric_core": "manufacturing_and_processing_facilities",
+      "review_status": "approve_mapping",
+      "review_notes": "Correct existing family for count of manufacturing/processing facilities.",
+      "action": "accept",
+      "canonical_id": "manufacturing_facilities_count",
+      "dimension": null,
+      "memory_sources": [
+        "mondelez_provisional_review_action_queue_reviewed.csv",
+        "mondelez_review_memory.json"
+      ]
+    },
+    "metric_core:manufacturing and processing facilities": {
+      "raw_name": "manufacturing and processing facilities",
+      "metric_core": "manufacturing_and_processing_facilities",
+      "review_status": "approve_mapping",
+      "review_notes": "Correct existing family for count of manufacturing/processing facilities.",
+      "action": "accept",
+      "canonical_id": "manufacturing_facilities_count",
+      "dimension": null,
+      "memory_sources": [
+        "mondelez_provisional_review_action_queue_reviewed.csv",
+        "mondelez_review_memory.json"
+      ]
+    },
+    "metric_core:countries": {
+      "raw_name": "countries",
+      "metric_core": "countries",
+      "review_status": "add_canonical",
+      "review_notes": "This is countries hosting manufacturing/processing facilities, not facility count.",
+      "action": "accept",
+      "canonical_id": "manufacturing_country_count",
+      "dimension": null,
+      "memory_sources": [
+        "mondelez_provisional_review_action_queue_reviewed.csv",
+        "mondelez_review_memory.json"
+      ]
+    },
+    "raw_name:net revenues generated outside the united states": {
+      "raw_name": "net revenues generated outside the United States",
+      "metric_core": "net_revenues_outside_us",
+      "review_status": "route_financial",
+      "review_notes": "Financial revenue split with geography dimension; route to financial registry.",
+      "action": "route_financial",
+      "canonical_id": "total_revenue",
+      "memory_sources": [
+        "mondelez_provisional_review_action_queue_reviewed.csv",
+        "mondelez_review_memory.json"
+      ]
+    },
+    "metric_core:net revenues outside us": {
+      "raw_name": "net revenues generated outside the United States",
+      "metric_core": "net_revenues_outside_us",
+      "review_status": "route_financial",
+      "review_notes": "Financial revenue split with geography dimension; route to financial registry.",
+      "action": "route_financial",
+      "canonical_id": "total_revenue",
+      "memory_sources": [
+        "mondelez_provisional_review_action_queue_reviewed.csv",
+        "mondelez_review_memory.json"
+      ]
+    },
+    "metric_core:operating countries": {
+      "raw_name": "countries",
+      "metric_core": "operating_countries",
+      "review_status": "approve_mapping",
+      "review_notes": "Count of countries served/operated in; existing markets_operating_in family is acceptable, with context retained from source.",
+      "action": "accept",
+      "canonical_id": "markets_operating_in",
+      "dimension": null,
+      "memory_sources": [
+        "mondelez_provisional_review_action_queue_reviewed.csv",
+        "mondelez_review_memory.json"
+      ]
+    },
+    "raw_name:principal manufacturing and processing facilities": {
+      "raw_name": "principal manufacturing and processing facilities",
+      "metric_core": "manufacturing_facilities",
+      "review_status": "approve_mapping",
+      "review_notes": "Correct existing family for principal manufacturing/processing facility count.",
+      "action": "accept",
+      "canonical_id": "manufacturing_facilities_count",
+      "dimension": null,
+      "memory_sources": [
+        "mondelez_provisional_review_action_queue_reviewed.csv",
+        "mondelez_review_memory.json"
+      ]
+    },
+    "metric_core:manufacturing facilities": {
+      "raw_name": "principal manufacturing and processing facilities",
+      "metric_core": "manufacturing_facilities",
+      "review_status": "approve_mapping",
+      "review_notes": "Correct existing family for principal manufacturing/processing facility count.",
+      "action": "accept",
+      "canonical_id": "manufacturing_facilities_count",
+      "dimension": null,
+      "memory_sources": [
+        "mondelez_provisional_review_action_queue_reviewed.csv",
+        "mondelez_review_memory.json"
+      ]
+    },
+    "metric_core:manufacturing countries": {
+      "raw_name": "countries",
+      "metric_core": "manufacturing_countries",
+      "review_status": "add_canonical",
+      "review_notes": "Reusable footprint metric: number of countries containing manufacturing facilities.",
+      "action": "accept",
+      "canonical_id": "manufacturing_country_count",
+      "dimension": null,
+      "memory_sources": [
+        "mondelez_provisional_review_action_queue_reviewed.csv",
+        "mondelez_review_memory.json"
+      ]
+    },
+    "raw_name:principal distribution centers and warehouses": {
+      "raw_name": "principal distribution centers and warehouses",
+      "metric_core": "principal_distribution_centers_and_warehouses",
+      "review_status": "approve_mapping",
+      "review_notes": "Closest existing family is warehouse/distribution-center count; add aliases if applying.",
+      "action": "accept",
+      "canonical_id": "warehouse_count",
+      "dimension": null,
+      "memory_sources": [
+        "mondelez_provisional_review_action_queue_reviewed.csv",
+        "mondelez_review_memory.json"
+      ]
+    },
+    "metric_core:principal distribution centers and warehouses": {
+      "raw_name": "principal distribution centers and warehouses",
+      "metric_core": "principal_distribution_centers_and_warehouses",
+      "review_status": "approve_mapping",
+      "review_notes": "Closest existing family is warehouse/distribution-center count; add aliases if applying.",
+      "action": "accept",
+      "canonical_id": "warehouse_count",
+      "dimension": null,
+      "memory_sources": [
+        "mondelez_provisional_review_action_queue_reviewed.csv",
+        "mondelez_review_memory.json"
+      ]
+    },
+    "metric_core:union representation": {
+      "raw_name": "employees represented by labor unions or workers' councils",
+      "metric_core": "union_representation",
+      "review_status": "add_canonical",
+      "review_notes": "Universal human-capital metric: share of workforce represented by unions/workers councils.",
+      "action": "accept",
+      "canonical_id": "union_representation_rate",
+      "dimension": null,
+      "memory_sources": [
+        "mondelez_provisional_review_action_queue_reviewed.csv",
+        "mondelez_review_memory.json"
+      ]
+    },
+    "raw_name:79 000 employees outside the united states": {
+      "raw_name": "79,000 employees outside the United States",
+      "metric_core": "total_employees_outside_US",
+      "review_status": "fix_dimension_mapping",
+      "review_notes": "Employee count with geography dimension: outside United States.",
+      "action": "accept",
+      "canonical_id": "employee_headcount",
+      "dimension": {
+        "dimension_type": "geography",
+        "dimension_member": "Outside United States"
+      },
+      "memory_sources": [
+        "mondelez_provisional_review_action_queue_reviewed.csv",
+        "mondelez_review_memory.json"
+      ]
+    },
+    "metric_core:total employees outside us": {
+      "raw_name": "79,000 employees outside the United States",
+      "metric_core": "total_employees_outside_US",
+      "review_status": "fix_dimension_mapping",
+      "review_notes": "Employee count with geography dimension: outside United States.",
+      "action": "accept",
+      "canonical_id": "employee_headcount",
+      "dimension": {
+        "dimension_type": "geography",
+        "dimension_member": "Outside United States"
+      },
+      "memory_sources": [
+        "mondelez_provisional_review_action_queue_reviewed.csv",
+        "mondelez_review_memory.json"
+      ]
+    },
+    "raw_name:employees in the united states": {
+      "raw_name": "employees in the United States",
+      "metric_core": "total_employees_US",
+      "review_status": "fix_dimension_mapping",
+      "review_notes": "Employee count with geography dimension: United States.",
+      "action": "accept",
+      "canonical_id": "employee_headcount",
+      "dimension": {
+        "dimension_type": "geography",
+        "dimension_member": "United States"
+      },
+      "memory_sources": [
+        "mondelez_provisional_review_action_queue_reviewed.csv",
+        "mondelez_review_memory.json"
+      ]
+    },
+    "metric_core:total employees us": {
+      "raw_name": "employees in the United States",
+      "metric_core": "total_employees_US",
+      "review_status": "fix_dimension_mapping",
+      "review_notes": "Employee count with geography dimension: United States.",
+      "action": "accept",
+      "canonical_id": "employee_headcount",
+      "dimension": {
+        "dimension_type": "geography",
+        "dimension_member": "United States"
+      },
+      "memory_sources": [
+        "mondelez_provisional_review_action_queue_reviewed.csv",
+        "mondelez_review_memory.json"
+      ]
+    },
+    "metric_core:union representation us": {
+      "raw_name": "employees represented by labor unions or workers' councils",
+      "metric_core": "union_representation_US",
+      "review_status": "add_canonical",
+      "review_notes": "Universal human-capital metric: share of workforce represented by unions/workers councils; geography dimension: United States.",
+      "action": "accept",
+      "canonical_id": "union_representation_rate",
+      "dimension": {
+        "dimension_type": "geography",
+        "dimension_member": "United States"
+      },
+      "memory_sources": [
+        "mondelez_provisional_review_action_queue_reviewed.csv",
+        "mondelez_review_memory.json"
+      ]
+    },
+    "raw_name:effective date": {
+      "raw_name": "effective date",
+      "metric_core": "global_minimum_tax_effective_date",
+      "review_status": "do_not_auto_accept",
+      "review_notes": "Tax/legal effective-date extraction, outside operational metric scope.",
+      "action": "do_not_auto_accept",
+      "canonical_id": "",
+      "memory_sources": [
+        "mondelez_provisional_review_action_queue_reviewed.csv",
+        "mondelez_review_memory.json"
+      ]
+    },
+    "metric_core:global minimum tax effective date": {
+      "raw_name": "effective date",
+      "metric_core": "global_minimum_tax_effective_date",
+      "review_status": "do_not_auto_accept",
+      "review_notes": "Tax/legal effective-date extraction, outside operational metric scope.",
+      "action": "do_not_auto_accept",
+      "canonical_id": "",
+      "memory_sources": [
+        "mondelez_provisional_review_action_queue_reviewed.csv",
+        "mondelez_review_memory.json"
+      ]
+    },
+    "metric_core:market presence": {
+      "raw_name": "countries",
+      "metric_core": "market_presence",
+      "review_status": "approve_mapping",
+      "review_notes": "Count of countries/markets where products are sold; existing markets_operating_in family is correct.",
+      "action": "accept",
+      "canonical_id": "markets_operating_in",
+      "dimension": null,
+      "memory_sources": [
+        "mondelez_provisional_review_action_queue_reviewed.csv",
+        "mondelez_review_memory.json"
+      ]
+    },
+    "metric_core:operations presence": {
+      "raw_name": "countries",
+      "metric_core": "operations_presence",
+      "review_status": "approve_mapping",
+      "review_notes": "Count of countries where the company has operations; acceptable existing family, context retained from source.",
+      "action": "accept",
+      "canonical_id": "markets_operating_in",
+      "dimension": null,
+      "memory_sources": [
+        "mondelez_provisional_review_action_queue_reviewed.csv",
+        "mondelez_review_memory.json"
+      ]
+    },
+    "raw_name:period of implementation": {
+      "raw_name": "period of implementation",
+      "metric_core": "implementation_duration",
+      "review_status": "do_not_auto_accept",
+      "review_notes": "ERP project timeline, not a reusable operational performance metric for this registry.",
+      "action": "do_not_auto_accept",
+      "canonical_id": "",
+      "memory_sources": [
+        "mondelez_provisional_review_action_queue_reviewed.csv",
+        "mondelez_review_memory.json"
+      ]
+    },
+    "metric_core:implementation duration": {
+      "raw_name": "period of implementation",
+      "metric_core": "implementation_duration",
+      "review_status": "do_not_auto_accept",
+      "review_notes": "ERP project timeline, not a reusable operational performance metric for this registry.",
+      "action": "do_not_auto_accept",
+      "canonical_id": "",
+      "memory_sources": [
+        "mondelez_provisional_review_action_queue_reviewed.csv",
+        "mondelez_review_memory.json"
+      ]
+    },
+    "raw_name:acquisition of evirth shanghai industrial co ltd": {
+      "raw_name": "acquisition of Evirth (Shanghai) Industrial Co., Ltd.",
+      "metric_core": "acquisitions",
+      "review_status": "route_financial_or_market",
+      "review_notes": "M&A event count; not customer acquisition cost and not an operational KPI.",
+      "action": "route_financial",
+      "canonical_id": "",
+      "memory_sources": [
+        "mondelez_provisional_review_action_queue_reviewed.csv",
+        "mondelez_review_memory.json"
+      ]
+    },
+    "metric_core:acquisitions": {
+      "raw_name": "acquisition of Evirth (Shanghai) Industrial Co., Ltd.",
+      "metric_core": "acquisitions",
+      "review_status": "route_financial_or_market",
+      "review_notes": "M&A event count; not customer acquisition cost and not an operational KPI.",
+      "action": "route_financial",
+      "canonical_id": "",
+      "memory_sources": [
+        "mondelez_provisional_review_action_queue_reviewed.csv",
+        "mondelez_review_memory.json"
+      ]
+    },
+    "raw_name:ukraine": {
+      "raw_name": "Ukraine",
+      "metric_core": "net_revenue",
+      "review_status": "route_financial",
+      "review_notes": "Geography-level revenue split; route to financial registry with geography dimension.",
+      "action": "route_financial",
+      "canonical_id": "total_revenue",
+      "memory_sources": [
+        "mondelez_provisional_review_action_queue_reviewed.csv",
+        "mondelez_review_memory.json"
+      ]
+    },
+    "metric_core:net revenue": {
+      "raw_name": "Russia",
+      "metric_core": "net_revenue",
+      "review_status": "route_financial",
+      "review_notes": "Geography-level revenue split; route to financial registry with geography dimension.",
+      "action": "route_financial",
+      "canonical_id": "total_revenue",
+      "memory_sources": [
+        "mondelez_provisional_review_action_queue_reviewed.csv",
+        "mondelez_review_memory.json"
+      ]
+    },
+    "raw_name:russia": {
+      "raw_name": "Russia",
+      "metric_core": "net_revenue",
+      "review_status": "route_financial",
+      "review_notes": "Geography-level revenue split; route to financial registry with geography dimension.",
+      "action": "route_financial",
+      "canonical_id": "total_revenue",
+      "memory_sources": [
+        "mondelez_provisional_review_action_queue_reviewed.csv",
+        "mondelez_review_memory.json"
+      ]
+    },
+    "metric_core:employee count": {
+      "raw_name": "employees",
+      "metric_core": "employee_count",
+      "review_status": "approve_mapping",
+      "review_notes": "Employee count; existing employee_headcount family is correct.",
+      "action": "accept",
+      "canonical_id": "employee_headcount",
+      "dimension": null,
+      "memory_sources": [
+        "mondelez_provisional_review_action_queue_reviewed.csv",
+        "mondelez_review_memory.json"
+      ]
+    }
+  },
+  "merge_conflicts": {}
+}

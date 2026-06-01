@@ -1,0 +1,558 @@
+{
+  "version": "review_memory_v1",
+  "source_review_csv": "mondelez_provisional_review_action_queue_reviewed.csv",
+  "decisions": {
+    "raw_name:net revenues": {
+      "raw_name": "net revenues",
+      "metric_core": "net_revenues",
+      "review_status": "route_financial",
+      "review_notes": "Financial revenue metric; route to financial registry, not operational registry.",
+      "action": "route_financial",
+      "canonical_id": "total_revenue"
+    },
+    "metric_core:net revenues": {
+      "raw_name": "net revenues",
+      "metric_core": "net_revenues",
+      "review_status": "route_financial",
+      "review_notes": "Financial revenue metric; route to financial registry, not operational registry.",
+      "action": "route_financial",
+      "canonical_id": "total_revenue"
+    },
+    "raw_name:net revenues from continuing operations": {
+      "raw_name": "net revenues from continuing operations",
+      "metric_core": "net_revenues",
+      "review_status": "route_financial",
+      "review_notes": "Financial/customer concentration disclosure; route to financial or risk registry.",
+      "action": "route_financial",
+      "canonical_id": "total_revenue"
+    },
+    "raw_name:u s employees": {
+      "raw_name": "U.S. employees",
+      "metric_core": "u_s_workforce_size",
+      "review_status": "fix_dimension_mapping",
+      "review_notes": "Employee count with geography dimension: United States.",
+      "action": "accept",
+      "canonical_id": "employee_headcount",
+      "dimension": {
+        "dimension_type": "geography",
+        "dimension_member": "United States"
+      }
+    },
+    "metric_core:workforce": {
+      "raw_name": "U.S. employees",
+      "metric_core": "workforce",
+      "review_status": "fix_dimension_mapping",
+      "review_notes": "Employee count with geography dimension: United States.",
+      "action": "accept",
+      "canonical_id": "employee_headcount",
+      "dimension": {
+        "dimension_type": "geography",
+        "dimension_member": "United States"
+      }
+    },
+    "raw_name:employees": {
+      "raw_name": "employees",
+      "metric_core": "employee_count",
+      "review_status": "approve_mapping",
+      "review_notes": "Employee count; existing employee_headcount family is correct.",
+      "action": "accept",
+      "canonical_id": "employee_headcount",
+      "dimension": null
+    },
+    "metric_core:workforce size": {
+      "raw_name": "employees",
+      "metric_core": "workforce_size",
+      "review_status": "approve_mapping",
+      "review_notes": "Total workforce/headcount; existing employee_headcount family is correct.",
+      "action": "accept",
+      "canonical_id": "employee_headcount",
+      "dimension": null
+    },
+    "metric_core:u s workforce size": {
+      "raw_name": "U.S. employees",
+      "metric_core": "u_s_workforce_size",
+      "review_status": "fix_dimension_mapping",
+      "review_notes": "Employee count with geography dimension: United States.",
+      "action": "accept",
+      "canonical_id": "employee_headcount",
+      "dimension": {
+        "dimension_type": "geography",
+        "dimension_member": "United States"
+      }
+    },
+    "raw_name:employees outside the united states": {
+      "raw_name": "employees outside the United States",
+      "metric_core": "international_workforce_size",
+      "review_status": "fix_dimension_mapping",
+      "review_notes": "Employee count with geography dimension: outside United States.",
+      "action": "accept",
+      "canonical_id": "employee_headcount",
+      "dimension": {
+        "dimension_type": "geography",
+        "dimension_member": "Outside United States"
+      }
+    },
+    "metric_core:international workforce size": {
+      "raw_name": "employees outside the United States",
+      "metric_core": "international_workforce_size",
+      "review_status": "fix_dimension_mapping",
+      "review_notes": "Employee count with geography dimension: outside United States.",
+      "action": "accept",
+      "canonical_id": "employee_headcount",
+      "dimension": {
+        "dimension_type": "geography",
+        "dimension_member": "Outside United States"
+      }
+    },
+    "raw_name:u s employees represented by labor unions or workers councils": {
+      "raw_name": "U.S. employees represented by labor unions or workers' councils",
+      "metric_core": "union_represented_u_s_employees",
+      "review_status": "add_canonical",
+      "review_notes": "Universal human-capital metric: share of workforce represented by unions/workers councils; geography dimension: United States.",
+      "action": "accept",
+      "canonical_id": "union_representation_rate",
+      "dimension": {
+        "dimension_type": "geography",
+        "dimension_member": "United States"
+      }
+    },
+    "metric_core:union represented u s employees": {
+      "raw_name": "U.S. employees represented by labor unions or workers' councils",
+      "metric_core": "union_represented_u_s_employees",
+      "review_status": "add_canonical",
+      "review_notes": "Universal human-capital metric: share of workforce represented by unions/workers councils; geography dimension: United States.",
+      "action": "accept",
+      "canonical_id": "union_representation_rate",
+      "dimension": {
+        "dimension_type": "geography",
+        "dimension_member": "United States"
+      }
+    },
+    "raw_name:employees outside the united states represented by labor unions or workers councils": {
+      "raw_name": "employees outside the United States represented by labor unions or workers' councils",
+      "metric_core": "union_represented_international_employees",
+      "review_status": "add_canonical",
+      "review_notes": "Universal human-capital metric: share of workforce represented by unions/workers councils; geography dimension: outside United States.",
+      "action": "accept",
+      "canonical_id": "union_representation_rate",
+      "dimension": {
+        "dimension_type": "geography",
+        "dimension_member": "Outside United States"
+      }
+    },
+    "metric_core:union represented international employees": {
+      "raw_name": "employees outside the United States represented by labor unions or workers' councils",
+      "metric_core": "union_represented_international_employees",
+      "review_status": "add_canonical",
+      "review_notes": "Universal human-capital metric: share of workforce represented by unions/workers councils; geography dimension: outside United States.",
+      "action": "accept",
+      "canonical_id": "union_representation_rate",
+      "dimension": {
+        "dimension_type": "geography",
+        "dimension_member": "Outside United States"
+      }
+    },
+    "raw_name:number of countries": {
+      "raw_name": "number of countries",
+      "metric_core": "number_of_countries",
+      "review_status": "do_not_auto_accept",
+      "review_notes": "This is pay-equity analysis coverage, not a stable operational footprint metric.",
+      "action": "do_not_auto_accept",
+      "canonical_id": ""
+    },
+    "metric_core:number of countries": {
+      "raw_name": "number of countries",
+      "metric_core": "number_of_countries",
+      "review_status": "do_not_auto_accept",
+      "review_notes": "This is pay-equity analysis coverage, not a stable operational footprint metric.",
+      "action": "do_not_auto_accept",
+      "canonical_id": ""
+    },
+    "raw_name:number of employees": {
+      "raw_name": "number of employees",
+      "metric_core": "number_of_employees",
+      "review_status": "do_not_auto_accept",
+      "review_notes": "This is employee coverage within a pay-equity analysis, not total employee headcount.",
+      "action": "do_not_auto_accept",
+      "canonical_id": ""
+    },
+    "metric_core:number of employees": {
+      "raw_name": "number of employees",
+      "metric_core": "number_of_employees",
+      "review_status": "do_not_auto_accept",
+      "review_notes": "This is employee coverage within a pay-equity analysis, not total employee headcount.",
+      "action": "do_not_auto_accept",
+      "canonical_id": ""
+    },
+    "raw_name:pay gap between male and female employees": {
+      "raw_name": "pay gap between male and female employees",
+      "metric_core": "pay_gap",
+      "review_status": "add_canonical",
+      "review_notes": "Universal human-capital metric: compensation gap between male and female employees.",
+      "action": "accept",
+      "canonical_id": "gender_pay_gap",
+      "dimension": {
+        "dimension_type": "gender",
+        "dimension_member": "female"
+      }
+    },
+    "metric_core:pay gap": {
+      "raw_name": "pay gap between male and female employees",
+      "metric_core": "pay_gap",
+      "review_status": "add_canonical",
+      "review_notes": "Universal human-capital metric: compensation gap between male and female employees.",
+      "action": "accept",
+      "canonical_id": "gender_pay_gap",
+      "dimension": {
+        "dimension_type": "gender",
+        "dimension_member": "female"
+      }
+    },
+    "raw_name:manufacturing and processing facilities": {
+      "raw_name": "manufacturing and processing facilities",
+      "metric_core": "manufacturing_and_processing_facilities",
+      "review_status": "approve_mapping",
+      "review_notes": "Correct existing family for count of manufacturing/processing facilities.",
+      "action": "accept",
+      "canonical_id": "manufacturing_facilities_count",
+      "dimension": null
+    },
+    "metric_core:manufacturing and processing facilities": {
+      "raw_name": "manufacturing and processing facilities",
+      "metric_core": "manufacturing_and_processing_facilities",
+      "review_status": "approve_mapping",
+      "review_notes": "Correct existing family for count of manufacturing/processing facilities.",
+      "action": "accept",
+      "canonical_id": "manufacturing_facilities_count",
+      "dimension": null
+    },
+    "metric_core:countries": {
+      "raw_name": "countries",
+      "metric_core": "countries",
+      "review_status": "add_canonical",
+      "review_notes": "This is countries hosting manufacturing/processing facilities, not facility count.",
+      "action": "accept",
+      "canonical_id": "manufacturing_country_count",
+      "dimension": null
+    },
+    "raw_name:net revenues generated outside the united states": {
+      "raw_name": "net revenues generated outside the United States",
+      "metric_core": "net_revenues_outside_us",
+      "review_status": "route_financial",
+      "review_notes": "Financial revenue split with geography dimension; route to financial registry.",
+      "action": "route_financial",
+      "canonical_id": "total_revenue"
+    },
+    "metric_core:net revenues outside us": {
+      "raw_name": "net revenues generated outside the United States",
+      "metric_core": "net_revenues_outside_us",
+      "review_status": "route_financial",
+      "review_notes": "Financial revenue split with geography dimension; route to financial registry.",
+      "action": "route_financial",
+      "canonical_id": "total_revenue"
+    },
+    "metric_core:operating countries": {
+      "raw_name": "countries",
+      "metric_core": "operating_countries",
+      "review_status": "approve_mapping",
+      "review_notes": "Count of countries served/operated in; existing markets_operating_in family is acceptable, with context retained from source.",
+      "action": "accept",
+      "canonical_id": "markets_operating_in",
+      "dimension": null
+    },
+    "raw_name:principal manufacturing and processing facilities": {
+      "raw_name": "principal manufacturing and processing facilities",
+      "metric_core": "manufacturing_facilities",
+      "review_status": "approve_mapping",
+      "review_notes": "Correct existing family for principal manufacturing/processing facility count.",
+      "action": "accept",
+      "canonical_id": "manufacturing_facilities_count",
+      "dimension": null
+    },
+    "metric_core:manufacturing facilities": {
+      "raw_name": "principal manufacturing and processing facilities",
+      "metric_core": "manufacturing_facilities",
+      "review_status": "approve_mapping",
+      "review_notes": "Correct existing family for principal manufacturing/processing facility count.",
+      "action": "accept",
+      "canonical_id": "manufacturing_facilities_count",
+      "dimension": null
+    },
+    "metric_core:manufacturing countries": {
+      "raw_name": "countries",
+      "metric_core": "manufacturing_countries",
+      "review_status": "add_canonical",
+      "review_notes": "Reusable footprint metric: number of countries containing manufacturing facilities.",
+      "action": "accept",
+      "canonical_id": "manufacturing_country_count",
+      "dimension": null
+    },
+    "raw_name:principal distribution centers and warehouses": {
+      "raw_name": "principal distribution centers and warehouses",
+      "metric_core": "principal_distribution_centers_and_warehouses",
+      "review_status": "approve_mapping",
+      "review_notes": "Closest existing family is warehouse/distribution-center count; add aliases if applying.",
+      "action": "accept",
+      "canonical_id": "warehouse_count",
+      "dimension": null
+    },
+    "metric_core:principal distribution centers and warehouses": {
+      "raw_name": "principal distribution centers and warehouses",
+      "metric_core": "principal_distribution_centers_and_warehouses",
+      "review_status": "approve_mapping",
+      "review_notes": "Closest existing family is warehouse/distribution-center count; add aliases if applying.",
+      "action": "accept",
+      "canonical_id": "warehouse_count",
+      "dimension": null
+    },
+    "metric_core:union representation": {
+      "raw_name": "employees represented by labor unions or workers' councils",
+      "metric_core": "union_representation",
+      "review_status": "add_canonical",
+      "review_notes": "Universal human-capital metric: share of workforce represented by unions/workers councils.",
+      "action": "accept",
+      "canonical_id": "union_representation_rate",
+      "dimension": null
+    },
+    "raw_name:79 000 employees outside the united states": {
+      "raw_name": "79,000 employees outside the United States",
+      "metric_core": "total_employees_outside_US",
+      "review_status": "fix_dimension_mapping",
+      "review_notes": "Employee count with geography dimension: outside United States.",
+      "action": "accept",
+      "canonical_id": "employee_headcount",
+      "dimension": {
+        "dimension_type": "geography",
+        "dimension_member": "Outside United States"
+      }
+    },
+    "metric_core:total employees outside us": {
+      "raw_name": "79,000 employees outside the United States",
+      "metric_core": "total_employees_outside_US",
+      "review_status": "fix_dimension_mapping",
+      "review_notes": "Employee count with geography dimension: outside United States.",
+      "action": "accept",
+      "canonical_id": "employee_headcount",
+      "dimension": {
+        "dimension_type": "geography",
+        "dimension_member": "Outside United States"
+      }
+    },
+    "raw_name:employees in the united states": {
+      "raw_name": "employees in the United States",
+      "metric_core": "total_employees_US",
+      "review_status": "fix_dimension_mapping",
+      "review_notes": "Employee count with geography dimension: United States.",
+      "action": "accept",
+      "canonical_id": "employee_headcount",
+      "dimension": {
+        "dimension_type": "geography",
+        "dimension_member": "United States"
+      }
+    },
+    "metric_core:total employees us": {
+      "raw_name": "employees in the United States",
+      "metric_core": "total_employees_US",
+      "review_status": "fix_dimension_mapping",
+      "review_notes": "Employee count with geography dimension: United States.",
+      "action": "accept",
+      "canonical_id": "employee_headcount",
+      "dimension": {
+        "dimension_type": "geography",
+        "dimension_member": "United States"
+      }
+    },
+    "metric_core:union representation us": {
+      "raw_name": "employees represented by labor unions or workers' councils",
+      "metric_core": "union_representation_US",
+      "review_status": "add_canonical",
+      "review_notes": "Universal human-capital metric: share of workforce represented by unions/workers councils; geography dimension: United States.",
+      "action": "accept",
+      "canonical_id": "union_representation_rate",
+      "dimension": {
+        "dimension_type": "geography",
+        "dimension_member": "United States"
+      }
+    },
+    "raw_name:effective date": {
+      "raw_name": "effective date",
+      "metric_core": "global_minimum_tax_effective_date",
+      "review_status": "do_not_auto_accept",
+      "review_notes": "Tax/legal effective-date extraction, outside operational metric scope.",
+      "action": "do_not_auto_accept",
+      "canonical_id": ""
+    },
+    "metric_core:global minimum tax effective date": {
+      "raw_name": "effective date",
+      "metric_core": "global_minimum_tax_effective_date",
+      "review_status": "do_not_auto_accept",
+      "review_notes": "Tax/legal effective-date extraction, outside operational metric scope.",
+      "action": "do_not_auto_accept",
+      "canonical_id": ""
+    },
+    "metric_core:market presence": {
+      "raw_name": "countries",
+      "metric_core": "market_presence",
+      "review_status": "approve_mapping",
+      "review_notes": "Count of countries/markets where products are sold; existing markets_operating_in family is correct.",
+      "action": "accept",
+      "canonical_id": "markets_operating_in",
+      "dimension": null
+    },
+    "metric_core:operations presence": {
+      "raw_name": "countries",
+      "metric_core": "operations_presence",
+      "review_status": "approve_mapping",
+      "review_notes": "Count of countries where the company has operations; acceptable existing family, context retained from source.",
+      "action": "accept",
+      "canonical_id": "markets_operating_in",
+      "dimension": null
+    },
+    "raw_name:period of implementation": {
+      "raw_name": "period of implementation",
+      "metric_core": "implementation_duration",
+      "review_status": "do_not_auto_accept",
+      "review_notes": "ERP project timeline, not a reusable operational performance metric for this registry.",
+      "action": "do_not_auto_accept",
+      "canonical_id": ""
+    },
+    "metric_core:implementation duration": {
+      "raw_name": "period of implementation",
+      "metric_core": "implementation_duration",
+      "review_status": "do_not_auto_accept",
+      "review_notes": "ERP project timeline, not a reusable operational performance metric for this registry.",
+      "action": "do_not_auto_accept",
+      "canonical_id": ""
+    },
+    "raw_name:acquisition of evirth shanghai industrial co ltd": {
+      "raw_name": "acquisition of Evirth (Shanghai) Industrial Co., Ltd.",
+      "metric_core": "acquisitions",
+      "review_status": "route_financial_or_market",
+      "review_notes": "M&A event count; not customer acquisition cost and not an operational KPI.",
+      "action": "route_financial",
+      "canonical_id": ""
+    },
+    "metric_core:acquisitions": {
+      "raw_name": "acquisition of Evirth (Shanghai) Industrial Co., Ltd.",
+      "metric_core": "acquisitions",
+      "review_status": "route_financial_or_market",
+      "review_notes": "M&A event count; not customer acquisition cost and not an operational KPI.",
+      "action": "route_financial",
+      "canonical_id": ""
+    },
+    "raw_name:ukraine": {
+      "raw_name": "Ukraine",
+      "metric_core": "net_revenue",
+      "review_status": "route_financial",
+      "review_notes": "Geography-level revenue split; route to financial registry with geography dimension.",
+      "action": "route_financial",
+      "canonical_id": "total_revenue"
+    },
+    "metric_core:net revenue": {
+      "raw_name": "Russia",
+      "metric_core": "net_revenue",
+      "review_status": "route_financial",
+      "review_notes": "Geography-level revenue split; route to financial registry with geography dimension.",
+      "action": "route_financial",
+      "canonical_id": "total_revenue"
+    },
+    "raw_name:russia": {
+      "raw_name": "Russia",
+      "metric_core": "net_revenue",
+      "review_status": "route_financial",
+      "review_notes": "Geography-level revenue split; route to financial registry with geography dimension.",
+      "action": "route_financial",
+      "canonical_id": "total_revenue"
+    },
+    "metric_core:employee count": {
+      "raw_name": "employees",
+      "metric_core": "employee_count",
+      "review_status": "approve_mapping",
+      "review_notes": "Employee count; existing employee_headcount family is correct.",
+      "action": "accept",
+      "canonical_id": "employee_headcount",
+      "dimension": null
+    }
+  },
+  "skipped_conflicting_keys": {
+    "raw_name:countries": [
+      {
+        "raw_name": "countries",
+        "metric_core": "countries",
+        "review_status": "add_canonical",
+        "review_notes": "This is countries hosting manufacturing/processing facilities, not facility count.",
+        "action": "accept",
+        "canonical_id": "manufacturing_country_count",
+        "dimension": null
+      },
+      {
+        "raw_name": "countries",
+        "metric_core": "operating_countries",
+        "review_status": "approve_mapping",
+        "review_notes": "Count of countries served/operated in; existing markets_operating_in family is acceptable, with context retained from source.",
+        "action": "accept",
+        "canonical_id": "markets_operating_in",
+        "dimension": null
+      },
+      {
+        "raw_name": "countries",
+        "metric_core": "operating_countries",
+        "review_status": "approve_mapping",
+        "review_notes": "Count of countries served/operated in; existing markets_operating_in family is acceptable, with context retained from source.",
+        "action": "accept",
+        "canonical_id": "markets_operating_in",
+        "dimension": null
+      },
+      {
+        "raw_name": "countries",
+        "metric_core": "manufacturing_countries",
+        "review_status": "add_canonical",
+        "review_notes": "Reusable footprint metric: number of countries containing manufacturing facilities.",
+        "action": "accept",
+        "canonical_id": "manufacturing_country_count",
+        "dimension": null
+      },
+      {
+        "raw_name": "countries",
+        "metric_core": "market_presence",
+        "review_status": "approve_mapping",
+        "review_notes": "Count of countries/markets where products are sold; existing markets_operating_in family is correct.",
+        "action": "accept",
+        "canonical_id": "markets_operating_in",
+        "dimension": null
+      },
+      {
+        "raw_name": "countries",
+        "metric_core": "operations_presence",
+        "review_status": "approve_mapping",
+        "review_notes": "Count of countries where the company has operations; acceptable existing family, context retained from source.",
+        "action": "accept",
+        "canonical_id": "markets_operating_in",
+        "dimension": null
+      }
+    ],
+    "raw_name:employees represented by labor unions or workers councils": [
+      {
+        "raw_name": "employees represented by labor unions or workers' councils",
+        "metric_core": "union_representation",
+        "review_status": "add_canonical",
+        "review_notes": "Universal human-capital metric: share of workforce represented by unions/workers councils.",
+        "action": "accept",
+        "canonical_id": "union_representation_rate",
+        "dimension": null
+      },
+      {
+        "raw_name": "employees represented by labor unions or workers' councils",
+        "metric_core": "union_representation_US",
+        "review_status": "add_canonical",
+        "review_notes": "Universal human-capital metric: share of workforce represented by unions/workers councils; geography dimension: United States.",
+        "action": "accept",
+        "canonical_id": "union_representation_rate",
+        "dimension": {
+          "dimension_type": "geography",
+          "dimension_member": "United States"
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,382 @@
+[
+  {
+    "canonical_id": "total_revenue",
+    "display_name": "Total Revenue",
+    "category": "financial_backbone",
+    "unit": "monetary",
+    "fact_type": "financial_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated",
+      "segment"
+    ],
+    "source_basis": [
+      "ifrs_financial_backbone",
+      "cross_company_reports"
+    ],
+    "notes": "Use for net revenue or net sales at company or segment scope."
+  },
+  {
+    "canonical_id": "gross_margin",
+    "display_name": "Gross Margin",
+    "category": "financial_backbone",
+    "unit": "percentage",
+    "fact_type": "financial_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated",
+      "segment"
+    ],
+    "source_basis": [
+      "ifrs_financial_backbone",
+      "cross_company_reports"
+    ],
+    "notes": "Common across beverage, apparel, and retail reporting."
+  },
+  {
+    "canonical_id": "operating_income",
+    "display_name": "Operating Income",
+    "category": "financial_backbone",
+    "unit": "monetary",
+    "fact_type": "financial_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated",
+      "segment"
+    ],
+    "source_basis": [
+      "ifrs_financial_backbone",
+      "cross_company_reports"
+    ],
+    "notes": "Keep distinct from operating profit when filings present both."
+  },
+  {
+    "canonical_id": "operating_profit",
+    "display_name": "Operating Profit",
+    "category": "financial_backbone",
+    "unit": "monetary",
+    "fact_type": "financial_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated",
+      "segment"
+    ],
+    "source_basis": [
+      "ifrs_financial_backbone",
+      "cross_company_reports"
+    ],
+    "notes": "Used frequently in consumer and CPG filings, including core segment contexts."
+  },
+  {
+    "canonical_id": "cash_flow",
+    "display_name": "Cash Flow",
+    "category": "cash_and_capital",
+    "unit": "monetary",
+    "fact_type": "financial_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated"
+    ],
+    "source_basis": [
+      "ifrs_financial_backbone",
+      "cross_company_reports"
+    ],
+    "notes": "Parent family for operating, investing, financing, and free cash flow concepts."
+  },
+  {
+    "canonical_id": "inventory",
+    "display_name": "Inventory",
+    "category": "inventory_and_supply_chain",
+    "unit": "monetary",
+    "fact_type": "financial_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated",
+      "segment"
+    ],
+    "source_basis": [
+      "ifrs_financial_backbone",
+      "cross_company_reports"
+    ],
+    "notes": "Appears both as a balance sheet metric and an operational discussion anchor."
+  },
+  {
+    "canonical_id": "earnings_per_share",
+    "display_name": "Earnings Per Share",
+    "category": "financial_backbone",
+    "unit": "ratio",
+    "fact_type": "financial_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated"
+    ],
+    "source_basis": [
+      "ifrs_financial_backbone",
+      "cross_company_reports"
+    ],
+    "notes": "Use as parent for reported and adjusted EPS variants."
+  },
+  {
+    "canonical_id": "organic_revenue_growth",
+    "display_name": "Organic Revenue Growth",
+    "category": "operational_performance",
+    "unit": "percentage",
+    "fact_type": "operational_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated",
+      "segment",
+      "brand",
+      "geography"
+    ],
+    "source_basis": [
+      "cross_company_reports"
+    ],
+    "notes": "Strongly evidenced in PepsiCo and broadly relevant for consumer companies."
+  },
+  {
+    "canonical_id": "pricing_impact",
+    "display_name": "Pricing Impact",
+    "category": "operational_performance",
+    "unit": "percentage",
+    "fact_type": "operational_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated",
+      "segment",
+      "brand",
+      "geography"
+    ],
+    "source_basis": [
+      "cross_company_reports"
+    ],
+    "notes": "Use for disclosed pricing contribution to growth or change."
+  },
+  {
+    "canonical_id": "volume_impact",
+    "display_name": "Volume Impact",
+    "category": "operational_performance",
+    "unit": "percentage",
+    "fact_type": "operational_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated",
+      "segment",
+      "brand",
+      "geography"
+    ],
+    "source_basis": [
+      "cross_company_reports"
+    ],
+    "notes": "Use for physical volume, unit case volume, or sales volume contribution."
+  },
+  {
+    "canonical_id": "mix_impact",
+    "display_name": "Mix Impact",
+    "category": "operational_performance",
+    "unit": "percentage",
+    "fact_type": "operational_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated",
+      "segment",
+      "brand",
+      "geography"
+    ],
+    "source_basis": [
+      "cross_company_reports"
+    ],
+    "notes": "Useful for price-volume-mix style consumer reporting."
+  },
+  {
+    "canonical_id": "digital_sales",
+    "display_name": "Digital Sales",
+    "category": "channel_and_route_to_market",
+    "unit": "monetary",
+    "fact_type": "operational_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated",
+      "segment",
+      "channel"
+    ],
+    "source_basis": [
+      "cross_company_reports"
+    ],
+    "notes": "Retail and omnichannel-heavy reports frequently refer to digital sales or digital growth."
+  },
+  {
+    "canonical_id": "direct_to_consumer_revenue",
+    "display_name": "Direct-to-Consumer Revenue",
+    "category": "channel_and_route_to_market",
+    "unit": "monetary",
+    "fact_type": "operational_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated",
+      "segment",
+      "channel"
+    ],
+    "source_basis": [
+      "cross_company_reports"
+    ],
+    "notes": "Especially important for Nike-like channel structures."
+  },
+  {
+    "canonical_id": "wholesale_revenue",
+    "display_name": "Wholesale Revenue",
+    "category": "channel_and_route_to_market",
+    "unit": "monetary",
+    "fact_type": "operational_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated",
+      "segment",
+      "channel"
+    ],
+    "source_basis": [
+      "cross_company_reports"
+    ],
+    "notes": "Useful for apparel and consumer distribution models."
+  },
+  {
+    "canonical_id": "store_traffic",
+    "display_name": "Store Traffic",
+    "category": "channel_and_route_to_market",
+    "unit": "count_or_index",
+    "fact_type": "operational_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated",
+      "geography",
+      "store_format"
+    ],
+    "source_basis": [
+      "cross_company_reports"
+    ],
+    "notes": "Retail-specific operational KPI highlighted in Target-like reporting."
+  },
+  {
+    "canonical_id": "inventory_management",
+    "display_name": "Inventory Management",
+    "category": "inventory_and_supply_chain",
+    "unit": "qualitative_or_ratio",
+    "fact_type": "operational_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated",
+      "segment"
+    ],
+    "source_basis": [
+      "cross_company_reports"
+    ],
+    "notes": "Not always numeric, but worth supporting as an operational concept family."
+  },
+  {
+    "canonical_id": "innovation_pipeline",
+    "display_name": "Innovation Pipeline",
+    "category": "brand_category_segment",
+    "unit": "qualitative_or_count",
+    "fact_type": "operational_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "consolidated",
+      "brand",
+      "category"
+    ],
+    "source_basis": [
+      "cross_company_reports"
+    ],
+    "notes": "Frequently discussed in consumer filings even when not tied to a standardized number."
+  },
+  {
+    "canonical_id": "brand_performance",
+    "display_name": "Brand Performance",
+    "category": "brand_category_segment",
+    "unit": "monetary_or_percentage",
+    "fact_type": "operational_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "brand",
+      "category",
+      "geography"
+    ],
+    "source_basis": [
+      "cross_company_reports"
+    ],
+    "notes": "Parent family for brand-specific growth, revenue, and margin facts."
+  },
+  {
+    "canonical_id": "segment_operating_profit",
+    "display_name": "Segment Operating Profit",
+    "category": "profitability_and_margin",
+    "unit": "monetary",
+    "fact_type": "operational_metric",
+    "valid_period_types": [
+      "annual",
+      "quarterly"
+    ],
+    "valid_scopes": [
+      "segment",
+      "geography"
+    ],
+    "source_basis": [
+      "cross_company_reports"
+    ],
+    "notes": "Useful where filings report core segment operating profit or analogous measures."
+  }
+]

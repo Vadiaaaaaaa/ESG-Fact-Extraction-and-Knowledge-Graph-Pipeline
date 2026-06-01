@@ -1,0 +1,380 @@
+[
+  {
+    "canonical_id": "ghg_emissions_avoided",
+    "display_name": "GHG Emissions Avoided",
+    "category": "emissions",
+    "unit_family": "weight",
+    "metric_subject": "emissions",
+    "metric_role": "avoidance",
+    "flow_direction": "avoided",
+    "denominator_type": null,
+    "comparable": true,
+    "comparability_notes": "Comparable in absolute terms. Baseline and methodology for calculating avoidance may differ.",
+    "aliases": [
+      "carbon emission avoided",
+      "emissions avoided",
+      "ghg avoided",
+      "carbon avoided",
+      "co2 avoided"
+    ],
+    "external_refs": [
+      {
+        "standard": "GRI",
+        "id": "GRI 305-5",
+        "label": "Reduction of GHG emissions"
+      },
+      {
+        "standard": "BRSR",
+        "id": "Principle 6 Essential",
+        "label": "GHG emissions avoided"
+      }
+    ],
+    "canonical_definition": "Total greenhouse gas emissions avoided through energy efficiency, renewable energy, or other initiatives.",
+    "recurrence": [
+      "ITC"
+    ],
+    "review_status": "pending_human_approval"
+  },
+  {
+    "canonical_id": "water_intensity_physical_output",
+    "display_name": "Water Intensity per Physical Output",
+    "category": "water",
+    "unit_family": "ratio",
+    "metric_subject": "water",
+    "metric_role": "intensity",
+    "flow_direction": "ratio",
+    "denominator_type": "production",
+    "comparable": true,
+    "comparability_notes": "Comparable when denominator unit is consistent.",
+    "aliases": [
+      "water intensity",
+      "water intensity physical output",
+      "water intensity per unit",
+      "water use intensity"
+    ],
+    "external_refs": [
+      {
+        "standard": "GRI",
+        "id": "GRI 303-5",
+        "label": "Water intensity"
+      },
+      {
+        "standard": "BRSR",
+        "id": "Principle 6 Essential",
+        "label": "Water intensity per physical output"
+      }
+    ],
+    "canonical_definition": "Water consumed per unit of physical production output.",
+    "recurrence": [
+      "ITC"
+    ],
+    "review_status": "pending_human_approval"
+  },
+  {
+    "canonical_id": "waste_recycling_rate",
+    "display_name": "Waste Recycling Rate",
+    "category": "waste",
+    "unit_family": "percentage",
+    "metric_subject": "waste",
+    "metric_role": "recovery",
+    "flow_direction": "ratio",
+    "denominator_type": null,
+    "comparable": true,
+    "comparability_notes": "Comparable when denominator (total waste generated) is consistent.",
+    "aliases": [
+      "solid waste recycling rate",
+      "waste recycling rate",
+      "recycling rate",
+      "recycling of waste",
+      "waste recycled percentage"
+    ],
+    "external_refs": [
+      {
+        "standard": "GRI",
+        "id": "GRI 306-4",
+        "label": "Waste diverted from disposal \u2014 percentage"
+      },
+      {
+        "standard": "BRSR",
+        "id": "Principle 6 Essential",
+        "label": "Waste recycling rate"
+      }
+    ],
+    "canonical_definition": "Percentage of total waste generated that is recycled or recovered.",
+    "recurrence": [
+      "ITC"
+    ],
+    "review_status": "pending_human_approval"
+  },
+  {
+    "canonical_id": "recycled_plastic_content_share",
+    "display_name": "Recycled Plastic Content in Packaging",
+    "category": "waste",
+    "unit_family": "percentage",
+    "metric_subject": "waste",
+    "metric_role": "intensity",
+    "flow_direction": "ratio",
+    "denominator_type": null,
+    "comparable": true,
+    "comparability_notes": "Comparable when denominator (total plastic packaging) is consistent.",
+    "aliases": [
+      "recycled plastic content used in packaging",
+      "recycled plastic content",
+      "recycled content in plastic",
+      "post-consumer recycled plastic content"
+    ],
+    "external_refs": [
+      {
+        "standard": "GRI",
+        "id": "GRI 301-2",
+        "label": "Recycled input materials used"
+      },
+      {
+        "standard": "BRSR",
+        "id": "Principle 2 EPR",
+        "label": "Recycled plastic content"
+      }
+    ],
+    "canonical_definition": "Share of plastic packaging made from recycled content.",
+    "recurrence": [
+      "ITC"
+    ],
+    "review_status": "pending_human_approval"
+  },
+  {
+    "canonical_id": "recycled_waste_paper_input",
+    "display_name": "Recycled Waste Paper Used as Input",
+    "category": "waste",
+    "unit_family": "weight",
+    "metric_subject": "waste",
+    "metric_role": "recovery",
+    "flow_direction": "recovery",
+    "denominator_type": null,
+    "comparable": true,
+    "aliases": [
+      "recycled post-consumer waste paper",
+      "post-consumer waste paper",
+      "externally sourced post-consumer waste paper",
+      "waste paper sourced",
+      "recycled waste paper input"
+    ],
+    "external_refs": [
+      {
+        "standard": "GRI",
+        "id": "GRI 301-2",
+        "label": "Recycled input materials \u2014 paper"
+      },
+      {
+        "standard": "BRSR",
+        "id": "Principle 2",
+        "label": "Recycled raw material input"
+      }
+    ],
+    "canonical_definition": "Weight of post-consumer waste paper collected and used as raw material input in paperboard or packaging production.",
+    "note": "ITC-specific given its paper/paperboard business, but reusable for any company reporting recycled fibre inputs.",
+    "recurrence": [
+      "ITC"
+    ],
+    "review_status": "pending_human_approval"
+  },
+  {
+    "canonical_id": "zero_liquid_discharge_units",
+    "display_name": "Zero Liquid Discharge Units",
+    "category": "water",
+    "unit_family": "count",
+    "metric_subject": "water",
+    "metric_role": "count",
+    "flow_direction": "unknown",
+    "denominator_type": null,
+    "comparable": true,
+    "aliases": [
+      "zero effluent discharge units",
+      "zero liquid discharge",
+      "ZLD units",
+      "units achieving zero effluent discharge"
+    ],
+    "external_refs": [
+      {
+        "standard": "BRSR",
+        "id": "Principle 6 Essential",
+        "label": "Zero liquid discharge"
+      },
+      {
+        "standard": "GRI",
+        "id": "GRI 303-3",
+        "label": "Water discharge \u2014 zero discharge"
+      }
+    ],
+    "canonical_definition": "Number of operational units achieving zero liquid discharge status.",
+    "recurrence": [
+      "ITC"
+    ],
+    "review_status": "pending_human_approval"
+  },
+  {
+    "canonical_id": "renewable_power_installed_capacity",
+    "display_name": "Renewable Power Installed Capacity (Solar + Wind)",
+    "category": "energy",
+    "unit_family": "power",
+    "metric_subject": "energy",
+    "metric_role": "generation",
+    "flow_direction": "output",
+    "denominator_type": null,
+    "comparable": true,
+    "aliases": [
+      "solar and wind power capacity",
+      "installed capacity solar and wind",
+      "renewable electricity capacity",
+      "installed solar and wind power capacity",
+      "renewable power capacity"
+    ],
+    "external_refs": [
+      {
+        "standard": "GRI",
+        "id": "GRI 302-1",
+        "label": "Renewable energy capacity"
+      },
+      {
+        "standard": "BRSR",
+        "id": "Principle 6 Essential",
+        "label": "Renewable energy installed capacity"
+      }
+    ],
+    "canonical_definition": "Total installed capacity of renewable power generation assets including solar and wind, in MW or KWp.",
+    "note": "Broader than rooftop_solar_installed_capacity \u2014 use when company reports combined solar+wind or any renewable capacity figure.",
+    "recurrence": [
+      "ITC"
+    ],
+    "review_status": "pending_human_approval"
+  },
+  {
+    "canonical_id": "wet_waste_composted",
+    "display_name": "Wet Waste Composted",
+    "category": "waste",
+    "unit_family": "weight",
+    "metric_subject": "waste",
+    "metric_role": "recovery",
+    "flow_direction": "recovery",
+    "denominator_type": null,
+    "comparable": true,
+    "aliases": [
+      "wet waste composted",
+      "organic waste composted",
+      "wet waste recovered by composting"
+    ],
+    "external_refs": [
+      {
+        "standard": "GRI",
+        "id": "GRI 306-4",
+        "label": "Waste diverted \u2014 composting"
+      },
+      {
+        "standard": "BRSR",
+        "id": "Principle 6 Essential",
+        "label": "Waste composted"
+      }
+    ],
+    "canonical_definition": "Weight of wet or organic waste diverted from disposal through composting.",
+    "recurrence": [
+      "ITC"
+    ],
+    "review_status": "pending_human_approval"
+  },
+  {
+    "canonical_id": "net_water_storage_potential",
+    "display_name": "Net Water Storage Potential",
+    "category": "water",
+    "unit_family": "volume",
+    "metric_subject": "water",
+    "metric_role": "harvest",
+    "flow_direction": "restoration",
+    "denominator_type": null,
+    "comparable": true,
+    "comparability_notes": "Comparable in absolute volume. Methodology for estimating storage potential may differ.",
+    "aliases": [
+      "net water storage potential",
+      "water storage potential",
+      "water harvesting storage capacity"
+    ],
+    "external_refs": [
+      {
+        "standard": "GRI",
+        "id": "GRI 303-1",
+        "label": "Water storage from harvesting"
+      },
+      {
+        "standard": "BRSR",
+        "id": "Principle 6 Essential",
+        "label": "Water harvesting potential"
+      }
+    ],
+    "canonical_definition": "Total net water storage potential created through rainwater harvesting structures and water conservation initiatives.",
+    "recurrence": [
+      "ITC"
+    ],
+    "review_status": "pending_human_approval"
+  },
+  {
+    "canonical_id": "crop_water_use_efficiency",
+    "display_name": "Crop Water Use Efficiency",
+    "category": "water",
+    "unit_family": "ratio",
+    "metric_subject": "water",
+    "metric_role": "intensity",
+    "flow_direction": "ratio",
+    "denominator_type": "production",
+    "comparable": false,
+    "comparability_notes": "Not directly comparable \u2014 crop type and growing conditions vary significantly.",
+    "aliases": [
+      "crop water use efficiency",
+      "agricultural water use efficiency",
+      "water use efficiency farming"
+    ],
+    "external_refs": [
+      {
+        "standard": "GRI",
+        "id": "GRI 303-5",
+        "label": "Water efficiency in agriculture"
+      },
+      {
+        "standard": "BRSR",
+        "id": "Principle 6",
+        "label": "Water use efficiency"
+      }
+    ],
+    "canonical_definition": "Water used per unit of agricultural output, measuring efficiency of water use in farming operations.",
+    "recurrence": [
+      "ITC"
+    ],
+    "review_status": "pending_human_approval"
+  },
+  {
+    "canonical_id": "cdp_water_score",
+    "display_name": "CDP Water Security Score",
+    "category": "governance",
+    "unit_family": "rating",
+    "metric_subject": null,
+    "metric_role": "rating",
+    "flow_direction": "unknown",
+    "denominator_type": null,
+    "comparable": true,
+    "comparability_notes": "Comparable using CDP's standardised scoring methodology.",
+    "aliases": [
+      "CDP water score",
+      "CDP water security score",
+      "CDP water rating"
+    ],
+    "external_refs": [
+      {
+        "standard": "CDP",
+        "id": "CDP Water Security",
+        "label": "CDP Water Security questionnaire score"
+      }
+    ],
+    "canonical_definition": "Score awarded by CDP (formerly Carbon Disclosure Project) for water security disclosure and management.",
+    "recurrence": [
+      "ITC"
+    ],
+    "review_status": "pending_human_approval"
+  }
+]
