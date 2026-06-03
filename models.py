@@ -14,8 +14,6 @@ class TemporalContext:
     fiscal_year_end: str = "December"
     primary_period: str = "FY2025"
     prior_period: str = "FY2024"
-    is_historical_reprint: bool = False
-
     @classmethod
     def from_dict(cls, data: dict[str, Any] | None) -> "TemporalContext":
         return cls(**(data or {}))
@@ -59,6 +57,8 @@ class Chunk:
     doc_id: str
     section_id: str
     chunk_id: str
+    prev_chunk_id: str | None
+    next_chunk_id: str | None
     section_title: str
     parent_section: str
     page_start: int | None
@@ -67,7 +67,6 @@ class Chunk:
     content: str
     char_count: int
     token_estimate: int
-    is_historical_reprint: bool
     temporal_context: TemporalContext
 
     @classmethod
@@ -76,6 +75,8 @@ class Chunk:
             doc_id=data.get("doc_id", ""),
             section_id=data.get("section_id", ""),
             chunk_id=data.get("chunk_id", ""),
+            prev_chunk_id=data.get("prev_chunk_id"),
+            next_chunk_id=data.get("next_chunk_id"),
             section_title=data.get("section_title", ""),
             parent_section=data.get("parent_section", ""),
             page_start=data.get("page_start"),
@@ -84,10 +85,6 @@ class Chunk:
             content=data.get("content", ""),
             char_count=data.get("char_count", 0),
             token_estimate=data.get("token_estimate", 0),
-            is_historical_reprint=data.get(
-                "is_historical_reprint",
-                (data.get("temporal_context") or {}).get("is_historical_reprint", False),
-            ),
             temporal_context=TemporalContext.from_dict(data.get("temporal_context")),
         )
 
@@ -100,7 +97,11 @@ class Chunk:
 @dataclass
 class ExtractedFact:
     fact_id: str
+    doc_id: str
+    section_id: str
     chunk_id: str
+    prev_chunk_id: str | None
+    next_chunk_id: str | None
     section_title: str
     parent_section: str
     page_start: int | None
@@ -111,12 +112,20 @@ class ExtractedFact:
     value: Any = None
     unit: str = ""
     period: str = ""
+    period_start: str | None = None
+    period_end: str | None = None
+    period_type: str = "unknown"
+    period_confidence: str = ""
+    fact_type: str = "measurement"
     entity: str = ""
     segment: str = ""
     evidence: str = ""
     metric_definition: str | None = None
     baseline_year: str | None = None
     confidence: float | None = None
+    rescue_pass: bool = False
+    rescue_result: str = ""
+    duplicate_chunk_ids: list[str] = field(default_factory=list)
     raw: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -129,7 +138,11 @@ class ExtractedFact:
 class NormalizedFact:
     fact_id: str
     source_fact_id: str
+    doc_id: str
+    section_id: str
     chunk_id: str
+    prev_chunk_id: str | None
+    next_chunk_id: str | None
     section_title: str
     parent_section: str
     page_start: int | None
@@ -143,11 +156,19 @@ class NormalizedFact:
     scale: str = ""
     currency: str = ""
     period: str = ""
+    period_start: str | None = None
+    period_end: str | None = None
+    period_type: str = "unknown"
+    period_confidence: str = ""
+    fact_type: str = "measurement"
     fiscal_year: int | None = None
     entity: str = ""
     segment: str = ""
     evidence: str = ""
     confidence: float | None = None
+    rescue_pass: bool = False
+    rescue_result: str = ""
+    duplicate_chunk_ids: list[str] = field(default_factory=list)
     raw: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:

@@ -227,5 +227,16 @@
   "Waste intensity in terms of physical output": "waste_intensity_physical_output",
   "Waste intensity": "waste_intensity_physical_output",
   "water savings": "water_saved_absolute",
-  "Total volume of water consumption": "water_consumption_absolute"
+  "Total volume of water consumption": "water_consumption_absolute",
+  "total water discharged": "water_discharged_total",
+  "total volume of water discharged": "water_discharged_total",
+  "water discharge total": "water_discharged_total",
+  "total discharge": "water_discharged_total",
+  "total effluent discharged": "water_discharged_total",
+  "water discharged": "water_discharged_total",
+  "water discharged total": "water_discharged_total",
+  "total wastewater discharged": "water_discharged_total",
+  "total water discharge": "water_discharged_total",
+  "water discharge": "water_discharged_total",
+  "effluent discharged": "water_discharged_total"
 }

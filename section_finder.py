@@ -2,11 +2,14 @@ from __future__ import annotations
 
 import argparse
 import json
+from functools import lru_cache
 import re
 from pathlib import Path
 from typing import Any
 
 import fitz
+
+from metric_registry_seed import REGISTRY as SEED_REGISTRY
 
 
 TARGET_PATTERNS = [
@@ -43,95 +46,8 @@ TARGET_PATTERNS = [
     "value creation",
 ]
 
-HIGH_VALUE_TERMS = [
-    "OEE",
-    "GHG",
-    "tCO2e",
-    "CO2e",
-    "renewable energy",
-    "water intensity",
-    "energy intensity",
-    "emission intensity",
-    "scope 1",
-    "scope 2",
-    "scope 3",
-    "EBITDA",
-    "BRSR",
-    "KPI",
-    "specific energy",
-    "water withdrawal",
-    "plastic waste",
-    "recyclable",
-    "EPR",
-    "distributor",
-    "outlet count",
-    "market share",
-    "employee headcount",
-    "TRIR",
-    "LTIR",
-]
-
-MEDIUM_VALUE_TERMS = [
-    "reduction",
-    "intensity",
-    "percentage",
-    "crore",
-    "million tonnes",
-    "kilolitre",
-    "megawatt",
-    "gigajoule",
-    "tonne of production",
-    "per unit",
-    "baseline",
-    "vs FY",
-    "vs 2013",
-    "year-on-year",
-    "manufacturing",
-    "supply chain",
-    "distribution",
-    "sustainability",
-    "environment",
-    "safety incident",
-    "training hours",
-    "attrition",
-]
-
-LOW_VALUE_TERMS = [
-    "efficiency",
-    "performance",
-    "target",
-    "goal",
-    "initiative",
-    "programme",
-    "water",
-    "energy",
-    "waste",
-    "emissions",
-    "packaging",
-    "sourcing",
-    "farmer",
-    "outlet",
-    "employee",
-    "worker",
-]
-
-OPERATIONAL_CONTEXT_TERMS = [
-    *HIGH_VALUE_TERMS,
-    *MEDIUM_VALUE_TERMS,
-    *LOW_VALUE_TERMS,
-    "factory",
-    "plant",
-    "plants",
-    "operations",
-    "operational",
-    "logistics",
-    "suppliers",
-    "renewable",
-    "plastic",
-    "water",
-    "energy",
-    "waste",
-]
+DEFAULT_REGISTRY_PATH = "consumer_master_registry_v1.json"
+SUPPLEMENTAL_REGISTRY_PATH = "registry_additions_approved.json"
 
 
 def _normalize_space(text: str) -> str:
@@ -158,16 +74,81 @@ def _term_hits(text: str, term: str) -> int:
     return len(re.findall(rf"(?<![a-z0-9]){re.escape(term_lower)}(?![a-z0-9])", lower))
 
 
-def score_page(text: str) -> int:
-    return (
-        sum(_term_hits(text, term) * 3 for term in HIGH_VALUE_TERMS)
-        + sum(_term_hits(text, term) * 2 for term in MEDIUM_VALUE_TERMS)
-        + sum(_term_hits(text, term) for term in LOW_VALUE_TERMS)
+def _canonical_keyword_weight(term: str) -> int:
+    normalized = str(term or "").strip().lower()
+    if not normalized:
+        return 0
+    if re.search(r"\d|/|%", normalized) or normalized.count(" ") >= 2:
+        return 3
+    if normalized.count(" ") == 1 or len(normalized) >= 12:
+        return 2
+    return 1
+
+
+def _normalize_registry_keyword(value: Any) -> str:
+    keyword = str(value or "").replace("_", " ").strip().lower()
+    keyword = re.sub(r"\s+", " ", keyword)
+    return keyword
+
+
+def _load_registry_entries(registry_path: str | Path | None = None) -> list[dict[str, Any]]:
+    entries: list[dict[str, Any]] = []
+    path = Path(registry_path) if registry_path else Path(DEFAULT_REGISTRY_PATH)
+    if path.exists():
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        if isinstance(payload, list):
+            entries.extend(item for item in payload if isinstance(item, dict))
+    else:
+        entries.extend(item for item in SEED_REGISTRY if isinstance(item, dict))
+
+    supplemental = Path(SUPPLEMENTAL_REGISTRY_PATH)
+    if (registry_path is None or path.name != supplemental.name) and supplemental.exists():
+        payload = json.loads(supplemental.read_text(encoding="utf-8"))
+        if isinstance(payload, list):
+            entries.extend(item for item in payload if isinstance(item, dict))
+    return entries
+
+
+@lru_cache(maxsize=4)
+def get_registry_keywords(registry_path: str | None = None) -> list[str]:
+    keywords: list[str] = []
+    seen: set[str] = set()
+    for entry in _load_registry_entries(registry_path):
+        raw_candidates = [
+            entry.get("display_name"),
+            entry.get("canonical_id"),
+            *(entry.get("aliases") or []),
+        ]
+        for candidate in raw_candidates:
+            keyword = _normalize_registry_keyword(candidate)
+            if len(keyword) < 3 or keyword in seen:
+                continue
+            seen.add(keyword)
+            keywords.append(keyword)
+    keywords.sort(key=lambda value: (-_canonical_keyword_weight(value), -len(value), value))
+    return keywords
+
+
+@lru_cache(maxsize=4)
+def get_registry_keyword_weights(registry_path: str | None = None) -> dict[str, int]:
+    return {
+        keyword: _canonical_keyword_weight(keyword)
+        for keyword in get_registry_keywords(registry_path)
+    }
+
+
+def score_page(text: str, registry_path: str | Path | None = None) -> int:
+    return sum(
+        _term_hits(text, keyword) * weight
+        for keyword, weight in get_registry_keyword_weights(str(registry_path) if registry_path else None).items()
     )
 
 
-def _operational_keyword_count(text: str) -> int:
-    return sum(_term_hits(text, term) for term in OPERATIONAL_CONTEXT_TERMS)
+def _operational_keyword_count(text: str, registry_path: str | Path | None = None) -> int:
+    return sum(
+        _term_hits(text, keyword)
+        for keyword in get_registry_keywords(str(registry_path) if registry_path else None)
+    )
 
 
 def _numeric_token_count(text: str) -> int:

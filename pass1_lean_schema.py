@@ -5,15 +5,23 @@ RAW_LABEL_TYPE = [
     "narrative_metric_phrase",
 ]
 
-PERIOD_TYPE = ["annual", "quarterly", "half_year", "ttm", "point_in_time", "unknown"]
+PERIOD_TYPE = [
+    "full_year",
+    "partial",
+    "point_in_time",
+    "cumulative",
+    "target",
+    "baseline",
+    "unknown",
+]
 
 FACT_TYPE = [
-    "actual",
-    "comparative_reference",
-    "guidance",
-    "estimate",
-    "delta",
+    "measurement",
+    "target",
+    "baseline",
     "ratio",
+    "boolean",
+    "count",
 ]
 
 SCOPE = ["consolidated", "sub_entity", "unknown"]
@@ -71,6 +79,14 @@ FACT_PROPERTIES = {
         "description": "Unit as written, e.g. %, $M, stores, bps.",
     },
     "raw_period": {"type": "string"},
+    "period_start": {
+        "type": ["string", "null"],
+        "description": "Normalized start date in ISO format YYYY-MM-DD when the fact period can be determined.",
+    },
+    "period_end": {
+        "type": ["string", "null"],
+        "description": "Normalized end date in ISO format YYYY-MM-DD when the fact period can be determined.",
+    },
     "baseline_year": {
         "type": ["string", "null"],
         "description": "Historical baseline/reference year for baseline-indexed facts, e.g. 2019 in 'vs 2019 baseline'. Null when not applicable.",

@@ -120,7 +120,7 @@ def _get_sentence_transformer_model() -> SentenceTransformer | None:
     if SentenceTransformer is None:
         return None
     if _MODEL is None:
-        _MODEL = SentenceTransformer(MODEL_NAME)
+        _MODEL = SentenceTransformer(MODEL_NAME, local_files_only=True)
     return _MODEL
 
 
@@ -136,6 +136,11 @@ def _get_openai_client() -> OpenAI | None:
 def _resolve_backend() -> str:
     global _BACKEND, _BACKEND_WARNING, _VECTOR_DIMENSIONS
     if _BACKEND is not None:
+        return _BACKEND
+
+    if os.getenv("FORCE_FALLBACK_EMBEDDINGS", "").strip() == "1":
+        _BACKEND = "fallback_hashing"
+        _BACKEND_WARNING = "Using numpy hash-vector fallback for definition similarity."
         return _BACKEND
 
     if SentenceTransformer is not None:
@@ -264,6 +269,19 @@ def top_definition_matches(fact_definition: str | None, k: int = 5) -> list[tupl
     matches = [item for item in matches if item[1] > 0.0]
     matches.sort(key=lambda item: item[1], reverse=True)
     return matches[:k]
+
+
+def text_vector(text: str | None) -> np.ndarray:
+    return _encode_text(text)
+
+
+def text_similarity(left: str | None, right: str | None) -> float:
+    left_vector = _encode_text(left)
+    right_vector = _encode_text(right)
+    if not np.any(left_vector) or not np.any(right_vector):
+        return 0.0
+    score = float(np.dot(left_vector, right_vector))
+    return max(0.0, min(1.0, score))
 
 
 def get_backend_status() -> tuple[str, str | None]:

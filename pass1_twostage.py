@@ -246,7 +246,7 @@ FACT_TYPE - use this rule precisely:
     (e.g. 47.5%, EUR 268 million, 19 hours, 7.2x)  -> fact_type = "actual"
   - If it is a change   - a delta, movement, or variance only
     (e.g. +3%, down 120 bps, declined 11 days)      -> fact_type = "delta"
-  Other valid values: comparative_reference | guidance | estimate | historical_reprint
+  Other valid values: comparative_reference | guidance | estimate
 
 PERIOD_TYPE (pick one):
   annual | quarterly | half_year | ttm | point_in_time | unknown
@@ -449,7 +449,6 @@ PASS1B_RESPONSE_FORMAT = {
                                     "estimate",
                                     "delta",
                                     "ratio",
-                                    "historical_reprint",
                                     None,
                                 ],
                             },

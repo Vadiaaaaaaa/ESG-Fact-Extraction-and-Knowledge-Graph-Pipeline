@@ -1,0 +1,87 @@
+{
+  "total_facts": 2695,
+  "success_count": 2364,
+  "failed_count": 13,
+  "inferred_count": 547,
+  "needs_context_count": 318,
+  "per_file": [
+    {
+      "file": "C:\\Users\\Vedika.Sahoo\\test\\workspace_test_outputs\\tata_consumer_pass1_edc.json",
+      "total_facts": 518,
+      "success_count": 452,
+      "failed_count": 4,
+      "inferred_count": 98,
+      "needs_context_count": 62
+    },
+    {
+      "file": "C:\\Users\\Vedika.Sahoo\\test\\workspace_test_outputs\\gcpl_pass1_edc.json",
+      "total_facts": 920,
+      "success_count": 860,
+      "failed_count": 0,
+      "inferred_count": 79,
+      "needs_context_count": 60
+    },
+    {
+      "file": "C:\\Users\\Vedika.Sahoo\\test\\workspace_test_outputs\\nestle_india_pass1_edc.json",
+      "total_facts": 351,
+      "success_count": 308,
+      "failed_count": 1,
+      "inferred_count": 101,
+      "needs_context_count": 42
+    },
+    {
+      "file": "C:\\Users\\Vedika.Sahoo\\test\\workspace_test_outputs\\itc_pass1_edc.json",
+      "total_facts": 906,
+      "success_count": 744,
+      "failed_count": 8,
+      "inferred_count": 269,
+      "needs_context_count": 154
+    }
+  ],
+  "failed_unit_strings": [
+    {
+      "raw_unit": "tonnes of CO2 equivalent/ Crore INR",
+      "count": 2
+    },
+    {
+      "raw_unit": "tonnes of waste generated/tonne of production",
+      "count": 2
+    },
+    {
+      "raw_unit": "+",
+      "count": 1
+    },
+    {
+      "raw_unit": "1st prize",
+      "count": 1
+    },
+    {
+      "raw_unit": "@",
+      "count": 1
+    },
+    {
+      "raw_unit": "MW2",
+      "count": 1
+    },
+    {
+      "raw_unit": "Metric tons of CO2 equivalent/ turnover in crores",
+      "count": 1
+    },
+    {
+      "raw_unit": "Metric tons of CO2 equivalent/Metric ton of production",
+      "count": 1
+    },
+    {
+      "raw_unit": "Mn+",
+      "count": 1
+    },
+    {
+      "raw_unit": "per Equity Share",
+      "count": 1
+    },
+    {
+      "raw_unit": "\u00a3",
+      "count": 1
+    }
+  ]
+}

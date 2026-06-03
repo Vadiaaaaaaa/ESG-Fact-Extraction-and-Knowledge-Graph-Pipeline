@@ -4,6 +4,7 @@ import argparse
 import csv
 import json
 import re
+from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
 
@@ -13,35 +14,18 @@ from section_finder import (
     ISOLATED_OPERATIONAL_FACT_RE,
     _is_explicitly_excluded,
     _numeric_token_count,
+    get_registry_keywords,
     score_page,
 )
 
 
-KEY_TERMS = [
-    "brsr",
-    "business responsibility",
-    "sustainability",
-    "environment",
-    "emissions",
-    "scope 1",
-    "scope 2",
-    "scope 3",
-    "energy",
-    "renewable",
-    "water",
-    "waste",
-    "plastic",
-    "packaging",
-    "supply chain",
-    "manufacturing",
-    "factory",
-    "safety",
-    "training",
-    "employee",
-    "diversity",
-    "distribution",
-    "outlet",
-]
+@dataclass
+class AuditResult:
+    high_signal_unselected: int
+    borderline_review_candidates: int
+    risk_level: str
+    flagged_pages: list[dict[str, Any]]
+    rows: list[dict[str, Any]]
 
 
 def _normalize_space(text: str) -> str:
@@ -50,8 +34,9 @@ def _normalize_space(text: str) -> str:
 
 
 def _hits(text: str) -> str:
+    key_terms = get_registry_keywords()
     lower = text.lower()
-    return "; ".join(term for term in KEY_TERMS if term in lower)
+    return "; ".join(term for term in key_terms if term in lower)
 
 
 def _preview(text: str, limit: int = 420) -> str:
@@ -64,8 +49,9 @@ def _load_selected(page_report: str | Path) -> set[int]:
 
 
 def _hit_set(text: str) -> set[str]:
+    key_terms = get_registry_keywords()
     lower = text.lower()
-    return {term for term in KEY_TERMS if term in lower}
+    return {term for term in key_terms if term in lower}
 
 
 def _review_signal(
@@ -158,6 +144,67 @@ def audit(pdf_path: str | Path, page_report: str | Path) -> list[dict[str, Any]]
                 }
             )
     return rows
+
+
+def run_coverage_audit(doc: fitz.Document | str | Path, selected_pages: set[int] | list[int]) -> AuditResult:
+    selected = {int(page) for page in selected_pages}
+    rows: list[dict[str, Any]] = []
+    should_close = not isinstance(doc, fitz.Document)
+    pdf = fitz.open(str(doc)) if should_close else doc
+    try:
+        for index, page in enumerate(pdf):
+            text = _normalize_space(page.get_text("text"))
+            score = score_page(text)
+            numeric_tokens = _numeric_token_count(text)
+            excluded = _is_explicitly_excluded(text)
+            high_signal_unselected = (
+                index not in selected
+                and not excluded
+                and (score >= 15 or (score >= 8 and numeric_tokens >= 20))
+            )
+            review_candidate, row_risk_level, miss_reason = _review_signal(
+                index=index,
+                text=text,
+                score=score,
+                numeric_tokens=numeric_tokens,
+                selected=index in selected,
+                excluded=excluded,
+                selected_pages=selected,
+            )
+            rows.append(
+                {
+                    "page": index + 1,
+                    "selected": index in selected,
+                    "score": score,
+                    "numeric_tokens": numeric_tokens,
+                    "excluded": excluded,
+                    "high_signal_unselected": high_signal_unselected,
+                    "review_candidate": review_candidate,
+                    "risk_level": row_risk_level,
+                    "miss_reason": miss_reason,
+                    "hits": _hits(text),
+                    "preview": _preview(text),
+                }
+            )
+    finally:
+        if should_close:
+            pdf.close()
+
+    flagged_pages = [row for row in rows if row["review_candidate"]]
+    if any(row["risk_level"] == "HIGH" for row in flagged_pages):
+        risk_level = "HIGH"
+    elif any(row["risk_level"] == "MEDIUM" for row in flagged_pages):
+        risk_level = "MEDIUM"
+    else:
+        risk_level = "LOW"
+
+    return AuditResult(
+        high_signal_unselected=sum(1 for row in rows if row["high_signal_unselected"]),
+        borderline_review_candidates=sum(1 for row in rows if row["review_candidate"]),
+        risk_level=risk_level,
+        flagged_pages=flagged_pages,
+        rows=rows,
+    )
 
 
 def main() -> None:

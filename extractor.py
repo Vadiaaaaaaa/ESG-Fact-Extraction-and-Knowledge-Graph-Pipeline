@@ -32,7 +32,7 @@ if hasattr(sys.stderr, "reconfigure"):
 if "--summary" not in sys.argv:
     print("starting...", flush=True)
 
-MODEL = "gpt-4o-mini"
+MODEL = "gpt-4.1-mini"
 MAX_CONCURRENT_CALLS = 2
 API_TIMEOUT_SECONDS = 300
 RETRY_WAIT_SECONDS = 10
@@ -183,6 +183,7 @@ def _validation_context_for_chunk(chunk: Chunk) -> dict[str, Any]:
         "company": _metadata_value("company_name", "company", default=""),
         "fiscal_period": _primary_period_for_chunk(chunk),
         "primary_period": _primary_period_for_chunk(chunk),
+        "filing_year": getattr(chunk.temporal_context, "filing_year", None),
         "fiscal_year_end_month": _metadata_value(
             "fiscal_year_end_month",
             default=getattr(chunk.temporal_context, "fiscal_year_end", ""),
@@ -212,20 +213,6 @@ def _is_excluded_table_chunk(chunk: dict[str, Any]) -> bool:
 
 
 def _render_system_prompt(chunk: Chunk) -> str:
-    filing_year = chunk.temporal_context.filing_year
-    historical_reprint_context = ""
-    if chunk.temporal_context.is_historical_reprint:
-        historical_reprint_context = f"""
-
-IMPORTANT: This is a REPRINTED HISTORICAL DOCUMENT. The filing year is {filing_year} but this content is from a past year.
-
-Detect the actual year from the content (look for explicit year references like "in 1997", "fiscal year ended December 31, 1997").
-
-Assign ALL facts to the year found in the content, NOT to {filing_year}.
-
-Set fact_type = "historical_reprint" for all facts extracted from this section.
-"""
-
     replacements = {
         "company": _metadata_value("company_name", "company", default=""),
         "fiscal_period": _primary_period_for_chunk(chunk),
@@ -238,7 +225,7 @@ Set fact_type = "historical_reprint" for all facts extracted from this section.
         "has_disclosed_segments": str(
             _metadata_value("has_segments", "has_disclosed_segments", default=False)
         ).lower(),
-        "historical_reprint_context": historical_reprint_context,
+        "historical_reprint_context": "",
     }
 
     prompt = FAST_PASS1_PROMPT_TEMPLATE if FAST_PARAGRAPH_MODE else PASS1_PROMPT_TEMPLATE
@@ -249,19 +236,6 @@ Set fact_type = "historical_reprint" for all facts extracted from this section.
 
 
 def _prompt_replacements(chunk: Chunk) -> dict[str, str]:
-    filing_year = chunk.temporal_context.filing_year
-    historical_reprint_context = ""
-    if chunk.temporal_context.is_historical_reprint:
-        historical_reprint_context = f"""
-
-IMPORTANT: This is a REPRINTED HISTORICAL DOCUMENT. The filing year is {filing_year} but this content is from a past year.
-
-Detect the actual year from the content (look for explicit year references like "in 1997", "fiscal year ended December 31, 1997").
-
-Assign ALL facts to the year found in the content, NOT to {filing_year}.
-
-Set fact_type = "historical_reprint" for all facts extracted from this section.
-"""
     return {
         "company": str(_metadata_value("company_name", "company", default="")),
         "fiscal_period": _primary_period_for_chunk(chunk),
@@ -276,7 +250,7 @@ Set fact_type = "historical_reprint" for all facts extracted from this section.
         "has_disclosed_segments": str(
             _metadata_value("has_segments", "has_disclosed_segments", default=False)
         ).lower(),
-        "historical_reprint_context": historical_reprint_context,
+        "historical_reprint_context": "",
     }
 
 
@@ -314,6 +288,8 @@ def _clone_chunk_with_content(chunk: Chunk, chunk_id: str, content: str) -> Chun
         doc_id=chunk.doc_id,
         section_id=chunk.section_id,
         chunk_id=chunk_id,
+        prev_chunk_id=chunk.prev_chunk_id,
+        next_chunk_id=chunk.next_chunk_id,
         section_title=chunk.section_title,
         parent_section=chunk.parent_section,
         page_start=chunk.page_start,
@@ -322,7 +298,6 @@ def _clone_chunk_with_content(chunk: Chunk, chunk_id: str, content: str) -> Chun
         content=content,
         char_count=len(content),
         token_estimate=max(1, (len(content) + 3) // 4) if content else 0,
-        is_historical_reprint=chunk.is_historical_reprint,
         temporal_context=chunk.temporal_context,
     )
 
@@ -433,19 +408,14 @@ def _extract_markdown_table_facts(chunk: Chunk) -> dict[str, list[dict[str, Any]
                     "raw_value": raw_value,
                     "raw_unit": "millions",
                     "raw_period": period,
+                    "period_confidence": "inferred" if period.isdigit() else "unknown",
+                    "period_start": f"{period}-01-01" if period.isdigit() else None,
+                    "period_end": f"{period}-12-31" if period.isdigit() else None,
                     "resolved_period_start": f"{period}-01-01" if period.isdigit() else None,
                     "resolved_period_end": f"{period}-12-31" if period.isdigit() else None,
-                    "period_type": "annual" if period.isdigit() else "unknown",
+                    "period_type": "full_year" if period.isdigit() else "unknown",
                     "period_resolution": "inferred" if period.isdigit() else "unresolvable",
-                    "fact_type": (
-                        "historical_reprint"
-                        if chunk.temporal_context.is_historical_reprint
-                        else (
-                            "actual"
-                            if period == str(chunk.temporal_context.filing_year)
-                            else "comparative_reference"
-                        )
-                    ),
+                    "fact_type": "measurement",
                     "scope": "consolidated",
                     "dimension_type": "none",
                     "dimension_member": None,
@@ -509,6 +479,13 @@ def _apply_local_fact_defaults(raw_fact: dict[str, Any]) -> dict[str, Any]:
         "definition_confidence": "low",
         "low_confidence": False,
         "baseline_year": None,
+        "period_confidence": "unknown",
+        "period_start": None,
+        "period_end": None,
+        "period_type": "unknown",
+        "fact_type": "measurement",
+        "rescue_pass": False,
+        "rescue_result": "",
     }
     for key, value in defaults.items():
         fact.setdefault(key, value)
@@ -544,6 +521,171 @@ def _call_structured_completion(
     return response, response_json, raw_content
 
 
+def _build_openai_client() -> Any:
+    try:
+        from dotenv import load_dotenv
+        load_dotenv()
+    except ImportError:
+        pass
+
+    from openai import OpenAI
+
+    return OpenAI(
+        api_key=os.getenv("OPENAI_API_KEY"),
+        timeout=API_TIMEOUT_SECONDS,
+        max_retries=1,
+    )
+
+
+RESCUE_RESPONSE_FORMAT = {
+    "type": "json_schema",
+    "json_schema": {
+        "name": "neighbor_rescue_result",
+        "strict": True,
+        "schema": {
+            "type": "object",
+            "properties": {
+                "fact_id": {"type": "string"},
+                "rescue_result": {"type": "string", "enum": ["confirmed", "rejected", "corrected"]},
+                "confidence": {"type": "string", "enum": ["high", "medium", "low"]},
+                "corrected_raw_value": {"type": ["string", "null"]},
+                "corrected_raw_unit": {"type": ["string", "null"]},
+                "corrected_source_sentence": {"type": ["string", "null"]},
+                "reason": {"type": "string"},
+            },
+            "required": [
+                "fact_id",
+                "rescue_result",
+                "confidence",
+                "corrected_raw_value",
+                "corrected_raw_unit",
+                "corrected_source_sentence",
+                "reason",
+            ],
+            "additionalProperties": False,
+        },
+    },
+}
+
+
+def _build_neighbor_rescue_prompt(fact: ExtractedFact, context_text: str) -> str:
+    raw = fact.raw or {}
+    fact_payload = {
+        "fact_id": fact.fact_id,
+        "raw_name": raw.get("raw_name") or fact.metric,
+        "raw_value": raw.get("raw_value") or fact.value,
+        "raw_unit": raw.get("raw_unit") or fact.unit,
+        "raw_period": raw.get("raw_period") or fact.period,
+        "source_sentence": raw.get("source_sentence") or fact.evidence,
+        "failed_checks": raw.get("failed_checks") or [],
+        "rescue_note": raw.get("rescue_note"),
+    }
+    return (
+        "You are reviewing one previously extracted operational fact that was flagged as uncertain.\n"
+        "Use the neighboring chunk context only to confirm, reject, or correct this specific fact.\n"
+        "Do not extract any new facts.\n"
+        "Return rescue_result=\"confirmed\" if the fact is real as written.\n"
+        "Return rescue_result=\"corrected\" if the fact is real but the value or unit should be updated from context.\n"
+        "Return rescue_result=\"rejected\" if the wider context shows this is not a valid reported fact.\n\n"
+        f"FACT:\n{json.dumps(fact_payload, ensure_ascii=False, indent=2)}\n\n"
+        f"CONTEXT:\n{context_text}"
+    )
+
+
+def _neighbor_context_text(chunk: Chunk, chunk_lookup: dict[str, Chunk]) -> str:
+    context_parts: list[str] = []
+    if chunk.prev_chunk_id and chunk.prev_chunk_id in chunk_lookup:
+        context_parts.append(chunk_lookup[chunk.prev_chunk_id].content)
+    context_parts.append(chunk.content)
+    if chunk.next_chunk_id and chunk.next_chunk_id in chunk_lookup:
+        context_parts.append(chunk_lookup[chunk.next_chunk_id].content)
+    return "\n---\n".join(part for part in context_parts if part)
+
+
+def _apply_neighbor_rescue_result(fact: ExtractedFact, rescue_result: dict[str, Any]) -> bool:
+    outcome = str(rescue_result.get("rescue_result") or "").lower()
+    fact.raw = dict(fact.raw or {})
+    fact.raw["rescue_pass"] = True
+    fact.raw["rescue_result"] = outcome
+    fact.raw["rescue_reason"] = str(rescue_result.get("reason") or "")
+    fact.rescue_pass = True
+    fact.rescue_result = outcome
+
+    if outcome == "rejected":
+        return False
+
+    fact.decision = "keep"
+    fact.raw["decision"] = "keep"
+    fact.raw["confidence"] = str(rescue_result.get("confidence") or fact.raw.get("confidence") or "medium")
+    fact.raw["source_sentence"] = str(
+        rescue_result.get("corrected_source_sentence")
+        or fact.raw.get("source_sentence")
+        or fact.evidence
+        or ""
+    )
+    fact.evidence = fact.raw["source_sentence"]
+
+    if outcome == "corrected":
+        corrected_value = rescue_result.get("corrected_raw_value")
+        corrected_unit = rescue_result.get("corrected_raw_unit")
+        if corrected_value not in (None, ""):
+            fact.raw["raw_value"] = corrected_value
+            fact.value = corrected_value
+        if corrected_unit not in (None, ""):
+            fact.raw["raw_unit"] = corrected_unit
+            fact.unit = str(corrected_unit)
+    return True
+
+
+def _run_neighbor_rescue_pass(
+    facts: list[ExtractedFact],
+    chunk_lookup: dict[str, Chunk],
+) -> tuple[list[ExtractedFact], dict[str, int]]:
+    rescue_candidates = [fact for fact in facts if str(fact.decision).lower() == "rescue"]
+    summary = {"sent": len(rescue_candidates), "confirmed": 0, "rejected": 0, "corrected": 0, "errors": 0}
+    if not rescue_candidates:
+        return facts, summary
+
+    try:
+        client = _build_openai_client()
+    except Exception:
+        return facts, summary
+
+    kept_facts: list[ExtractedFact] = []
+    for fact in facts:
+        if str(fact.decision).lower() != "rescue":
+            kept_facts.append(fact)
+            continue
+        chunk = chunk_lookup.get(fact.chunk_id)
+        if chunk is None:
+            kept_facts.append(fact)
+            continue
+        prompt = _build_neighbor_rescue_prompt(fact, _neighbor_context_text(chunk, chunk_lookup))
+        try:
+            _, response_json, _ = _call_structured_completion(
+                client,
+                system_prompt=prompt,
+                user_content="Review this one fact and return the rescue decision as JSON.",
+                response_format=RESCUE_RESPONSE_FORMAT,
+            )
+        except Exception:
+            summary["errors"] += 1
+            kept_facts.append(fact)
+            continue
+
+        outcome = str(response_json.get("rescue_result") or "").lower()
+        if outcome == "confirmed":
+            summary["confirmed"] += 1
+        elif outcome == "corrected":
+            summary["corrected"] += 1
+        elif outcome == "rejected":
+            summary["rejected"] += 1
+
+        if _apply_neighbor_rescue_result(fact, response_json):
+            kept_facts.append(fact)
+    return kept_facts, summary
+
+
 def _attach_metric_definitions(
     client: Any,
     chunk: Chunk,
@@ -560,13 +702,14 @@ def _attach_metric_definitions(
                 {
                     "fact_id": str(fact.get("fact_id") or f"{chunk.chunk_id}_fact_{index}"),
                     "raw_name": str(fact.get("raw_name") or ""),
-                    "raw_value": str(fact.get("raw_value") or ""),
-                    "raw_unit": str(fact.get("raw_unit") or ""),
-                    "fact_class": str(fact.get("fact_class") or ""),
-                    "metric_core": str(fact.get("metric_core") or ""),
-                    "parent_metric_hint": str(fact.get("parent_metric_hint") or ""),
-                    "source_sentence": str(fact.get("source_sentence") or ""),
-                }
+        "raw_value": str(fact.get("raw_value") or ""),
+        "raw_unit": str(fact.get("raw_unit") or ""),
+        "fact_class": str(fact.get("fact_class") or ""),
+        "metric_core": str(fact.get("metric_core") or ""),
+        "period_confidence": str(fact.get("period_confidence") or "unknown"),
+        "parent_metric_hint": str(fact.get("parent_metric_hint") or ""),
+        "source_sentence": str(fact.get("source_sentence") or ""),
+    }
                 for index, fact in enumerate(fact_batch, start=1)
             ]
         }
@@ -1306,6 +1449,15 @@ def _consolidate_fact_anchors(
 def _dedup_extracted_facts(facts: list[ExtractedFact]) -> tuple[list[ExtractedFact], list[dict[str, Any]]]:
     removed: list[dict[str, Any]] = []
 
+    def merge_duplicate_provenance(keep_fact: ExtractedFact, drop_fact: ExtractedFact) -> None:
+        merged_chunks: list[str] = []
+        for chunk_id in [keep_fact.chunk_id, *list(keep_fact.duplicate_chunk_ids or []), drop_fact.chunk_id, *list(drop_fact.duplicate_chunk_ids or [])]:
+            if chunk_id and chunk_id not in merged_chunks:
+                merged_chunks.append(chunk_id)
+        keep_fact.duplicate_chunk_ids = [chunk_id for chunk_id in merged_chunks if chunk_id != keep_fact.chunk_id]
+        keep_fact.raw = dict(keep_fact.raw or {})
+        keep_fact.raw["duplicate_chunk_ids"] = list(keep_fact.duplicate_chunk_ids)
+
     def score(fact: ExtractedFact) -> tuple[int, int, int]:
         decision_rank = {"keep": 3, "rescue": 2, "drop": 1}.get(str(fact.decision).lower(), 0)
         confidence_rank = {"high": 3, "medium": 2, "low": 1}.get(str(fact.raw.get("confidence", "")).lower(), 0)
@@ -1330,6 +1482,7 @@ def _dedup_extracted_facts(facts: list[ExtractedFact]) -> tuple[list[ExtractedFa
                 best_by_key[key] = fact
                 continue
             if score(fact) > score(existing):
+                merge_duplicate_provenance(fact, existing)
                 removed.append(
                     {
                         "removed_fact_id": existing.fact_id,
@@ -1340,6 +1493,7 @@ def _dedup_extracted_facts(facts: list[ExtractedFact]) -> tuple[list[ExtractedFa
                 )
                 best_by_key[key] = fact
             else:
+                merge_duplicate_provenance(existing, fact)
                 removed.append(
                     {
                         "removed_fact_id": fact.fact_id,
@@ -1365,6 +1519,7 @@ def _dedup_extracted_facts(facts: list[ExtractedFact]) -> tuple[list[ExtractedFa
                 best_by_key[key] = fact
                 continue
             if score(fact) > score(existing):
+                merge_duplicate_provenance(fact, existing)
                 removed.append(
                     {
                         "removed_fact_id": existing.fact_id,
@@ -1375,6 +1530,7 @@ def _dedup_extracted_facts(facts: list[ExtractedFact]) -> tuple[list[ExtractedFa
                 )
                 best_by_key[key] = fact
             else:
+                merge_duplicate_provenance(existing, fact)
                 removed.append(
                     {
                         "removed_fact_id": fact.fact_id,
@@ -1411,6 +1567,7 @@ def _dedup_extracted_facts(facts: list[ExtractedFact]) -> tuple[list[ExtractedFa
                                 keep_fact, drop_fact = a, b
                             else:
                                 keep_fact, drop_fact = b, a
+                            merge_duplicate_provenance(keep_fact, drop_fact)
                             removed.append(
                                 {
                                     "removed_fact_id": drop_fact.fact_id,
@@ -1448,6 +1605,7 @@ def _dedup_extracted_facts(facts: list[ExtractedFact]) -> tuple[list[ExtractedFa
                 survivors = [fact for fact in group if fact not in generic]
                 for drop_fact in generic:
                     keep_fact = max(specific, key=score)
+                    merge_duplicate_provenance(keep_fact, drop_fact)
                     removed.append(
                         {
                             "removed_fact_id": drop_fact.fact_id,
@@ -1492,6 +1650,7 @@ def _dedup_extracted_facts(facts: list[ExtractedFact]) -> tuple[list[ExtractedFa
             if year_facts and non_year_facts:
                 for drop_fact in year_facts:
                     keep_fact = max(non_year_facts, key=score)
+                    merge_duplicate_provenance(keep_fact, drop_fact)
                     removed.append(
                         {
                             "removed_fact_id": drop_fact.fact_id,
@@ -1542,9 +1701,12 @@ def _adapt_pass1b_keep_record(raw_fact: dict[str, Any]) -> dict[str, Any]:
         "raw_value": raw_value,
         "raw_unit": raw_unit,
         "raw_period": "",
+        "period_confidence": "unknown",
+        "period_start": raw_fact.get("period_start"),
+        "period_end": raw_fact.get("period_end"),
         "source_sentence": source_sentence,
         "period_type": str(raw_fact.get("period_type") or "unknown"),
-        "fact_type": str(raw_fact.get("fact_type") or "actual"),
+        "fact_type": str(raw_fact.get("fact_type") or "measurement"),
         "scope": "sub_entity" if dimension_type not in {"", "none"} and dimension_member else "consolidated",
         "dimension_type": dimension_type if dimension_type else "none",
         "dimension_member": dimension_member,
@@ -1793,7 +1955,7 @@ def _infer_fact_interpretation(raw_fact: dict[str, Any]) -> dict[str, Any]:
                     "change_unit": "bps",
                 }
             )
-            raw_fact["fact_type"] = "actual"
+            raw_fact["fact_type"] = "measurement"
             return interpretation
 
         if _RANGE_CONTEXT_RE.search(lower_sentence) and not _CHANGE_WORD_RE.search(lower_sentence):
@@ -1821,7 +1983,7 @@ def _infer_fact_interpretation(raw_fact: dict[str, Any]) -> dict[str, Any]:
                 "new_value": raw_value,
             }
         )
-        raw_fact["fact_type"] = "actual"
+        raw_fact["fact_type"] = "measurement"
         change_component = _extract_change_component(
             source_sentence,
             exclude={interpreted_prior_value, raw_value},
@@ -1842,7 +2004,7 @@ def _infer_fact_interpretation(raw_fact: dict[str, Any]) -> dict[str, Any]:
                 "change_unit": raw_unit or None,
             }
         )
-        raw_fact["fact_type"] = "delta"
+        raw_fact["fact_type"] = "measurement"
         return interpretation
 
     if raw_value and _RANGE_CONTEXT_RE.search(lower_sentence) and len(numeric_spans) >= 2:
@@ -1856,7 +2018,7 @@ def _infer_fact_interpretation(raw_fact: dict[str, Any]) -> dict[str, Any]:
                 "range_unit": raw_unit or None,
             }
         )
-        raw_fact["fact_type"] = "actual"
+        raw_fact["fact_type"] = "measurement"
         return interpretation
 
     interpretation["new_value"] = raw_value
@@ -2019,6 +2181,34 @@ def _call_openai_two_stage(chunk: Chunk, client: Any) -> Any:
     return {"facts": enriched_facts, "_telemetry": telemetry, "_drops": dropped_records}
 
 
+def _stream_create(client: Any, **kwargs: Any) -> tuple[str, Any]:
+    """Stream a chat completion and return (content_str, usage_or_None).
+
+    Replaces a standard blocking create() call. The timeout parameter now acts
+    as an inter-token silence timeout rather than a total-response timeout, so
+    slow but actively-generating responses no longer get cut off.
+    """
+    stream = client.chat.completions.create(
+        stream=True,
+        stream_options={"include_usage": True},
+        **kwargs,
+    )
+    content_parts: list[str] = []
+    usage = None
+    for chunk_event in stream:
+        if chunk_event.choices:
+            delta = chunk_event.choices[0].delta
+            if delta and delta.content:
+                content_parts.append(delta.content)
+        if getattr(chunk_event, "usage", None) is not None:
+            usage = (
+                chunk_event.usage.model_dump()
+                if hasattr(chunk_event.usage, "model_dump")
+                else dict(chunk_event.usage)
+            )
+    return "".join(content_parts), usage
+
+
 def _call_openai(chunk: Chunk) -> Any:
     content = (
         TABLE_EXTRACTION_PREFIX + chunk.content
@@ -2034,19 +2224,7 @@ def _call_openai(chunk: Chunk) -> Any:
         print("--- CASH FLOW TABLE CONTENT ---", flush=True)
         print(content[:1500], flush=True)
 
-    try:
-        from dotenv import load_dotenv
-        load_dotenv()
-    except ImportError:
-        pass
-
-    from openai import OpenAI
-
-    client = OpenAI(
-        api_key=os.getenv("OPENAI_API_KEY"),
-        timeout=API_TIMEOUT_SECONDS,
-        max_retries=1,
-    )
+    client = _build_openai_client()
     print(f"Calling API for {chunk.chunk_id}...", flush=True)
     if FAST_PARAGRAPH_MODE and TWO_STAGE_PASS1:
         return _call_openai_two_stage(chunk, client)
@@ -2059,7 +2237,8 @@ def _call_openai(chunk: Chunk) -> Any:
             {"role": "user", "content": "Extract facts from this paragraph as JSON."},
         ]
         response_format_snapshot = deepcopy(PASS1_LEAN_RESPONSE_FORMAT)
-        response = client.chat.completions.create(
+        content, _usage = _stream_create(
+            client,
             model=MODEL,
             response_format=PASS1_LEAN_RESPONSE_FORMAT,
             messages=request_messages,
@@ -2111,10 +2290,13 @@ def _call_openai(chunk: Chunk) -> Any:
                                     },
                                     "raw_unit": {"type": "string"},
                                     "raw_period": {"type": "string"},
-                                    "baseline_year": {"type": ["string", "null"]},
-                                    "source_sentence": {"type": "string"},
-                                    "period_type": {"type": "string"},
-                                    "fact_type": {"type": "string"},
+                    "baseline_year": {"type": ["string", "null"]},
+                    "source_sentence": {"type": "string"},
+                    "period_confidence": {"type": "string"},
+                    "period_start": {"type": ["string", "null"]},
+                    "period_end": {"type": ["string", "null"]},
+                    "period_type": {"type": "string"},
+                    "fact_type": {"type": "string"},
                                     "scope": {"type": "string"},
                                     "dimension_type": {"type": "string"},
                                     "dimension_member": {"type": ["string", "null"]},
@@ -2132,7 +2314,8 @@ def _call_openai(chunk: Chunk) -> Any:
                 },
             },
         }
-        response = client.chat.completions.create(
+        content, _usage = _stream_create(
+            client,
             model=MODEL,
             response_format=response_format_snapshot,
             messages=request_messages,
@@ -2141,7 +2324,7 @@ def _call_openai(chunk: Chunk) -> Any:
     elapsed = time.monotonic() - start_time
     print(f"Done {chunk.chunk_id} - got response in {elapsed:.1f}s", flush=True)
 
-    content = response.choices[0].message.content or "{}"
+    content = content or "{}"
     print(f"Raw API response for {chunk.chunk_id}:", flush=True)
     print(content[:500], flush=True)
     print("---END RESPONSE---", flush=True)
@@ -2157,16 +2340,14 @@ def _call_openai(chunk: Chunk) -> Any:
     definition_start = time.monotonic()
     enriched_facts, definition_telemetry = _attach_metric_definitions(client, chunk, enriched_facts)
     definition_elapsed = time.monotonic() - definition_start
-    usage = None
-    if getattr(response, "usage", None) is not None:
-        usage = response.usage.model_dump() if hasattr(response.usage, "model_dump") else dict(response.usage)
+    usage = _usage  # captured from stream final chunk
     telemetry = {
         "request": {
             "model": MODEL,
             "timeout": API_TIMEOUT_SECONDS,
             "response_format": response_format_snapshot,
         },
-        "response": response.model_dump() if hasattr(response, "model_dump") else None,
+        "response": None,  # no response object with streaming
         "usage": usage,
         "timing": {
             "api_seconds": elapsed,
@@ -2259,7 +2440,11 @@ def _to_extracted_fact(chunk: Chunk, raw_fact: dict[str, Any], index: int) -> Ex
     dimension_member = str(raw_fact.get("dimension_member") or "")
     return ExtractedFact(
         fact_id=str(raw_fact.get("fact_id") or f"{chunk.chunk_id}_fact_{index}"),
+        doc_id=chunk.doc_id,
+        section_id=chunk.section_id,
         chunk_id=chunk.chunk_id,
+        prev_chunk_id=chunk.prev_chunk_id,
+        next_chunk_id=chunk.next_chunk_id,
         section_title=chunk.section_title,
         parent_section=chunk.parent_section,
         page_start=chunk.page_start,
@@ -2269,13 +2454,21 @@ def _to_extracted_fact(chunk: Chunk, raw_fact: dict[str, Any], index: int) -> Ex
         metric=str(raw_fact.get("raw_name") or raw_fact.get("metric") or raw_fact.get("metric_name") or ""),
         value=raw_fact.get("raw_value", raw_fact.get("value")),
         unit=str(raw_fact.get("raw_unit") or raw_fact.get("unit", "")),
-        period=str(raw_fact.get("raw_period") or raw_fact.get("period", "")),
+        period=str(raw_fact.get("period") or raw_fact.get("raw_period") or ""),
+        period_start=raw_fact.get("period_start") or raw_fact.get("resolved_period_start"),
+        period_end=raw_fact.get("period_end") or raw_fact.get("resolved_period_end"),
+        period_type=str(raw_fact.get("period_type") or "unknown"),
+        period_confidence=str(raw_fact.get("period_confidence") or ""),
+        fact_type=str(raw_fact.get("fact_type") or "measurement"),
         entity=str(raw_fact.get("entity", "")),
         segment=str(raw_fact.get("segment_name") or raw_fact.get("segment") or dimension_member),
         evidence=str(raw_fact.get("source_sentence") or raw_fact.get("evidence", "")),
         metric_definition=raw_fact.get("metric_definition"),
         baseline_year=raw_fact.get("baseline_year"),
         confidence=raw_fact.get("confidence"),
+        rescue_pass=bool(raw_fact.get("rescue_pass")),
+        rescue_result=str(raw_fact.get("rescue_result") or ""),
+        duplicate_chunk_ids=list(raw_fact.get("duplicate_chunk_ids") or []),
         raw=raw_fact,
     )
 
@@ -2308,10 +2501,6 @@ def run_pass1(
 
     facts = []
     telemetry_records = []
-    historical_reprint_chunks = [
-        chunk for chunk in chunks_to_process
-        if chunk.temporal_context.is_historical_reprint
-    ]
     failed_chunks = []
 
     with ThreadPoolExecutor(max_workers=MAX_CONCURRENT_CALLS) as executor:
@@ -2336,6 +2525,8 @@ def run_pass1(
             for index, raw_fact in enumerate(_extract_fact_items(response_json or {}), start=1):
                 facts.append(_to_extracted_fact(chunk, raw_fact, index))
 
+    chunk_lookup = {chunk.chunk_id: chunk for chunk in chunks_to_process}
+    facts, rescue_summary = _run_neighbor_rescue_pass(facts, chunk_lookup)
     pre_consolidation_count = len(facts)
     facts, anchor_consolidated = _consolidate_fact_anchors(facts)
     pre_dedup_count = len(facts)
@@ -2369,6 +2560,7 @@ def run_pass1(
             "total_wall_seconds": time.monotonic() - run_start,
             "file_write_seconds": write_elapsed,
         },
+        "rescue": rescue_summary,
         "chunks": telemetry_records,
         "anchor_consolidated": anchor_consolidated,
         "dedup_removed": dedup_removed,
@@ -2384,14 +2576,18 @@ def run_pass1(
 
     print(f"Chunks processed: {len(chunks_to_process)}", flush=True)
     print(f"Chunks skipped: {len(skipped_chunks)}", flush=True)
-    print(
-        "Historical reprint chunks processed: "
-        f"{len(historical_reprint_chunks)}",
-        flush=True,
-    )
     print(f"Total facts extracted: {len(facts)}", flush=True)
     print(f"Anchor consolidations removed: {len(anchor_consolidated)}", flush=True)
     print(f"Duplicates removed: {len(dedup_removed)}", flush=True)
+    print(
+        "Neighbor rescue: "
+        f"sent={rescue_summary['sent']}, "
+        f"confirmed={rescue_summary['confirmed']}, "
+        f"corrected={rescue_summary['corrected']}, "
+        f"rejected={rescue_summary['rejected']}, "
+        f"errors={rescue_summary['errors']}",
+        flush=True,
+    )
     print(
         "Facts by decision: "
         f"keep={decision_counts['keep']}, "

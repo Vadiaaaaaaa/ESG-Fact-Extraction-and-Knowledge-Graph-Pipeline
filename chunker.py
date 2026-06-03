@@ -48,13 +48,14 @@ def _chunk_record(
     chunk_number: int,
     chunk_type: str,
     content: str,
-    is_historical_reprint: bool,
 ) -> Chunk:
     section_title = section.section_title
     return Chunk(
         doc_id=section.doc_id,
         section_id=section.section_id,
         chunk_id=f"{_slugify(section_title)}_{chunk_number}",
+        prev_chunk_id=None,
+        next_chunk_id=None,
         section_title=section_title,
         parent_section=section.parent_section,
         page_start=section.page_start,
@@ -63,13 +64,11 @@ def _chunk_record(
         content=content,
         char_count=len(content),
         token_estimate=_token_estimate(content),
-        is_historical_reprint=is_historical_reprint,
         temporal_context=TemporalContext(
             filing_year=FILING_YEAR,
             fiscal_year_end="December",
             primary_period=f"FY{FILING_YEAR}",
             prior_period=f"FY{FILING_YEAR - 1}",
-            is_historical_reprint=is_historical_reprint,
         ),
     )
 
@@ -386,7 +385,6 @@ def chunk_sections(sections: list[dict[str, Any] | Section]) -> list[Chunk]:
                             chunk_number,
                             "text",
                             text_chunk,
-                            is_historical_reprint=True,
                         )
                     )
                     chunk_number += 1
@@ -403,7 +401,6 @@ def chunk_sections(sections: list[dict[str, Any] | Section]) -> list[Chunk]:
                             chunk_number,
                             "text",
                             text_chunk,
-                            is_historical_reprint=False,
                         )
                     )
                     chunk_number += 1
@@ -417,7 +414,6 @@ def chunk_sections(sections: list[dict[str, Any] | Section]) -> list[Chunk]:
                             chunk_number,
                             "text",
                             before,
-                            is_historical_reprint=False,
                         )
                     )
                     chunk_number += 1
@@ -428,7 +424,6 @@ def chunk_sections(sections: list[dict[str, Any] | Section]) -> list[Chunk]:
                         chunk_number,
                         "text",
                         after,
-                        is_historical_reprint=True,
                     )
                 )
                 chunk_number += 1
@@ -442,7 +437,6 @@ def chunk_sections(sections: list[dict[str, Any] | Section]) -> list[Chunk]:
                     chunk_number,
                     "table",
                     table_text,
-                    is_historical_reprint=section_is_historical,
                 )
             )
             chunk_number += 1
@@ -517,10 +511,6 @@ def inspect_chunk(chunk_id: str, input_path: str | Path = "chunks_output.json") 
         print(f"page_range: {page_start} to {page_end}")
         print(f"chunk_type: {chunk.chunk_type}")
         print(f"token_estimate: {chunk.token_estimate}")
-        print(
-            "is_historical_reprint: "
-            f"{chunk.temporal_context.is_historical_reprint}"
-        )
         print("\n--- FULL CONTENT START ---")
         print(chunk.content)
         print("--- FULL CONTENT END ---")

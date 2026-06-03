@@ -8,53 +8,8 @@ from typing import Any
 
 import fitz
 
-from section_finder import find_operational_sections
-
-
-OPERATIONAL_KEYWORDS = {
-    "operations": 4,
-    "operational": 4,
-    "manufacturing": 5,
-    "factory": 5,
-    "factories": 5,
-    "plant": 4,
-    "plants": 4,
-    "supply chain": 5,
-    "distribution": 4,
-    "logistics": 4,
-    "warehouse": 4,
-    "warehouses": 4,
-    "procurement": 3,
-    "supplier": 3,
-    "suppliers": 3,
-    "sustainability": 5,
-    "sustainable": 4,
-    "esg": 5,
-    "environment": 5,
-    "environmental": 5,
-    "emissions": 5,
-    "carbon": 4,
-    "energy": 5,
-    "renewable": 5,
-    "water": 5,
-    "waste": 5,
-    "plastic": 4,
-    "packaging": 4,
-    "safety": 4,
-    "injury": 4,
-    "injuries": 4,
-    "employee": 3,
-    "employees": 3,
-    "workforce": 3,
-    "diversity": 3,
-    "women": 3,
-    "training": 3,
-    "r&d": 3,
-    "research and development": 3,
-    "innovation": 3,
-    "nutrition": 3,
-    "quality": 3,
-}
+from audit_selected_pages import run_coverage_audit
+from section_finder import find_operational_sections, get_registry_keyword_weights
 
 EXCLUDE_KEYWORDS = {
     "independent auditor": 7,
@@ -86,7 +41,7 @@ def _normalize_space(text: str) -> str:
 
 def _page_score(text: str) -> tuple[int, int]:
     lower = text.lower()
-    include_score = sum(weight for keyword, weight in OPERATIONAL_KEYWORDS.items() if keyword in lower)
+    include_score = sum(weight for keyword, weight in get_registry_keyword_weights().items() if keyword in lower)
     exclude_score = sum(weight for keyword, weight in EXCLUDE_KEYWORDS.items() if keyword in lower)
     return include_score, exclude_score
 
@@ -181,6 +136,8 @@ def build_chunks(
                     "doc_id": doc_id,
                     "section_id": f"{doc_id}_page_{page['page']:03d}",
                     "chunk_id": chunk_id,
+                    "prev_chunk_id": None,
+                    "next_chunk_id": None,
                     "section_title": f"{company_name} operational text page {page['page']}",
                     "parent_section": "fast_pdf_text_ingest",
                     "page_start": page["page"],
@@ -189,16 +146,17 @@ def build_chunks(
                     "content": content,
                     "char_count": len(content),
                     "token_estimate": _token_estimate(content),
-                    "is_historical_reprint": False,
                     "temporal_context": {
                         "filing_year": filing_year,
                         "fiscal_year_end": fiscal_year_end,
                         "primary_period": primary_period,
                         "prior_period": prior_period,
-                        "is_historical_reprint": False,
                     },
                 }
             )
+    for index, chunk in enumerate(chunks):
+        chunk["prev_chunk_id"] = chunks[index - 1]["chunk_id"] if index > 0 else None
+        chunk["next_chunk_id"] = chunks[index + 1]["chunk_id"] if index + 1 < len(chunks) else None
     return chunks
 
 
@@ -210,6 +168,7 @@ def write_metadata(
     filing_year: int,
     fiscal_year_end: str,
     currency: str,
+    coverage_audit: dict[str, Any] | None = None,
 ) -> Path:
     chunks_path = Path(output_chunks_path)
     metadata_path = chunks_path.with_name(f"{chunks_path.stem.replace('_chunks', '')}_metadata.json")
@@ -226,6 +185,8 @@ def write_metadata(
         "currency": currency,
         "metadata_confidence": "medium",
     }
+    if coverage_audit is not None:
+        metadata["coverage_audit"] = coverage_audit
     with metadata_path.open("w", encoding="utf-8") as handle:
         json.dump(metadata, handle, indent=2, ensure_ascii=False)
         handle.write("\n")
@@ -247,11 +208,25 @@ def main() -> None:
     parser.add_argument("--max-words", type=int, default=520)
     parser.add_argument("--overlap-words", type=int, default=70)
     parser.add_argument("--page-report", default="", help="Optional selected-page report JSON path")
+    parser.add_argument(
+        "--force-continue",
+        action="store_true",
+        help="Continue even if the automatic coverage audit reports HIGH risk unselected pages.",
+    )
     args = parser.parse_args()
 
     doc_id = args.doc_id or re.sub(r"[^a-z0-9]+", "_", args.company_name.lower()).strip("_")
     pages = extract_pages(args.pdf)
     section_selection = find_operational_sections(args.pdf)
+    coverage_audit_result = run_coverage_audit(args.pdf, section_selection["selected_pages"])
+    if coverage_audit_result.risk_level == "HIGH" and not args.force_continue:
+        flagged_pages = ", ".join(str(row["page"]) for row in coverage_audit_result.flagged_pages if row["risk_level"] == "HIGH")
+        raise SystemExit(
+            "PIPELINE HALTED - Coverage audit found "
+            f"{coverage_audit_result.high_signal_unselected} high-signal unselected pages.\n"
+            f"Pages: {flagged_pages or 'none listed'}\n"
+            "Rerun with --force-continue to override."
+        )
     selected_page_indexes = set(section_selection["selected_pages"])
     selected_pages = [
         page
@@ -279,12 +254,40 @@ def main() -> None:
         filing_year=args.filing_year,
         fiscal_year_end=args.fiscal_year_end,
         currency=args.currency,
+        coverage_audit={
+            "high_signal_unselected": coverage_audit_result.high_signal_unselected,
+            "borderline_review_candidates": coverage_audit_result.borderline_review_candidates,
+            "risk_level": coverage_audit_result.risk_level,
+            "coverage_audit_overridden": bool(args.force_continue and coverage_audit_result.risk_level == "HIGH"),
+            "flagged_pages": [
+                {
+                    "page": row["page"],
+                    "risk_level": row["risk_level"],
+                    "miss_reason": row["miss_reason"],
+                }
+                for row in coverage_audit_result.flagged_pages
+            ],
+        },
     )
     if args.page_report:
         with Path(args.page_report).open("w", encoding="utf-8") as handle:
             json.dump(
                 {
                     "section_selection": section_selection,
+                    "coverage_audit": {
+                        "high_signal_unselected": coverage_audit_result.high_signal_unselected,
+                        "borderline_review_candidates": coverage_audit_result.borderline_review_candidates,
+                        "risk_level": coverage_audit_result.risk_level,
+                        "coverage_audit_overridden": bool(args.force_continue and coverage_audit_result.risk_level == "HIGH"),
+                        "flagged_pages": [
+                            {
+                                "page": row["page"],
+                                "risk_level": row["risk_level"],
+                                "miss_reason": row["miss_reason"],
+                            }
+                            for row in coverage_audit_result.flagged_pages
+                        ],
+                    },
                     "pages": [
                         {
                             "page": page["page"],
@@ -304,6 +307,14 @@ def main() -> None:
     print(f"Pages scanned: {len(pages)}")
     print(f"Pages selected: {len(selected_pages)}")
     print(f"Section finder method: {section_selection['method']}")
+    print(
+        "Coverage audit: "
+        f"risk={coverage_audit_result.risk_level}, "
+        f"high_signal_unselected={coverage_audit_result.high_signal_unselected}, "
+        f"borderline_review_candidates={coverage_audit_result.borderline_review_candidates}"
+    )
+    if args.force_continue and coverage_audit_result.risk_level == "HIGH":
+        print("WARNING: coverage audit override active", flush=True)
     if section_selection.get("toc_sections_found"):
         print("TOC sections found:", "; ".join(section_selection["toc_sections_found"]))
     if section_selection.get("warnings"):

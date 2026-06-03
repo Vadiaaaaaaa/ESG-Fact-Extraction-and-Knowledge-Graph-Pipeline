@@ -74,12 +74,58 @@ sustainability, targets, or financial results:
   category, customer, product, site, or facility is valid. Extract it. Do not
   discard sub-lines.
 - Guidance, outlook, targets, and commitments are valid when numeric
-  (set fact_type = guidance when the number is a future target).
+  (set fact_type = target when the number is a future target).
 
 Do not invent facts with no reported number. If prose says "improved production
 planning accuracy", "lower freshwater consumption intensity", or "reduced
 transportation costs" but gives no value, do not extract it as a quantitative
 fact.
+
+Do NOT extract numerical references from biographical or legal text — years of
+experience, tenure in years, award counts, committee membership seat counts,
+regulatory clause numbers, or exhibit reference numbers. These are not
+operational metrics.
+
+----------------------------------------
+ABSOLUTE VALUE vs RELATIVE CHANGE
+----------------------------------------
+When a sentence contains both an absolute figure and a relative change (e.g.
+"4 million outlets — a remarkable two-fold increase since 2020"), extract the
+ABSOLUTE figure (4 million, unit = count) as the primary fact for the count
+metric. Extract the relative change (2x / 100% increase) only as a separate
+fact with fact_class = "ratio_change" if it has standalone value.
+Never extract a multiplier or fold-increase number as the value of an absolute
+count or volume metric.
+
+Examples:
+- "4 million outlets, a two-fold increase since 2020"
+  -> primary: raw_name="outlets", raw_value="4", raw_unit="million", fact_class="scalar_kpi"
+  -> secondary: raw_name="outlet growth", raw_value="2", raw_unit="x", fact_class="ratio_change"
+- "302 Mn Litres of water recharged, a 15% improvement"
+  -> primary: raw_name="water recharged", raw_value="302", raw_unit="Mn Litres", fact_class="scalar_kpi"
+  -> secondary: raw_name="water recharged improvement", raw_value="15", raw_unit="%", fact_class="change"
+
+----------------------------------------
+SUSTAINABILITY TARGETS
+----------------------------------------
+Extract sustainability targets and commitments as facts with fact_type = target.
+A target is any statement where the company commits to achieving a specific
+measurable value by a future date or period.
+
+Examples:
+- "We aim to source 35% of power from renewable sources by FY2026"
+  -> raw_name="renewable energy share", raw_value="35", raw_unit="%",
+     fact_type="target", period_type="target", period_end="2026-03-31"
+- "100% recyclable packaging by 2025"
+  -> raw_name="recyclable packaging share", raw_value="100", raw_unit="%",
+     fact_type="target", period_type="target", period_end="2025-12-31"
+- "35% women in global workforce by FY2027"
+  -> raw_name="women in workforce", raw_value="35", raw_unit="%",
+     fact_type="target", period_type="target", period_end="2027-03-31"
+
+Do NOT drop targets because they lack a current measured value.
+The period for a target is the TARGET YEAR, not the report year.
+Current measured facts must remain fact_type = measurement.
 
 ----------------------------------------
 NARRATIVE DECOMPOSITION RULES
@@ -173,17 +219,54 @@ dimension-scoped breakdown.
 ----------------------------------------
 FACT TYPE & PERIOD TYPE
 ----------------------------------------
-fact_type: actual | comparative_reference | guidance | estimate | delta | ratio | historical_reprint
-period_type: annual | quarterly | half_year | ttm | point_in_time | unknown
+fact_type: measurement | target | baseline | ratio | boolean | count
+period_type: full_year | partial | point_in_time | cumulative | target | baseline | unknown
 
-Use fact_type = "delta" when the reported number is only a change amount
-(for example, "10% improvement", "75 basis point increase", "15% reduction").
-Use fact_type = "actual" when the number is an absolute level, count, volume,
-share, ratio, or total.
+Use fact_type = "measurement" for completed-period reported figures.
+Use fact_type = "target" for future commitments or goals.
+Use fact_type = "baseline" for reference-year values used as comparison anchors.
+Use fact_type = "ratio" for company-reported shares, rates, or intensities where
+the denominator is already embedded in the number.
+Use fact_type = "boolean" for yes/no or achieved/not achieved disclosures.
+Use fact_type = "count" for discrete-item counts such as facilities, outlets,
+employees, training hours, patents, or sites.
 
-Capture the raw period string in raw_period exactly as written
-(for example, "fiscal 2024", "FY 2024-25", "during the year", "year ago").
-Date math happens downstream.
+PERIOD EXTRACTION IS REQUIRED.
+- raw_period must describe the period the fact itself refers to, not just the report year.
+- period_start and period_end are required normalized fields when the period can be inferred.
+- If a table column or row header says FY2022, FY 2021-22, CY2023, 2022-23, or similar,
+  then facts extracted from that column/row must use that period in raw_period.
+- A FY2023 report can contain FY2022 comparative facts. Those facts must keep FY2022 in raw_period.
+- If the sentence says "compared with FY2022", "in CY2021", or "as of March 2022",
+  capture that referenced period in raw_period.
+- For a full Indian fiscal year FY2024, set period_start = "2023-04-01",
+  period_end = "2024-03-31", and period_type = "full_year".
+- For a full calendar year CY2024, set period_start = "2024-01-01",
+  period_end = "2024-12-31", and period_type = "full_year".
+- For future targets like "by 2030", set fact_type = "target", period_type = "target",
+  period_end = "2030-12-31", and leave period_start null unless explicitly stated.
+- For baseline references like "FY2019 baseline", set fact_type = "baseline",
+  period_type = "baseline", and fill the fiscal-year range when known.
+- If the text only supports part of a year (quarter, half year, YTD, nine months), set
+  period_type = "partial" and extract period_start/period_end as precisely as possible.
+- If the metric is cumulative "since 2017" or similar, set period_type = "cumulative".
+- If period cannot be determined, set period_start = null, period_end = null,
+  period_type = "unknown". Unknown is valid.
+
+Example:
+- Report context: FY2023
+- Table columns: FY2023 | FY2022
+- If a fact comes from the FY2022 column, raw_period = "FY2022", not "FY2023"
+
+Capture the raw period string in raw_period exactly as written when possible
+(for example, "FY2022", "FY 2021-22", "CY2023", "during the year", "year ago").
+Do not leave raw_period blank when the source provides a detectable period label.
+Date math and final canonical formatting happen downstream.
+
+UNIT EXTRACTION IS REQUIRED.
+- If the unit is implicit in the same clause, extract it explicitly in raw_unit.
+- Example: "302 million litres of water withdrawn" -> raw_unit = "million litres".
+- Do not leave raw_unit blank when the unit is present in the evidence text.
 
 For baseline-indexed facts, populate baseline_year with the reference year when
 the source says "vs 2008 baseline", "since 2019", "compared to 2020 baseline",
@@ -234,8 +317,11 @@ Return a single JSON object with a "facts" key. Each element has EXACTLY these f
       "raw_value": "",
       "raw_unit": "",
       "raw_period": "",
+      "period_start": null,
+      "period_end": null,
       "baseline_year": null,
       "source_sentence": "",
+      "period_confidence": "",
 
       "period_type": "",
       "fact_type": "",
@@ -261,7 +347,8 @@ SECTION TEXT
 
 LEAN_FIELDS = [
     "raw_name", "metric_core", "fact_class", "direction", "raw_label_type",
-    "raw_value", "raw_unit", "raw_period", "baseline_year",
+    "raw_value", "raw_unit", "raw_period", "period_start", "period_end",
+    "baseline_year", "period_confidence",
     "source_sentence", "period_type", "fact_type", "scope", "dimension_type",
     "dimension_member", "graph_fact_type", "parent_metric_hint", "driver_phrase",
 ]

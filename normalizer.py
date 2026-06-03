@@ -1,4 +1,4 @@
-import argparse
+﻿import argparse
 import difflib
 import json
 import os
@@ -17,11 +17,12 @@ from normalizer_guardrails import (
     fact_type_hint_from_pass1,
     match_is_compatible,
     metric_core_risk,
-    normalize_value_safe,
     unit_family_from_raw_unit,
 )
 from provisional_review import write_review_files
 from review_memory import load_review_memory, lookup_review_decision
+from semantic_registry import infer_fact_semantics_draft, semantic_alias_gate, semantic_typing_from_registry, unit_family_for_fact
+from unit_normaliser import normalise_fact_value
 
 try:
     from ontology_shortlist import shortlist_candidates as _shortlist_candidates
@@ -56,14 +57,14 @@ Rules:
 - If fact_type_hint suggests a breakdown_fact, do not force a plain canonical metric unless the candidate_shortlist clearly supports it.
 
 Unit rules:
-- Monetary: infer currency from symbols (£ GBP, $ USD, € EUR) else use default currency. Infer raw_scale from raw_unit or source_sentence: thousands/millions/billions. If unknown, raw_scale="not_stated", scale_factor=null, value_normalized=null, and mention that in mapping_note.
-- Percentage: if raw_unit has % or percent, or raw_name implies rate/margin/growth/return, set currency=null, raw_scale="percentage", scale_factor=0.01, unit_canonical="ratio", value_normalized=raw numeric * 0.01.
-- Count: currency=null. Apply thousands/millions scaling when stated. unit_canonical should be the canonical unit if obvious, otherwise the raw unit noun.
-- Range facts: keep value_normalized=null and populate range_low_normalized and range_high_normalized.
+- Use the pipeline unit normaliser output as the authoritative value layer.
+- Preserve raw_value and raw_unit_string exactly as extracted.
+- Populate normalised_value, normalised_unit_symbol, and normalisation_confidence on every row.
+- If unit normalisation fails or needs context, keep normalised_value=null and mention that in mapping_note.
 
 Decision rules:
-- normalized: mapping_confidence is high or medium, scale_factor is not null, and input decision was "keep"
-- partial: low/no_match, missing scale, unknown currency, or input decision was "rescue"
+- normalized: mapping_confidence is high or medium and input decision was "keep"
+- partial: low/no_match, failed/needs_context unit normalisation, unknown currency, or input decision was "rescue"
 - new_metric: is_new_metric=true and input decision was "keep"
 - drop: input decision was "drop"
 
@@ -75,7 +76,6 @@ Each output object must contain:
 - variant_flag
 - variant_label
 - currency
-- scale_factor
 - normalization_decision"""
 
 CORROBORATION_THRESHOLD = 0.45
@@ -84,7 +84,7 @@ PASS2_USER_PROMPT = """Normalize these facts:
 {pass1_facts_batch}"""
 
 
-MODEL = "gpt-4o-mini"
+MODEL = "gpt-4.1-mini"
 BATCH_SIZE = 20
 TEST_BATCHES = 3
 SAMPLE_FACTS = 200
@@ -172,9 +172,10 @@ PASS2_DEFAULTS = {
     "is_new_metric": False,
     "proposed_canonical_id": "",
     "currency": "",
-    "raw_scale": "",
-    "scale_factor": None,
-    "value_normalized": None,
+    "normalised_value": None,
+    "normalised_unit_symbol": None,
+    "normalisation_confidence": "failed",
+    "raw_unit_string": None,
     "range_low_normalized": None,
     "range_high_normalized": None,
     "unit_canonical": "",
@@ -358,9 +359,9 @@ def accept_match(
 ) -> tuple[str, str]:
     """
     Returns (decision, reason) where decision is one of:
-      "accept"       — map to best_candidate["canonical_id"]
-      "provisional"  — mint a new provisional canonical
-      "quarantine"   — high-risk metric_core, do not mint into live registry
+      "accept"       â€” map to best_candidate["canonical_id"]
+      "provisional"  â€” mint a new provisional canonical
+      "quarantine"   â€” high-risk metric_core, do not mint into live registry
     """
     metric_core = str(fact.get("metric_core") or "")
     raw_name = str(fact.get("raw_name") or "")
@@ -626,6 +627,42 @@ You may only choose one of the provided canonical_id values or AMBIGUOUS."""
     return "AMBIGUOUS", f"Layer 2 returned invalid candidate {choice!r}."
 
 
+def _semantic_tiebreaker_conflict(
+    candidate: dict[str, Any] | None,
+    fact: dict[str, Any],
+    registry_lookup: dict[str, dict[str, Any]],
+) -> str | None:
+    if not candidate:
+        return None
+    canonical_id = str(candidate.get("canonical_id") or "")
+    registry_entry = registry_lookup.get(canonical_id)
+    if not registry_entry:
+        return None
+
+    canonical_semantics = semantic_typing_from_registry(registry_entry)
+    if not canonical_semantics.is_typed:
+        return None
+
+    fact_semantics = infer_fact_semantics_draft(fact)
+    if not fact_semantics.is_typed:
+        return None
+
+    gate = semantic_alias_gate(
+        fact_semantics=fact_semantics,
+        canonical_semantics=canonical_semantics,
+        fact_unit_family=unit_family_for_fact(fact),
+        canonical_unit_family=str(registry_entry.get("unit_family") or registry_entry.get("unit") or "unknown"),
+    )
+    blocking_reasons = [
+        reason
+        for reason in gate.block_reasons
+        if reason in {"subject_mismatch", "role_mismatch", "energy_source_mismatch"}
+    ]
+    if not blocking_reasons:
+        return None
+    return ", ".join(blocking_reasons)
+
+
 def _try_margin_tiebreaker(
     *,
     decision: str,
@@ -656,6 +693,17 @@ def _try_margin_tiebreaker(
     if layer1_choice is None:
         layer1_choice, token = _layer1_baseline_reduction_tiebreaker(match_fact, tied_candidates, fact)
     if layer1_choice is not None:
+        semantic_conflict = _semantic_tiebreaker_conflict(layer1_choice, fact, registry_lookup)
+        if semantic_conflict:
+            audit = {
+                "resolution_method": "provisional",
+                "tiebreaker_layer": "layer1",
+                "tiebreaker_reason": (
+                    f"Layer 1 token match declined due to semantic incompatibility: {semantic_conflict}."
+                ),
+                "tiebreaker_token": token,
+            }
+            return decision, reason, best_candidate, audit
         audit = {
             "resolution_method": "tiebreaker_layer1_token",
             "tiebreaker_layer": "layer1",
@@ -728,6 +776,20 @@ def _try_margin_tiebreaker(
 
     for candidate in tied_candidates:
         if str(candidate.get("canonical_id") or "") == choice:
+            semantic_conflict = _semantic_tiebreaker_conflict(candidate, fact, registry_lookup)
+            if semantic_conflict:
+                audit = {
+                    "resolution_method": "provisional",
+                    "tiebreaker_layer": "layer2",
+                    "tiebreaker_reason": (
+                        f"{llm_reason} Declined due to semantic incompatibility: {semantic_conflict}."
+                    ),
+                    "tiebreaker_top_candidate": top_id,
+                    "tiebreaker_top_score": top_score,
+                    "tiebreaker_choice": choice,
+                    "tiebreaker_choice_matched_top": False,
+                }
+                return decision, reason, best_candidate, audit
             audit = {
                 "resolution_method": "tiebreaker_layer2_llm",
                 "tiebreaker_layer": "layer2",
@@ -853,22 +915,62 @@ def _review_memory_candidate_id(
     return None
 
 
+_FINANCIAL_KEYWORD_RE = re.compile(
+    r"\b("
+    r"revenue|turnover|net sales|ebitda|ebit|profit|pat|dividend|eps|"
+    r"earnings per share|earnings|income|debt|"
+    r"cash and cash|cash equivalent|operating cash|investing cash|financing cash|cash flow|"
+    r"capex|capital expenditure|"
+    r"operating profit margin|net profit margin|profit margin|gross margin|"
+    r"return on equity|return on net worth|return on average equity|"
+    r"return on capital employed|roce|return on investment|"
+    r"working capital|inventory turnover|debtors turnover|current ratio|"
+    r"revenue growth|sales growth|cagr|"
+    r"shareholders fund|retained earnings|total comprehensive income|"
+    r"tax expense|profit before tax|profit after tax"
+    r")\b",
+    re.IGNORECASE,
+)
+
+_GROWTH_RATE_RE = re.compile(
+    r"\b(yoy|y-o-y|year.on.year|year over year|cagr|growth rate)\b",
+    re.IGNORECASE,
+)
+
+_FINANCIAL_METRIC_NAMES = {
+    "sales", "total revenue", "operating cash flow", "investing cash flow",
+    "financing cash flow", "cash and cash equivalents", "earnings per share",
+    "capital expenditure", "capex", "ebitda", "ebit", "net income",
+    "gross profit", "operating profit", "profit after tax", "profit before tax",
+    "shareholders fund", "retained earnings", "total comprehensive income",
+    "depreciation and amortisation", "impairment loss",
+}
+
+
 def _is_financial_fact(fact: dict[str, Any], match_fact: dict[str, Any] | None = None) -> bool:
     raw = fact.get("raw", {}) if isinstance(fact, dict) else {}
     graph_fact_type = str(raw.get("graph_fact_type") or fact.get("graph_fact_type") or "").strip()
     if graph_fact_type == "financial_metric":
         return True
+
+    # Check the input fact's own metric name before any registry matching
+    fact_metric = str(fact.get("metric") or raw.get("raw_name") or "").lower().strip()
+    if fact_metric in _FINANCIAL_METRIC_NAMES:
+        return True
+    if _FINANCIAL_KEYWORD_RE.search(fact_metric):
+        return True
+    # Growth-rate language on any metric → financial (growth rates of any metric are P&L territory)
+    if _GROWTH_RATE_RE.search(fact_metric):
+        return True
+
     if match_fact:
         text = " ".join(
             str(match_fact.get(key) or "")
             for key in ("raw_name", "metric_core")
         ).lower()
-        return bool(
-            re.search(
-                r"\b(revenue|turnover|net sales|ebitda|profit|pat|dividend|eps|earnings|income|debt)\b",
-                text,
-            )
-        )
+        if _FINANCIAL_KEYWORD_RE.search(text):
+            return True
+
     return False
 
 
@@ -1019,7 +1121,7 @@ def _parse_numeric(value: Any, dash_as_zero: bool = False) -> float | None:
     text = str(value).strip()
     if not text:
         return None
-    if text in {"-", "—", "–"}:
+    if text in {"-", "â€”", "â€“"}:
         return 0.0 if dash_as_zero else None
 
     negative = text.startswith("(") and text.endswith(")")
@@ -1050,7 +1152,7 @@ def _is_year_like_value(value: Any) -> bool:
     text = str(value or "").strip()
     if not text:
         return False
-    if text in {"-", "—", "–"}:
+    if text in {"-", "â€”", "â€“"}:
         return False
 
     negative = text.startswith("(") and text.endswith(")")
@@ -1083,7 +1185,7 @@ def _looks_like_date_text(value: Any) -> bool:
 
 def _is_non_numeric_text(value: Any) -> bool:
     text = str(value or "").strip()
-    if not text or text in {"-", "—", "–"}:
+    if not text or text in {"-", "â€”", "â€“"}:
         return False
     return _parse_numeric(text) is None
 
@@ -1110,96 +1212,6 @@ def _looks_like_exchange_rate_name(raw_name: str) -> bool:
         "dirham",
     ]
     return any(term in text for term in currency_terms)
-
-
-def _infer_raw_scale(raw_unit: str) -> str:
-    unit_text = (raw_unit or "").strip().lower()
-    if any(token in unit_text for token in ["%", "percent", "percentage"]):
-        return "percentage"
-    if any(token in unit_text for token in ["crore", " cr", "cr "]):
-        return "crore"
-    if any(token in unit_text for token in ["lakh", "lac"]):
-        return "lakh"
-    if any(token in unit_text for token in ["bn", "billion", "billions"]):
-        return "billions"
-    if any(token in unit_text for token in ["mn", "million", "millions"]):
-        return "millions"
-    if any(token in unit_text for token in ["k", "000", "thousand", "thousands"]):
-        return "thousands"
-    return "not_stated"
-
-
-def _scale_factor_for_raw_unit(raw_unit: str) -> float | None:
-    raw_scale = _infer_raw_scale(raw_unit)
-    if raw_scale == "percentage":
-        return 0.01
-    if raw_scale == "crore":
-        return 10_000_000
-    if raw_scale == "lakh":
-        return 100_000
-    if raw_scale == "thousands":
-        return 1_000
-    if raw_scale == "millions":
-        return 1_000_000
-    if raw_scale == "billions":
-        return 1_000_000_000
-    return None
-
-
-def _coerce_scale_factor(scale_factor: Any) -> float | None:
-    if scale_factor is None:
-        return None
-    if isinstance(scale_factor, (int, float)):
-        return float(scale_factor)
-    try:
-        return float(str(scale_factor).strip())
-    except (TypeError, ValueError):
-        return None
-
-
-def _scale_factor_from_text(text: str) -> float | None:
-    normalized = (text or "").lower().strip()
-    if not normalized:
-        return None
-    if any(token in normalized for token in ["billion", "billions", " bn", "bn ", "(bn)", " in bn"]):
-        return 1_000_000_000.0
-    if any(token in normalized for token in ["million", "millions", " mn", "mn ", "(mn)", " in mn"]):
-        return 1_000_000.0
-    if any(token in normalized for token in ["thousand", "thousands", " 000", "000s", "in 000"]):
-        return 1_000.0
-    return None
-
-
-def _metadata_has_millions_scale(metadata: dict[str, Any]) -> bool:
-    reporting_scale = str(metadata.get("reporting_scale", "") or "").lower().strip()
-    reporting_scale_factor = metadata.get("reporting_scale_factor")
-    return (
-        reporting_scale == "millions"
-        or reporting_scale_factor == 1_000_000
-    )
-
-
-def _statement_context(section_title: str, source_sentence: str = "", chunk_type: str = "") -> bool:
-    title = (section_title or "").lower()
-    source = source_sentence or ""
-    return (
-        (chunk_type or "").lower() == "table"
-        or "|" in source
-        or any(
-        phrase in title
-        for phrase in [
-            "statement",
-            "balance",
-            "cash flow",
-            "consolidated",
-            "income",
-            "disposal",
-            "acquisition",
-            "scope",
-            "revenue",
-            "segment",
-        ])
-    )
 
 
 def _unit_family_for_fact(
@@ -1347,36 +1359,6 @@ def _candidate_is_valid(
     return True
 
 
-def _determine_scale_factor_and_value(
-    fact_id: str,
-    canonical_id: str,
-    unit_family: str | None,
-    raw_name: str,
-    raw_value: Any,
-    raw_unit: str,
-    source_sentence: str,
-    section_title: str,
-    chunk_type: str,
-    metadata: dict[str, Any],
-) -> tuple[float | None, float | None]:
-    if _is_year_like_value(raw_value) or _looks_like_date_text(raw_value):
-        return None, None
-    if _is_non_numeric_text(raw_value):
-        return None, None
-    normalized = normalize_value_safe(
-        {
-            "raw_value": raw_value,
-            "raw_unit": raw_unit,
-            "source_sentence": source_sentence,
-        },
-        canonical_expected_family=unit_family,
-    )
-    return (
-        float(normalized["applied_scale"]) if normalized.get("applied_scale") is not None else None,
-        normalized.get("normalized_value"),
-    )
-
-
 def _infer_unit_canonical(
     canonical_id: str,
     canonical_category: str,
@@ -1423,6 +1405,9 @@ def _enrich_normalized_fact(
     raw_name = str(raw.get("raw_name") or enriched.get("metric", "") or "")
     raw_unit = str(raw.get("raw_unit") or enriched.get("unit", "") or "")
     raw_value = raw.get("raw_value", enriched.get("value"))
+    enriched["raw_value"] = raw_value
+    enriched["raw_unit"] = raw_unit
+    enriched["period_label"] = str(enriched.get("period") or raw.get("period") or "")
     source_sentence = str(raw.get("source_sentence") or enriched.get("evidence", "") or "")
     section_title = str(enriched.get("section_title", "") or "")
     chunk_type = str(enriched.get("chunk_type", "") or "")
@@ -1462,7 +1447,6 @@ def _enrich_normalized_fact(
     else:
         enriched["proposed_canonical_id"] = ""
         enriched["proposed_canonical_definition"] = None
-    enriched["raw_scale"] = _infer_raw_scale(raw_unit)
     enriched["mapping_note"] = str(enriched.get("mapping_note", "") or "")
     enriched["range_low_normalized"] = None
     enriched["range_high_normalized"] = None
@@ -1475,21 +1459,6 @@ def _enrich_normalized_fact(
         raw_name=raw_name,
         raw_unit=raw_unit,
     )
-    scale_factor, value_normalized = _determine_scale_factor_and_value(
-        fact_id=fact_id,
-        canonical_id=canonical_id,
-        unit_family=unit_family,
-        raw_name=raw_name,
-        raw_value=raw_value,
-        raw_unit=raw_unit,
-        source_sentence=source_sentence,
-        section_title=section_title,
-        chunk_type=chunk_type,
-        metadata=metadata,
-    )
-    enriched["scale_factor"] = scale_factor
-    enriched["value_normalized"] = value_normalized
-
     enriched["unit_canonical"] = _infer_unit_canonical(
         canonical_id=canonical_id,
         canonical_category=canonical_category,
@@ -1514,6 +1483,62 @@ def _enrich_normalized_fact(
             raw_graph_fact_type=str(raw.get("graph_fact_type") or ""),
         )
     )
+
+    unit_norm = normalise_fact_value(enriched)
+    enriched["raw_unit_string"] = str(unit_norm.get("raw_unit") or raw_unit or "")
+    enriched["normalised_value"] = unit_norm.get("normalised_value")
+    enriched["normalised_unit_symbol"] = unit_norm.get("normalised_unit_symbol")
+    enriched["unit_canonical"] = enriched.get("normalised_unit_symbol") or enriched.get("unit_canonical") or ""
+    enriched["normalization_status"] = normalization_decision
+    enriched["similarity_score"] = float(
+        enriched.get("best_score")
+        if enriched.get("best_score") is not None
+        else (1.0 if enriched.get("alias_resolved") else 0.0)
+    )
+    resolution_method = str(enriched.get("resolution_method") or "scorer")
+    enriched["tiebreaker_used"] = resolution_method in {"tiebreaker_layer1_token", "tiebreaker_layer2_llm"}
+    if enriched["tiebreaker_used"]:
+        enriched["tiebreaker_result"] = "accept" if normalization_decision in {"normalized", "partial"} else "reject"
+    elif str(enriched.get("tiebreaker_layer") or ""):
+        enriched["tiebreaker_result"] = "reject"
+    else:
+        enriched["tiebreaker_result"] = None
+    enriched["normalisation_confidence"] = str(
+        unit_norm.get("normalisation_confidence")
+        or "failed"
+    )
+
+    gate_result = "not_applicable"
+    if canonical_id and registry_entry:
+        fact_semantics = infer_fact_semantics_draft({"raw": raw, **enriched})
+        canonical_semantics = semantic_typing_from_registry(registry_entry)
+        gate = semantic_alias_gate(
+            fact_semantics=fact_semantics,
+            canonical_semantics=canonical_semantics,
+            fact_unit_family=unit_family_from_raw_unit(raw_unit) or unit_family_for_fact({"raw": raw, **enriched}),
+            canonical_unit_family=str(registry_entry.get("unit_family") or ""),
+        )
+        enriched["gate_block_reasons"] = list(gate.block_reasons)
+        substantive_failures = [
+            reason for reason in gate.block_reasons if reason not in {"canonical_untyped", "fact_untyped"}
+        ]
+        if gate.eligible:
+            gate_result = "pass"
+        elif substantive_failures:
+            gate_result = "fail"
+    enriched["gate_result"] = gate_result
+
+    similarity_score = float(enriched.get("similarity_score") or 0.0)
+    if normalization_decision == "normalized":
+        enriched["final_confidence"] = similarity_score
+    elif normalization_decision == "partial" and enriched["tiebreaker_used"] and enriched.get("tiebreaker_result") == "accept":
+        enriched["final_confidence"] = similarity_score * 0.85
+    elif str(enriched.get("tiebreaker_result") or "") == "reject":
+        enriched["final_confidence"] = 0.5
+    elif normalization_decision == "new_metric":
+        enriched["final_confidence"] = 0.0
+    else:
+        enriched["final_confidence"] = similarity_score
     return enriched
 
 
@@ -1556,9 +1581,9 @@ def _resolve_batch_by_alias(
         resolved_fact["variant_flag"] = False
         resolved_fact["variant_label"] = ""
         resolved_fact["currency"] = default_currency
-        resolved_fact["scale_factor"] = _scale_factor_for_raw_unit(
-            str(raw.get("raw_unit") or fact.get("unit", "") or "")
-        )
+        resolved_fact["best_score"] = 1.0
+        resolved_fact["second_best_score"] = 0.0
+        resolved_fact["resolution_method"] = "scorer"
         resolved_fact["normalization_decision"] = (
             "partial"
             if str(fact.get("decision", "")).lower() == "rescue"
@@ -1660,7 +1685,6 @@ def _resolve_batch_by_fuzzy_match(
             resolved_fact["variant_flag"] = False
             resolved_fact["variant_label"] = ""
             resolved_fact["currency"] = default_currency
-            resolved_fact["scale_factor"] = _scale_factor_for_raw_unit(raw_unit)
             resolved_fact["normalization_decision"] = (
                 "partial" if str(fact.get("decision", "")).lower() == "rescue" else "normalized"
             )
@@ -1715,6 +1739,12 @@ def _resolve_batch_by_fuzzy_match(
             resolved_fact["mapping_note"] = reason
             resolved_fact["currency"] = default_currency
             resolved_fact["alias_resolved"] = False
+            resolved_fact["best_score"] = (
+                float(best_candidate.get("score", 0.0))
+                if best_candidate
+                else 0.0
+            )
+            resolved_fact["second_best_score"] = float(second_best_score)
             resolved_fact.update(tiebreaker_audit)
             resolved_by_fact_id[fact_id] = _enrich_normalized_fact(
                 resolved_fact,
@@ -1734,6 +1764,12 @@ def _resolve_batch_by_fuzzy_match(
             resolved_fact["quarantine_reason"] = reason
             resolved_fact["currency"] = default_currency
             resolved_fact["alias_resolved"] = False
+            resolved_fact["best_score"] = (
+                float(best_candidate.get("score", 0.0))
+                if best_candidate
+                else 0.0
+            )
+            resolved_fact["second_best_score"] = float(second_best_score)
             resolved_by_fact_id[fact_id] = _enrich_normalized_fact(
                 resolved_fact,
                 registry_lookup,
@@ -1750,9 +1786,8 @@ def _resolve_batch_by_fuzzy_match(
         resolved_fact["variant_flag"] = False
         resolved_fact["variant_label"] = ""
         resolved_fact["currency"] = default_currency
-        resolved_fact["scale_factor"] = _scale_factor_for_raw_unit(
-            raw_unit
-        )
+        resolved_fact["best_score"] = float(best_candidate.get("score", 0.0))
+        resolved_fact["second_best_score"] = float(second_best_score)
         if str(fact.get("decision", "")).lower() == "rescue":
             resolved_fact["normalization_decision"] = "partial"
         else:
@@ -1925,7 +1960,7 @@ def _ensure_filing_metadata(pass1_path: str | Path) -> dict[str, Any]:
     metadata_path = _metadata_path_for_input(pass1_path)
     if metadata_path is None:
         raise FileNotFoundError(
-            "No metadata file found — run filing_metadata.py first"
+            "No metadata file found â€” run filing_metadata.py first"
         )
     return _load_json(metadata_path)
 
@@ -2644,6 +2679,73 @@ def print_dry_run_summary(results: dict) -> None:
     print(f"Layer 2 LLM calls: {TIEBREAKER_LLM_CALL_COUNT}", flush=True)
 
 
+def _scope3_magnitude_guard(facts: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Quarantine Scope 3 facts whose value is implausibly small vs Scope 1."""
+    scope1_vals = [
+        f.get("normalised_value")
+        for f in facts
+        if f.get("canonical_id") == "scope_1_emissions_absolute"
+        and f.get("normalised_value") is not None
+    ]
+    if not scope1_vals:
+        return facts
+    scope1_max = max(scope1_vals)
+    quarantined = 0
+    for f in facts:
+        if f.get("canonical_id") == "scope_3_emissions_absolute":
+            val = f.get("normalised_value")
+            if val is not None and scope1_max > 0 and val < 0.01 * scope1_max:
+                f["normalization_decision"] = "quarantine"
+                f["normalization_status"] = "quarantine"
+                f["quarantine_reason"] = "scope3_magnitude_implausible"
+                quarantined += 1
+    if quarantined:
+        print(f"Scope 3 magnitude guard: quarantined {quarantined} implausible facts (scope1_max={scope1_max:.0f})", flush=True)
+    return facts
+
+
+def _dedup_by_canonical(facts: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Remove cross-chunk duplicates where the same canonical_id+period+value appears multiple times.
+
+    Keeps the best fact per group (normalized > partial, then earliest fact_id).
+    Records the removed chunk_ids on the surviving fact's duplicate_chunk_ids field.
+    """
+    from collections import defaultdict
+    LOAD_DECISIONS = {"normalized", "partial"}
+    groups: dict[tuple, list[dict[str, Any]]] = defaultdict(list)
+    for f in facts:
+        cid = str(f.get("canonical_id") or "").strip()
+        dec = str(f.get("normalization_decision") or "").lower()
+        nv = f.get("normalised_value")
+        if cid and dec in LOAD_DECISIONS and nv is not None:
+            key = (cid, str(f.get("period_label") or f.get("period") or ""), str(nv))
+            groups[key].append(f)
+
+    decision_rank = {"normalized": 0, "partial": 1}
+    to_remove: set[str] = set()
+    for group in groups.values():
+        if len(group) <= 1:
+            continue
+        best = sorted(
+            group,
+            key=lambda f: (
+                decision_rank.get(str(f.get("normalization_decision") or ""), 2),
+                str(f.get("fact_id") or ""),
+            ),
+        )[0]
+        for f in group:
+            if f is not best:
+                to_remove.add(str(f.get("fact_id") or ""))
+                dups = best.setdefault("duplicate_chunk_ids", [])
+                dup_cid = str(f.get("chunk_id") or "")
+                if dup_cid and dup_cid not in dups:
+                    dups.append(dup_cid)
+
+    if to_remove:
+        print(f"Canonical dedup: removed {len(to_remove)} cross-chunk duplicate facts", flush=True)
+    return [f for f in facts if str(f.get("fact_id") or "") not in to_remove]
+
+
 def run_pass2(
     pass1_path: str | Path = "pass1_output.json",
     output_path: str | Path = "pass2_output.json",
@@ -2709,6 +2811,24 @@ def run_pass2(
     )
     print(f"Skipped due to checkpoint: {checkpoint_skipped_count}", flush=True)
 
+    # Filter financial facts out before batching so alias resolution cannot bypass the classifier.
+    default_currency = str(filing_metadata.get("currency", "") or "")
+    financial_by_fact_id: dict[str, dict[str, Any]] = {}
+    non_financial_pending: list[dict[str, Any]] = []
+    for fact in pending_facts:
+        match_fact = _build_match_fact(fact)
+        if _is_financial_fact(fact, match_fact):
+            financial_by_fact_id[str(fact.get("fact_id", ""))] = _resolved_financial_fact(
+                fact=fact,
+                match_fact=match_fact,
+                registry_lookup=registry_lookup,
+                metadata=filing_metadata,
+                default_currency=default_currency,
+            )
+        else:
+            non_financial_pending.append(fact)
+    pending_facts = non_financial_pending
+
     batches = _batched(pending_facts, BATCH_SIZE)
 
     if debug_mode:
@@ -2753,6 +2873,7 @@ def run_pass2(
         time.sleep(3)
 
     normalized_by_fact_id: dict[str, dict[str, Any]] = {}
+    normalized_by_fact_id.update(financial_by_fact_id)
     for batch_index in sorted(batch_results):
         for fact in batch_results[batch_index]:
             fact_id = str(fact.get("fact_id", ""))
@@ -2771,6 +2892,8 @@ def run_pass2(
         else:
             normalized_facts.append(fact)
 
+    normalized_facts = _scope3_magnitude_guard(normalized_facts)
+    normalized_facts = _dedup_by_canonical(normalized_facts)
     _write_json(output_path, normalized_facts)
     summarize_pass2(normalized_facts)
     return normalized_facts
