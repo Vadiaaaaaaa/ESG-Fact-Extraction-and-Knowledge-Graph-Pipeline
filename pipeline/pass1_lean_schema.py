@@ -1,0 +1,148 @@
+﻿import sys as _sys
+from pathlib import Path as _Path
+_HERE = _Path(__file__).resolve().parent
+_ROOT = _HERE.parent
+for _p in [str(_HERE), str(_ROOT / 'registry'), str(_ROOT / 'audit')]:
+    if _p not in _sys.path:
+        _sys.path.insert(0, _p)
+
+RAW_LABEL_TYPE = [
+    "metric_label",
+    "dimension_member",
+    "subtotal_label",
+    "narrative_metric_phrase",
+]
+
+PERIOD_TYPE = [
+    "full_year",
+    "partial",
+    "point_in_time",
+    "cumulative",
+    "target",
+    "baseline",
+    "unknown",
+]
+
+FACT_TYPE = [
+    "measurement",
+    "target",
+    "baseline",
+    "ratio",
+    "boolean",
+    "count",
+]
+
+SCOPE = ["consolidated", "sub_entity", "unknown"]
+
+DIMENSION_TYPE = [
+    "geography",
+    "segment",
+    "brand",
+    "channel",
+    "product_category",
+    "customer_type",
+    "time_comparison",
+    "none",
+]
+
+GRAPH_FACT_TYPE = [
+    "financial_metric",
+    "operational_metric",
+    "breakdown_fact",
+    "mix_share_metric",
+    "contribution_metric",
+    "specialized_note_metric",
+    "table_scaffold",
+]
+
+FACT_CLASS = ["scalar_kpi", "change", "transition", "range", "ratio_change"]
+DIRECTION = ["increased", "decreased", "unchanged", "reached"]
+
+FACT_PROPERTIES = {
+    "raw_name": {
+        "type": "string",
+        "description": "The label exactly as written in the text. Do not snake_case, normalize, or rewrite.",
+    },
+    "metric_core": {
+        "type": "string",
+        "description": "Stable snake_case metric-family slug derived from the fact's own subject, with no values, periods, or entity names.",
+    },
+    "fact_class": {
+        "type": "string",
+        "enum": FACT_CLASS,
+        "description": "The fact expression type: scalar KPI, change, transition, range, or ratio_change.",
+    },
+    "direction": {
+        "type": "string",
+        "enum": DIRECTION,
+        "description": "Movement polarity or level verb. Use decreased for reduced/lower/lesser, increased for improved/higher/growth, reached for absolute levels.",
+    },
+    "raw_label_type": {"type": "string", "enum": RAW_LABEL_TYPE},
+    "raw_value": {
+        "type": "string",
+        "description": "Numeric value exactly as written, including %, commas, and sign. Must contain the reported number; do not use an empty string.",
+    },
+    "raw_unit": {
+        "type": "string",
+        "description": "Unit as written, e.g. %, $M, stores, bps.",
+    },
+    "raw_period": {"type": "string"},
+    "period_start": {
+        "type": ["string", "null"],
+        "description": "Normalized start date in ISO format YYYY-MM-DD when the fact period can be determined.",
+    },
+    "period_end": {
+        "type": ["string", "null"],
+        "description": "Normalized end date in ISO format YYYY-MM-DD when the fact period can be determined.",
+    },
+    "baseline_year": {
+        "type": ["string", "null"],
+        "description": "Historical baseline/reference year for baseline-indexed facts, e.g. 2019 in 'vs 2019 baseline'. Null when not applicable.",
+    },
+    "source_sentence": {"type": "string"},
+    "period_type": {"type": "string", "enum": PERIOD_TYPE},
+    "fact_type": {"type": "string", "enum": FACT_TYPE},
+    "scope": {"type": "string", "enum": SCOPE},
+    "dimension_type": {"type": "string", "enum": DIMENSION_TYPE},
+    "dimension_member": {"type": ["string", "null"]},
+    "graph_fact_type": {
+        "type": "string",
+        "enum": GRAPH_FACT_TYPE,
+        "description": "The fact's business role in the graph. Never a primitive like percentage, count, or currency.",
+    },
+    "parent_metric_hint": {"type": ["string", "null"]},
+    "driver_phrase": {"type": ["string", "null"]},
+    "normalised_unit_symbol": {
+        "type": "string",
+        "description": "Canonical unit symbol after normalization, e.g. 'kg', 'GJ', 'tCO2e', '%', 'count', 'kL/tonne', 'per_million_hours'. Use empty string if unknown.",
+    },
+    "unit_normalisation_confidence": {
+        "type": "string",
+        "enum": ["exact", "inferred", "failed"],
+        "description": "How confident the unit normalization is. exact=unambiguous, inferred=reasonable guess, failed=could not normalize.",
+    },
+}
+
+PASS1_LEAN_RESPONSE_FORMAT = {
+    "type": "json_schema",
+    "json_schema": {
+        "name": "pass1_lean_facts",
+        "strict": True,
+        "schema": {
+            "type": "object",
+            "additionalProperties": False,
+            "required": ["facts"],
+            "properties": {
+                "facts": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": False,
+                        "required": list(FACT_PROPERTIES.keys()),
+                        "properties": FACT_PROPERTIES,
+                    },
+                }
+            },
+        },
+    },
+}

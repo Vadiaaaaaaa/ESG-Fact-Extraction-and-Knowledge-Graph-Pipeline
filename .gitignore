@@ -1,7 +1,11 @@
+workspace_test_outputs/
+_archive/
 .env
+pipeline_config.json
 __pycache__/
 *.pyc
-
-# Generated audits and archived test outputs
-workspace_test_outputs/
+*.log
 *.docx
+node_modules/
+.pytest_cache/
+*.csv

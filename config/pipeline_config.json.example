@@ -1,0 +1,11 @@
+{
+    "neo4j_uri": "neo4j://127.0.0.1:7687",
+    "neo4j_user": "neo4j",
+    "neo4j_pass": "YOUR_PASSWORD_HERE",
+    "output_dir": "workspace_test_outputs",
+    "default_sector": "FMCG",
+    "default_country": "India",
+    "default_currency": "INR",
+    "openai_model_pass1": "gpt-4.1-mini",
+    "openai_model_pass2_tiebreaker": "gpt-4.1-mini"
+}
