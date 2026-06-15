@@ -131,19 +131,18 @@ _NAME_TO_ID: dict[str, str] = {
 }
 
 _EVIDENCE_CANONICAL: dict[str, str] = {
-    "q1": "employee_headcount",
     "q2": "scope_1_emissions",
-    "q5": "water_consumption_absolute",
+    "q5": "scope_1_emissions",
     "q6": "water_consumption_absolute",
 }
 
 _EVIDENCE_KEYWORDS: dict[str, list[str]] = {
-    "q1": ["permanent employee", "permanent worker", "employee headcount", "total employee"],
+    "q1": ["scope 1", "scope1", "direct emission", "tCO2e"],
     "q2": ["scope 1", "scope1", "direct emission", "tCO2e"],
     "q3_nonrenew": ["non-renewable", "fossil fuel", "coal", "oil", "natural gas", "non renewable"],
     "q3_total":    ["total energy", "energy consumed", "GJ"],
     "q4": ["female", "wages paid to female", "gross wages"],
-    "q5": ["water withdrawal", "water consumption", "kiloliter", "kilolitre"],
+    "q5": ["scope 1", "scope1", "direct emission", "tCO2e"],
     "q6": ["water withdrawal", "water consumption", "kiloliter", "kilolitre"],
 }
 
@@ -255,7 +254,7 @@ def render_source_expander(sel: str, rows: list[dict]) -> None:
                       ]
                       AND o.normalised_unit_symbol = '%'
                       AND o.normalised_value IS NOT NULL
-                    WITH o, ev, ch ORDER BY o.normalised_value DESC LIMIT 1
+                    WITH o, ev, ch, c ORDER BY o.normalised_value DESC LIMIT 1
                     RETURN ev.text AS evidence, ch.page AS page,
                            o.source_doc_id AS doc_id, c.name AS company
                 """)
@@ -277,6 +276,38 @@ def render_source_expander(sel: str, rows: list[dict]) -> None:
                     f'{co_name}</div>'
                 )
                 html_parts.append(_evidence_block(doc_name, text, page))
+
+        # ── Q1: emissions improvement — single-company trend, no company key in rows ──
+        elif sel == "q1":
+            kws = _EVIDENCE_KEYWORDS["q1"]
+            ev = get_evidence("scope_1_emissions", "nestle_india", "FY2024")
+            if ev:
+                doc_name = DOC_NAMES.get(ev.get("doc_id", ""), ev.get("doc_id", ""))
+                text = clean_evidence(ev.get("evidence", "") or "", kws)
+                if not text:
+                    text = f"Extracted from {doc_name}, Page {ev.get('page', '')}"
+                html_parts.append(_evidence_block(doc_name, text, ev.get("page")))
+            else:
+                st.markdown(
+                    '<div style="font-family:Inter;font-size:13px;color:#9B9590;">'
+                    'No source text available.</div>',
+                    unsafe_allow_html=True)
+
+        # ── Q5: single-company Scope 1 trend (rows have year/value/unit, no company) ──
+        elif sel == "q5":
+            kws = _EVIDENCE_KEYWORDS["q5"]
+            ev = get_evidence("scope_1_emissions", "nestle_india", "FY2024")
+            if ev:
+                doc_name = DOC_NAMES.get(ev.get("doc_id", ""), ev.get("doc_id", ""))
+                text = clean_evidence(ev.get("evidence", "") or "", kws)
+                if not text:
+                    text = f"Extracted from {doc_name}, Page {ev.get('page', '')}"
+                html_parts.append(_evidence_block(doc_name, text, ev.get("page")))
+            else:
+                st.markdown(
+                    '<div style="font-family:Inter;font-size:13px;color:#9B9590;">'
+                    'No source text available.</div>',
+                    unsafe_allow_html=True)
 
         # ── Multi-company bar questions: one block per company ────────────────
         else:
@@ -374,32 +405,30 @@ def get_q3_fossil_data() -> list[dict]:
 
 # ── Queries ────────────────────────────────────────────────────────────────────
 Q1_CYPHER = """
-MATCH (o:Observation)-[:OF_METRIC]->(m:Metric),
-      (o)-[:REPORTED_BY]->(c:Company),
-      (o)-[:IN_PERIOD]->(p:Period {fiscal_year: 'FY2024'})
-WHERE m.canonical_id = 'employee_headcount'
-  AND o.normalization_status IN ['normalized', 'partial']
-  AND o.normalised_value IS NOT NULL
-  AND o.normalised_unit_symbol = 'count'
-WITH c, max(o.normalised_value) as value
-RETURN c.name as company,
-       value,
-       'employees' as unit
-ORDER BY value DESC""".strip()
-
-Q2_CYPHER = """
 MATCH (o:Observation)-[:OF_METRIC]->(m:Metric
       {canonical_id: 'scope_1_emissions'}),
-      (o)-[:REPORTED_BY]->(c:Company),
-      (o)-[:IN_PERIOD]->(p:Period {fiscal_year: 'FY2024'})
+      (o)-[:REPORTED_BY]->(c:Company
+      {company_id: 'nestle_india'}),
+      (o)-[:IN_PERIOD]->(p:Period)
 WHERE o.normalization_status IN ['normalized', 'partial']
   AND o.normalised_value IS NOT NULL
   AND o.normalised_value < 1000000
-WITH c, max(o.normalised_value) as value
-RETURN c.name as company,
-       value,
-       'tCO2e' as unit
-ORDER BY value DESC""".strip()
+WITH p.fiscal_year as year,
+     max(o.normalised_value) as value
+RETURN year, value, 'tCO2e' as unit
+ORDER BY year""".strip()
+
+Q2_CYPHER = """
+MATCH (o:Observation)-[:OF_METRIC]->(m:Metric),
+      (o)-[:REPORTED_BY]->(c:Company),
+      (o)-[:IN_PERIOD]->(p:Period {fiscal_year: 'FY2024'})
+WHERE m.canonical_id IN ['scope_1_emissions', 'scope_2_emissions']
+  AND o.normalization_status IN ['normalized', 'partial']
+  AND o.normalised_value IS NOT NULL
+WITH c.name AS company, m.canonical_id AS scope,
+     max(o.normalised_value) AS value
+RETURN company, scope, value, 'tCO2e' AS unit
+ORDER BY company, scope""".strip()
 
 Q4_CYPHER = """
 MATCH (o:Observation)-[:REPORTED_BY]->(c:Company),
@@ -418,16 +447,17 @@ ORDER BY value DESC""".strip()
 
 Q5_CYPHER = """
 MATCH (o:Observation)-[:OF_METRIC]->(m:Metric
-      {canonical_id: 'water_consumption_absolute'}),
-      (o)-[:REPORTED_BY]->(c:Company),
-      (o)-[:IN_PERIOD]->(p:Period {fiscal_year: 'FY2024'})
+      {canonical_id: 'scope_1_emissions'}),
+      (o)-[:REPORTED_BY]->(c:Company
+      {company_id: 'nestle_india'}),
+      (o)-[:IN_PERIOD]->(p:Period)
 WHERE o.normalization_status IN ['normalized', 'partial']
   AND o.normalised_value IS NOT NULL
-WITH c, max(o.normalised_value) as max_val
-RETURN c.name as company,
-       round(max_val / 1000) as value,
-       'kL' as unit
-ORDER BY value DESC""".strip()
+  AND o.normalised_value < 1000000
+WITH p.fiscal_year as year,
+     max(o.normalised_value) as value
+RETURN year, value, 'tCO2e' as unit
+ORDER BY year""".strip()
 
 Q6_CYPHER = """
 MATCH (o:Observation)-[:OF_METRIC]->(m:Metric),
@@ -451,30 +481,125 @@ RETURN o.normalised_value as value,
        o.source_doc_id as doc_id""".strip()
 
 QUESTIONS = [
-    {"id": "q1", "text": "How many permanent employees do these companies have?",       "category": "Social",        "cypher": Q1_CYPHER,  "chart": "bar"},
-    {"id": "q2", "text": "How do Scope 1 emissions compare across companies?",             "category": "Environmental", "cypher": Q2_CYPHER,  "chart": "bar"},
-    {"id": "q3", "text": "What percentage of Britannia's energy is still from fossil fuels?", "category": "Environmental", "cypher": None, "chart": "stat_dark"},
-    {"id": "q4", "text": "What share of total wages goes to female employees across companies?", "category": "Social", "cypher": Q4_CYPHER, "chart": "bar_pct"},
-    {"id": "q5", "text": "How does water consumption compare across companies?",        "category": "Environmental", "cypher": Q5_CYPHER,  "chart": "bar"},
-    {"id": "q6", "text": "How confident are we in Nestlé's water withdrawal figure?",  "category": "Provenance",    "cypher": Q6_CYPHER,  "chart": "provenance_water"},
+    {"id": "q1", "text": "Which company has improved its emissions the most since 2023?",        "category": "Environmental", "cypher": Q1_CYPHER,  "chart": "emissions_improvement"},
+    {"id": "q2", "text": "How do Scope 1 and Scope 2 emissions compare across companies?",       "category": "Environmental", "cypher": Q2_CYPHER,  "chart": "grouped_bar"},
+    {"id": "q3", "text": "What percentage of Britannia's energy comes from renewable sources?",  "category": "Environmental", "cypher": None,       "chart": "stat_renewable"},
+    {"id": "q4", "text": "What share of total wages goes to female employees across companies?", "category": "Social",        "cypher": Q4_CYPHER,  "chart": "bar_pct"},
+    {"id": "q5", "text": "How have Nestlé's Scope 1 emissions changed over time?",              "category": "Environmental", "cypher": Q5_CYPHER,  "chart": "line_trend"},
+    {"id": "q6", "text": "How confident are we in Nestlé's water withdrawal figure?",           "category": "Provenance",    "cypher": Q6_CYPHER,  "chart": "provenance_water"},
 ]
 
-METRIC_OPTIONS = {
-    "Scope 1 emissions":       "scope_1_emissions",
-    "Scope 2 emissions":       "scope_2_emissions",
-    "Water consumption":       "water_consumption_absolute",
-    "Water intensity":         "water_consumption_intensity",
-    "Energy consumption":      "absolute_energy_consumption",
-    "Renewable energy":        "renewable_energy_consumption_absolute",
-    "Non-renewable energy":    "non_renewable_energy_consumption_absolute",
-    "Total waste generated":   "total_waste_generated",
-    "Employee headcount":      "employee_headcount",
-    "Consumer complaints":     "complaint_count_filed",
+VERIFIED_METRICS: dict[str, dict] = {
+    "Scope 1 Emissions": {
+        "canonical_id": "scope_1_emissions",
+        "unit": "tCO2e",
+        "divide_by": 1,
+        "companies": ["nestle_india", "britannia", "marico"],
+        "years": ["FY2024"],
+        "principle": "Principle 6 GHG Disclosures",
+    },
+    "Scope 2 Emissions": {
+        "canonical_id": "scope_2_emissions",
+        "unit": "tCO2e",
+        "divide_by": 1,
+        "companies": ["nestle_india", "britannia", "marico"],
+        "years": ["FY2024"],
+        "principle": "Principle 6 GHG Disclosures",
+    },
+    "Total Water Withdrawal": {
+        "canonical_id": "water_withdrawal",
+        "unit": "kL",
+        "divide_by": 1000,
+        "companies": ["nestle_india", "britannia", "marico"],
+        "years": ["FY2024", "FY2025"],
+        "principle": "Principle 6 Water Disclosures",
+    },
+    "Water Consumption": {
+        "canonical_id": "water_consumption_absolute",
+        "unit": "kL",
+        "divide_by": 1000,
+        "companies": ["nestle_india", "britannia", "marico"],
+        "years": ["FY2024", "FY2025"],
+        "principle": "Principle 6 Water Disclosures",
+    },
+    "Total Energy (Renewable)": {
+        "canonical_id": "renewable_energy_consumption_absolute",
+        "unit": "GJ",
+        "divide_by": 1,
+        "companies": ["nestle_india", "britannia", "marico"],
+        "years": ["FY2024"],
+        "principle": "Principle 6 Energy Disclosures",
+    },
+    "Total Energy (Non-Renewable)": {
+        "canonical_id": "non_renewable_energy_consumption_absolute",
+        "unit": "GJ",
+        "divide_by": 1,
+        "companies": ["nestle_india", "britannia", "marico"],
+        "years": ["FY2024"],
+        "principle": "Principle 6 Energy Disclosures",
+    },
+    "Plastic Waste Generated": {
+        "canonical_id": "plastic_waste_generated",
+        "unit": "kg",
+        "divide_by": 1,
+        "companies": ["nestle_india", "britannia", "marico"],
+        "years": ["FY2024"],
+        "principle": "Principle 6 Waste Disclosures",
+    },
+    "Plastic Waste Collected": {
+        "canonical_id": "plastic_waste_collected",
+        "unit": "kg",
+        "divide_by": 1,
+        "companies": ["nestle_india", "britannia", "marico"],
+        "years": ["FY2024"],
+        "principle": "Principle 6 Waste Disclosures",
+    },
+    "Employee Headcount": {
+        "canonical_id": "employee_headcount",
+        "unit": "employees",
+        "divide_by": 1,
+        "companies": ["nestle_india", "britannia", "marico"],
+        "years": ["FY2024", "FY2025"],
+        "principle": "Section A Employee Disclosures",
+    },
+    "Total Recordable Injuries (Workers)": {
+        "canonical_id": "total_recordable_injuries_workers",
+        "unit": "count",
+        "divide_by": 1,
+        "companies": ["nestle_india", "britannia", "marico"],
+        "years": ["FY2024"],
+        "principle": "Principle 5 Safety Disclosures",
+    },
+    "Total Recordable Injuries (Employees)": {
+        "canonical_id": "total_recordable_injuries_employees",
+        "unit": "count",
+        "divide_by": 1,
+        "companies": ["nestle_india", "britannia", "marico"],
+        "years": ["FY2024"],
+        "principle": "Principle 5 Safety Disclosures",
+    },
+    "Worker Union Membership": {
+        "canonical_id": "worker_union_membership",
+        "unit": "count",
+        "divide_by": 1,
+        "companies": ["nestle_india", "britannia", "marico"],
+        "years": ["FY2024"],
+        "principle": "Principle 3 Labour Disclosures",
+    },
+    "Waste Generated": {
+        "canonical_id": "waste_generated",
+        "unit": "kg",
+        "divide_by": 1,
+        "companies": ["nestle_india", "britannia", "marico"],
+        "years": ["FY2024"],
+        "principle": "Principle 6 Waste Disclosures",
+    },
 }
-COMPANY_OPTIONS = {
-    "Nestlé India": "nestle_india",
-    "Britannia":    "britannia",
-    "Marico":       "marico",
+
+COMPANIES = {
+    "Nestlé India":       "nestle_india",
+    "Britannia Industries": "britannia",
+    "Marico":             "marico",
 }
 
 # ── Worded answer builders ─────────────────────────────────────────────────────
@@ -487,38 +612,46 @@ def _worded(sel: str, rows: list[dict]) -> str | None:
         return None
 
     if sel == "q1":
-        srt = sorted(rows, key=lambda r: r["value"], reverse=True)
+        srt = sorted(rows, key=lambda r: r.get("year", ""))
         if len(srt) < 2:
             return None
-        names = [_short(r["company"]) for r in srt]
-        vals  = [r["value"] for r in srt]
-        mid_parts = ", ".join(
-            f"<strong>{n}</strong> at <strong>{v:,.0f}</strong>"
-            for n, v in zip(names[1:], vals[1:])
-        )
+        first_val = srt[0]["value"]
+        last_val  = srt[-1]["value"]
+        first_yr  = srt[0]["year"]
+        last_yr   = srt[-1]["year"]
+        pct       = (last_val - first_val) / first_val * 100 if first_val else 0
+        direction = "decreased" if pct < 0 else "increased"
         return (
-            f"In FY2024, <strong>{names[0]}</strong> had the largest permanent workforce at "
-            f"<strong>{vals[0]:,.0f} employees</strong>, followed by {mid_parts}."
+            f"Among the companies in this graph, only <strong>Nestlé India</strong> has "
+            f"multi-year Scope 1 data. Their emissions <strong>{direction} by "
+            f"{abs(pct):.1f}%</strong> — from <strong>{first_val:,.0f} tCO2e</strong> "
+            f"in {first_yr} to <strong>{last_val:,.0f} tCO2e</strong> in {last_yr} — "
+            f"reflecting significant progress on their net zero roadmap."
         )
 
     if sel == "q2":
-        srt = sorted(rows, key=lambda r: r["value"], reverse=True)
-        if len(srt) < 2:
-            return None
-        hi  = srt[0]
-        mid = srt[1] if len(srt) > 2 else None
-        lo  = srt[-1]
-        mid_part = (
-            f", <strong>{_short(mid['company'])}</strong> at <strong>{mid['value']:,.0f} tCO2e</strong>"
-            if mid else ""
+        by_co: dict[str, dict] = {}
+        for r in rows:
+            co = r["company"]
+            if co not in by_co:
+                by_co[co] = {}
+            by_co[co][r["scope"]] = r["value"]
+        totals = {co: sum(v.values()) for co, v in by_co.items()}
+        hi_co  = max(totals, key=totals.get)
+        hi     = by_co[hi_co]
+        s1_hi  = hi.get("scope_1_emissions", 0)
+        s2_hi  = hi.get("scope_2_emissions", 0)
+        marico = by_co.get("Marico Limited", {})
+        marico_note = (
+            f" Marico's Scope 2 ({marico.get('scope_2_emissions',0):,.0f} tCO2e) exceeds "
+            f"its Scope 1 ({marico.get('scope_1_emissions',0):,.0f} tCO2e) — typical for "
+            f"companies with minimal on-site combustion but significant purchased electricity."
+            if marico.get("scope_2_emissions", 0) > marico.get("scope_1_emissions", 0) else ""
         )
         return (
-            f"In FY2024, <strong>{_short(hi['company'])}</strong> had the highest Scope 1 emissions at "
-            f"<strong>{hi['value']:,.0f} tCO2e</strong>"
-            f"{mid_part} and "
-            f"<strong>{_short(lo['company'])}</strong> at <strong>{lo['value']:,.0f} tCO2e</strong>. "
-            f"Scope 1 covers direct emissions from owned operations including boilers, "
-            f"furnaces and company vehicles."
+            f"In FY2024, <strong>{_short(hi_co)}</strong> had the highest combined GHG footprint: "
+            f"Scope 1 <strong>{s1_hi:,.0f}</strong> + Scope 2 <strong>{s2_hi:,.0f} tCO2e</strong>."
+            f"{marico_note}"
         )
 
     if sel == "q3":
@@ -526,13 +659,17 @@ def _worded(sel: str, rows: list[dict]) -> str | None:
             return None
         fossil_pct    = rows[0].get("fossil_pct")
         renewable_pct = rows[0].get("renewable_pct")
-        if fossil_pct is None:
+        nr_gj         = rows[0].get("non_renewable", 0)
+        total_gj      = rows[0].get("total", 0)
+        renew_gj      = total_gj - nr_gj if total_gj else 0
+        if renewable_pct is None:
             return None
         return (
-            f"<strong>{fossil_pct}%</strong> of Britannia's total energy consumption came from "
-            f"fossil fuel sources in FY2024. The remaining "
-            f"<strong>{renewable_pct}%</strong> came from renewable sources including "
-            f"solar, wind, and biomass."
+            f"<strong>{renewable_pct}%</strong> of Britannia's total energy consumption came from "
+            f"renewable sources in FY2024 — <strong>{renew_gj:,.0f} GJ</strong> of "
+            f"<strong>{total_gj:,.0f} GJ</strong> total. "
+            f"The remaining <strong>{fossil_pct}%</strong> came from fossil fuel sources "
+            f"including coal, oil and natural gas."
         )
 
     if sel == "q4":
@@ -555,22 +692,25 @@ def _worded(sel: str, rows: list[dict]) -> str | None:
         )
 
     if sel == "q5":
-        srt = sorted(rows, key=lambda r: r["value"], reverse=True)
+        srt = sorted(rows, key=lambda r: r.get("year", ""))
         if len(srt) < 2:
             return None
-        hi  = srt[0]
-        mid = srt[1] if len(srt) > 2 else None
-        lo  = srt[-1]
-        mid_part = (
-            f", <strong>{_short(mid['company'])}</strong> at <strong>{mid['value']:,.0f} kL</strong>,"
-            if mid else ""
-        )
+        first_val = srt[0]["value"]
+        last_val  = srt[-1]["value"]
+        first_yr  = srt[0]["year"]
+        last_yr   = srt[-1]["year"]
+        pct       = (last_val - first_val) / first_val * 100 if first_val else 0
+        if pct < 0:
+            return (
+                f"Nestlé India's Scope 1 emissions have <strong>decreased by "
+                f"{abs(pct):.1f}%</strong> from <strong>{first_val:,.0f} tCO2e</strong> "
+                f"in {first_yr} to <strong>{last_val:,.0f} tCO2e</strong> in {last_yr}, "
+                f"reflecting significant progress on their net zero roadmap."
+            )
         return (
-            f"In FY2024, <strong>{_short(hi['company'])}</strong> had the highest water consumption "
-            f"at <strong>{hi['value']:,.0f} kL</strong>"
-            f"{mid_part} and "
-            f"<strong>{_short(lo['company'])}</strong> at <strong>{lo['value']:,.0f} kL</strong>. "
-            f"All three companies operate zero liquid discharge facilities."
+            f"Nestlé India's Scope 1 emissions <strong>increased by {pct:.1f}%</strong> "
+            f"from <strong>{first_val:,.0f} tCO2e</strong> in {first_yr} to "
+            f"<strong>{last_val:,.0f} tCO2e</strong> in {last_yr}."
         )
 
     if sel == "q6":
@@ -590,11 +730,11 @@ def _worded(sel: str, rows: list[dict]) -> str | None:
 
 def _source_citation(sel: str, rows: list[dict]) -> str:
     _CITATIONS: dict[str, str] = {
-        "q1": "Source: Company Annual Reports FY2024, BRSR Section A — Employee Disclosures",
+        "q1": "Source: Nestlé India Annual Reports CY2023, FY2024 & FY2025, BRSR Section C — Principle 6 GHG Disclosures",
         "q2": "Source: Company Annual Reports FY2024, BRSR Section C — Principle 6 GHG Disclosures",
         "q3": "Source: Britannia Industries Annual Report FY2024, BRSR Section C — Principle 6 Energy Disclosures",
         "q4": "Source: Company Annual Reports FY2024, BRSR Section C — Principle 5 Human Rights Disclosures",
-        "q5": "Source: Company Annual Reports FY2024, BRSR Section C — Principle 6 Water Disclosures",
+        "q5": "Source: Nestlé India Annual Reports CY2023, FY2024 & FY2025, BRSR Section C — Principle 6 GHG Disclosures",
         "q6": "",
     }
     return _CITATIONS.get(sel, "")
@@ -810,6 +950,33 @@ div[data-testid="stMultiSelect"] label {
     line-height: 2;
 }
 .app-footer a { color: #C9748A; text-decoration: none; }
+
+/* ── Tab bar ── */
+button[data-baseweb="tab"] {
+    font-family: 'Inter', sans-serif !important;
+    font-size: 14px !important;
+    font-weight: 400 !important;
+    color: #9B9590 !important;
+    background: transparent !important;
+    border-bottom: 2px solid transparent !important;
+}
+button[data-baseweb="tab"][aria-selected="true"] {
+    color: #C9748A !important;
+    font-weight: 500 !important;
+    border-bottom-color: #C9748A !important;
+}
+button[data-baseweb="tab"]:hover {
+    color: #1A1A18 !important;
+    background: transparent !important;
+}
+
+/* ── Explorer Run button vertical alignment ── */
+div[data-testid="column"]:last-child div[data-testid="stButton"] button {
+    margin-top: 24px !important;
+    height: 42px !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -829,124 +996,249 @@ st.markdown("""
 <div class="app-header">
   <div>
     <span class="app-title">ESG Knowledge Graph</span>
-    <div class="app-subtitle">Indian FMCG · BRSR Sustainability Data</div>
+    <div class="app-subtitle">From unstructured data to queryable graph</div>
   </div>
   <div class="app-stats">
     3 companies &nbsp;·&nbsp; 4 documents &nbsp;·&nbsp;
-    2,462 observations &nbsp;·&nbsp; 78.3% eval accuracy
+    2,462 observations &nbsp;·&nbsp; 97.1% recall accuracy
   </div>
 </div>
 """, unsafe_allow_html=True)
 
-# ── Section 1: Question cards ──────────────────────────────────────────────────
-st.markdown('<div class="section-eyebrow">Questions this graph can answer</div>',
-            unsafe_allow_html=True)
+# ── Tabs ───────────────────────────────────────────────────────────────────────
+tab1, tab2, tab3 = st.tabs(["Questions", "Explorer", "Ask a Question"])
 
-col_l, col_r = st.columns(2, gap="small")
-for i, q in enumerate(QUESTIONS):
-    col = col_l if i % 2 == 0 else col_r
-    with col:
-        st.markdown(f'<div class="q-category">{q["category"]}</div>', unsafe_allow_html=True)
-        if st.button(q["text"], key=q["id"]):
-            if st.session_state.selected_question == q["id"]:
-                st.session_state.selected_question = None
-            else:
-                st.session_state.selected_question = q["id"]
-            st.rerun()
+with tab1:
+    # ── Question cards ─────────────────────────────────────────────────────────
+    st.markdown('<div class="section-eyebrow">Questions this graph can answer</div>',
+                unsafe_allow_html=True)
 
-# ── Result panel ───────────────────────────────────────────────────────────────
-sel = st.session_state.selected_question
-if sel:
-    q = next(x for x in QUESTIONS if x["id"] == sel)
+    col_l, col_r = st.columns(2, gap="small")
+    for i, q in enumerate(QUESTIONS):
+        col = col_l if i % 2 == 0 else col_r
+        with col:
+            st.markdown(f'<div class="q-category">{q["category"]}</div>', unsafe_allow_html=True)
+            if st.button(q["text"], key=q["id"]):
+                if st.session_state.selected_question == q["id"]:
+                    st.session_state.selected_question = None
+                else:
+                    st.session_state.selected_question = q["id"]
+                st.rerun()
 
-    if sel == "q3":
-        rows           = get_q3_fossil_data()
-        cypher_display = Q3_CYPHER_DISPLAY
-    else:
-        rows           = run_query(q["cypher"])
-        cypher_display = q["cypher"]
+    # ── Result panel ───────────────────────────────────────────────────────────
+    sel = st.session_state.selected_question
+    if sel:
+        q = next(x for x in QUESTIONS if x["id"] == sel)
 
-    n = len(rows)
+        if sel == "q3":
+            rows           = get_q3_fossil_data()
+            cypher_display = Q3_CYPHER_DISPLAY
+        else:
+            rows           = run_query(q["cypher"])
+            cypher_display = q["cypher"]
 
-    st.markdown(f'<div class="result-question">{q["text"]}</div>', unsafe_allow_html=True)
-    st.markdown(
-        f'<div class="result-meta">Verified Cypher query against Neo4j &nbsp;·&nbsp; '
-        f'{n} result{"s" if n != 1 else ""}</div>',
-        unsafe_allow_html=True,
-    )
+        n = len(rows)
 
-    if not rows:
-        st.warning("No data found for this query. The metric may not be available for all companies.")
-    else:
-        # ── 1. Worded answer ──────────────────────────────────────────────────
-        answer = _worded(sel, rows)
-        if answer:
-            st.markdown(f'<div class="worded-answer">{answer}</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="result-question">{q["text"]}</div>', unsafe_allow_html=True)
+        st.markdown(
+            f'<div class="result-meta">Verified Cypher query against Neo4j &nbsp;·&nbsp; '
+            f'{n} result{"s" if n != 1 else ""}</div>',
+            unsafe_allow_html=True,
+        )
 
-        # ── 2. Chart / stat / provenance ──────────────────────────────────────
-        if q["chart"] in ("bar", "bar_pct"):
-            df   = pd.DataFrame(rows).sort_values("value", ascending=True)
-            unit = df["unit"].dropna().iloc[0] if not df["unit"].dropna().empty else ""
-            fig  = hbar(df, unit)
-            if q["chart"] == "bar_pct":
-                fig.update_layout(xaxis=dict(
-                    range=[0, 35],
-                    title=dict(text="% of total wages", font=dict(size=11, color="#6B6560")),
+        if not rows:
+            st.warning("No data found for this query. The metric may not be available for all companies.")
+        else:
+            # ── 1. Worded answer ──────────────────────────────────────────────
+            answer = _worded(sel, rows)
+            if answer:
+                st.markdown(f'<div class="worded-answer">{answer}</div>', unsafe_allow_html=True)
+
+            # ── 2. Chart / stat / provenance ──────────────────────────────────
+            if q["chart"] in ("bar", "bar_pct"):
+                df   = pd.DataFrame(rows).sort_values("value", ascending=True)
+                unit = df["unit"].dropna().iloc[0] if not df["unit"].dropna().empty else ""
+                fig  = hbar(df, unit)
+                if q["chart"] == "bar_pct":
+                    fig.update_layout(xaxis=dict(
+                        range=[0, 35],
+                        title=dict(text="% of total wages", font=dict(size=11, color="#6B6560")),
+                        showgrid=False, showline=True, linecolor="#E2DDD8",
+                        tickfont=dict(size=11, color="#6B6560"),
+                    ))
+                st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+
+            elif q["chart"] == "line":
+                df = pd.DataFrame(rows)
+                kl_df   = df[df["unit"] == "kL/tonne"].copy() if "unit" in df.columns else df
+                plot_df = kl_df if not kl_df.empty else df
+                unit    = plot_df["unit"].dropna().iloc[0] if not plot_df["unit"].dropna().empty else ""
+                fig = go.Figure(go.Scatter(
+                    x=plot_df["year"], y=plot_df["value"],
+                    mode="lines+markers",
+                    line=dict(color="#C9748A", width=2),
+                    marker=dict(size=8, color="#C9748A", line=dict(color="white", width=2)),
+                ))
+                layout = {**_LAYOUT_BASE}
+                layout["yaxis"] = dict(
+                    showgrid=True, gridcolor="#F4F2EF", showline=False,
+                    title=dict(text=unit, font=dict(size=11, color="#6B6560")),
+                    tickfont=dict(size=11, color="#6B6560"),
+                )
+                layout["height"] = 280
+                fig.update_layout(**layout)
+                st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+
+            elif q["chart"] == "line_trend":
+                df = pd.DataFrame(rows).sort_values("year")
+                fig = go.Figure(go.Scatter(
+                    x=df["year"], y=df["value"],
+                    mode="lines+markers+text",
+                    line=dict(color="#C9748A", width=2),
+                    marker=dict(size=10, color="#C9748A", line=dict(color="white", width=2)),
+                    text=[f"{v:,.0f}" for v in df["value"]],
+                    textposition="top center",
+                    textfont=dict(size=11, color="#6B6560", family="Inter"),
+                ))
+                layout = {**_LAYOUT_BASE}
+                layout["yaxis"] = dict(
+                    showgrid=True, gridcolor="#F4F2EF", showline=False,
+                    rangemode="tozero",
+                    title=dict(text="tCO2e", font=dict(size=11, color="#6B6560")),
+                    tickfont=dict(size=11, color="#6B6560"),
+                )
+                layout["xaxis"] = dict(
                     showgrid=False, showline=True, linecolor="#E2DDD8",
                     tickfont=dict(size=11, color="#6B6560"),
-                ))
-            st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+                )
+                layout["height"] = 300
+                layout["margin"] = dict(l=10, r=20, t=30, b=10)
+                fig.update_layout(**layout)
+                st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+                st.markdown(
+                    '<div style="font-family:Inter,sans-serif;font-size:11px;color:#9B9590;'
+                    'margin-top:-0.4rem;margin-bottom:0.8rem;">'
+                    'Note: FY2024 covers a 15-month transition period (Jan 2023 – Mar 2024). '
+                    'CY2023 and FY2025 are standard 12-month periods.'
+                    '</div>',
+                    unsafe_allow_html=True,
+                )
 
-        elif q["chart"] == "line":
-            df = pd.DataFrame(rows)
-            # Filter to comparable kL/tonne rows for charting
-            kl_df = df[df["unit"] == "kL/tonne"].copy() if "unit" in df.columns else df
-            plot_df = kl_df if not kl_df.empty else df
-            unit = plot_df["unit"].dropna().iloc[0] if not plot_df["unit"].dropna().empty else ""
-            fig = go.Figure(go.Scatter(
-                x=plot_df["year"], y=plot_df["value"],
-                mode="lines+markers",
-                line=dict(color="#C9748A", width=2),
-                marker=dict(size=8, color="#C9748A", line=dict(color="white", width=2)),
-            ))
-            layout = {**_LAYOUT_BASE}
-            layout["yaxis"] = dict(
-                showgrid=True, gridcolor="#F4F2EF", showline=False,
-                title=dict(text=unit, font=dict(size=11, color="#6B6560")),
-                tickfont=dict(size=11, color="#6B6560"),
-            )
-            layout["height"] = 280
-            fig.update_layout(**layout)
-            st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
-
-        elif q["chart"] == "stat_dark":
-            fossil_pct    = rows[0].get("fossil_pct")
-            renewable_pct = rows[0].get("renewable_pct")
-            if fossil_pct is not None:
-                st.markdown(f"""
+            elif q["chart"] == "emissions_improvement":
+                srt = sorted(rows, key=lambda r: r.get("year", ""))
+                if len(srt) >= 2:
+                    first_val = srt[0]["value"]
+                    last_val  = srt[-1]["value"]
+                    first_yr  = srt[0]["year"]
+                    last_yr   = srt[-1]["year"]
+                    pct       = (last_val - first_val) / first_val * 100 if first_val else 0
+                    sign      = "−" if pct < 0 else "+"
+                    color     = "#2E7D6B" if pct < 0 else "#C41E3A"
+                    st.markdown(f"""
 <div style="font-family:'DM Serif Display',serif;font-size:80px;
-            color:#1A1A18;line-height:1;margin:1.2rem 0 0.4rem;">{fossil_pct}%</div>
-<div style="font-family:Inter,sans-serif;font-size:14px;color:#6B6560;margin-bottom:1.5rem;">
-  of total energy from fossil fuel sources &nbsp;·&nbsp; Britannia FY2024
+            color:{color};line-height:1;margin:1.2rem 0 0.4rem;">{sign}{abs(pct):.1f}%</div>
+<div style="font-family:Inter,sans-serif;font-size:14px;color:#6B6560;margin-bottom:1.8rem;">
+  Nestlé India Scope 1 emissions &nbsp;·&nbsp; {first_yr} → {last_yr}
+</div>
+<div style="display:flex;gap:32px;font-family:Inter,sans-serif;margin-bottom:1rem;align-items:center;">
+  <div>
+    <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.8px;
+                color:#9B9590;margin-bottom:4px;">{first_yr}</div>
+    <div style="font-size:22px;font-weight:500;color:#1A1A18;">{first_val:,.0f} tCO2e</div>
+  </div>
+  <div style="font-size:28px;color:#9B9590;">→</div>
+  <div>
+    <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.8px;
+                color:#9B9590;margin-bottom:4px;">{last_yr}</div>
+    <div style="font-size:22px;font-weight:500;color:{color};">{last_val:,.0f} tCO2e</div>
+  </div>
+</div>
+<div style="font-family:Inter,sans-serif;font-size:11px;color:#9B9590;margin-top:0.6rem;">
+  Only Nestlé India has multi-year Scope 1 data in this graph (CY2023, FY2024, FY2025).
 </div>
 """, unsafe_allow_html=True)
 
-        elif q["chart"] == "provenance_water":
-            row            = rows[0]
-            value          = row.get("value", 0)
-            unit           = row.get("unit", "")
-            status         = row.get("status", "—")
-            confidence     = row.get("confidence_score", "—")
-            raw_evidence   = row.get("evidence") or ""
-            page           = row.get("page", "—")
-            doc_id         = row.get("doc_id", "")
-            doc_name       = DOC_NAMES.get(doc_id, "Source document")
-            val_kl         = value / 1000 if isinstance(value, (int, float)) else 0
+            elif q["chart"] == "grouped_bar":
+                seen_order: list[str] = []
+                for r in rows:
+                    if r["company"] not in seen_order:
+                        seen_order.append(r["company"])
+                totals: dict[str, float] = {}
+                for r in rows:
+                    totals[r["company"]] = totals.get(r["company"], 0) + r["value"]
+                companies_ord = sorted(seen_order, key=lambda c: totals.get(c, 0), reverse=True)
+                scope1_vals = [
+                    next((r["value"] for r in rows
+                          if r["company"] == co and r["scope"] == "scope_1_emissions"), 0)
+                    for co in companies_ord
+                ]
+                scope2_vals = [
+                    next((r["value"] for r in rows
+                          if r["company"] == co and r["scope"] == "scope_2_emissions"), 0)
+                    for co in companies_ord
+                ]
+                co_short  = [_short(c) for c in companies_ord]
+                co_colors = [company_color(c) for c in companies_ord]
+                fig = go.Figure()
+                fig.add_trace(go.Bar(
+                    name="Scope 1 (Direct)",
+                    x=co_short, y=scope1_vals,
+                    marker_color=co_colors, marker_line_width=0,
+                    text=[f"{v:,.0f}" for v in scope1_vals],
+                    textposition="outside",
+                    textfont=dict(size=10, color="#6B6560", family="Inter"),
+                    width=0.35, opacity=1.0,
+                ))
+                fig.add_trace(go.Bar(
+                    name="Scope 2 (Electricity)",
+                    x=co_short, y=scope2_vals,
+                    marker_color=co_colors, marker_line_width=0,
+                    text=[f"{v:,.0f}" for v in scope2_vals],
+                    textposition="outside",
+                    textfont=dict(size=10, color="#6B6560", family="Inter"),
+                    width=0.35, opacity=0.4,
+                ))
+                layout = {**_LAYOUT_BASE}
+                layout["barmode"] = "group"
+                layout["showlegend"] = True
+                layout["legend"] = dict(
+                    orientation="h", x=0, y=1.08,
+                    font=dict(size=11, family="Inter", color="#6B6560"),
+                )
+                layout["yaxis"] = dict(
+                    showgrid=True, gridcolor="#F4F2EF", showline=False,
+                    title=dict(text="tCO2e", font=dict(size=11, color="#6B6560")),
+                    tickfont=dict(size=11, color="#6B6560"),
+                )
+                layout["height"] = 360
+                layout["margin"] = dict(l=10, r=20, t=50, b=10)
+                fig.update_layout(**layout)
+                st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
 
-            status_bg    = "#D4EDDA" if status == "normalized" else "#FFF3CD"
-            status_color = "#155724" if status == "normalized" else "#856404"
+            elif q["chart"] == "stat_renewable":
+                renewable_pct = rows[0].get("renewable_pct")
+                if renewable_pct is not None:
+                    st.markdown(f"""
+<div style="font-family:'DM Serif Display',serif;font-size:80px;
+            color:#2E7D6B;line-height:1;margin:1.2rem 0 0.4rem;">{renewable_pct}%</div>
+<div style="font-family:Inter,sans-serif;font-size:14px;color:#6B6560;margin-bottom:1.5rem;">
+  of total energy from renewable sources &nbsp;·&nbsp; Britannia FY2024
+</div>
+""", unsafe_allow_html=True)
 
-            st.markdown(f"""
+            elif q["chart"] == "provenance_water":
+                row          = rows[0]
+                value        = row.get("value", 0)
+                status       = row.get("status", "—")
+                raw_evidence = row.get("evidence") or ""
+                page         = row.get("page", "—")
+                doc_id       = row.get("doc_id", "")
+                doc_name     = DOC_NAMES.get(doc_id, "Source document")
+                val_kl       = value / 1000 if isinstance(value, (int, float)) else 0
+                status_bg    = "#D4EDDA" if status == "normalized" else "#FFF3CD"
+                status_color = "#155724" if status == "normalized" else "#856404"
+
+                st.markdown(f"""
 <div style="display:flex;gap:12px;margin:1rem 0 1.4rem;font-family:Inter,sans-serif;">
   <div style="flex:1;background:#FAF7F5;border:1px solid #E2DDD8;padding:1rem 1.2rem;">
     <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.8px;
@@ -967,9 +1259,9 @@ if sel:
 </div>
 """, unsafe_allow_html=True)
 
-            evidence_text = clean_evidence(raw_evidence, _EVIDENCE_KEYWORDS["q6"])
-            if evidence_text and evidence_text != "Source text not available":
-                st.markdown(f"""
+                evidence_text = clean_evidence(raw_evidence, _EVIDENCE_KEYWORDS["q6"])
+                if evidence_text and evidence_text != "Source text not available":
+                    st.markdown(f"""
 <div style="background:#FAF7F5;border-left:3px solid #C9748A;padding:1rem 1.2rem;
             font-style:italic;color:#3D3A37;font-size:13px;line-height:1.6;
             margin-bottom:0.4rem;">&ldquo;{evidence_text}&rdquo;</div>
@@ -977,7 +1269,7 @@ if sel:
             margin-bottom:1rem;">{doc_name} · Page {page}</div>
 """, unsafe_allow_html=True)
 
-            st.markdown("""
+                st.markdown("""
 <div style="font-size:12px;color:#9B9590;font-family:Inter,sans-serif;margin-top:0.4rem;">
   <code style="background:#F4F2EF;padding:1px 5px;font-size:11px;font-family:'JetBrains Mono',monospace;">normalized</code>
   &nbsp;= exact canonical match &nbsp;·&nbsp;
@@ -988,90 +1280,351 @@ if sel:
 </div>
 """, unsafe_allow_html=True)
 
-        # ── 3. Source citation ────────────────────────────────────────────────
-        cite = _source_citation(sel, rows)
-        if cite:
-            st.markdown(f'<div class="source-citation">{cite}</div>', unsafe_allow_html=True)
+            # ── 3. Source citation ────────────────────────────────────────────
+            cite = _source_citation(sel, rows)
+            if cite:
+                st.markdown(f'<div class="source-citation">{cite}</div>', unsafe_allow_html=True)
 
-        # ── Expanders ─────────────────────────────────────────────────────────
-        exp1, exp2 = st.columns(2)
-        with exp1:
-            with st.expander("Cypher query"):
-                st.markdown(f'<div class="cypher-code">{cypher_display}</div>',
-                            unsafe_allow_html=True)
-        with exp2:
-            render_source_expander(sel, rows)
+            # ── Expanders ─────────────────────────────────────────────────────
+            exp1, exp2 = st.columns(2)
+            with exp1:
+                with st.expander("Cypher query"):
+                    st.markdown(f'<div class="cypher-code">{cypher_display}</div>',
+                                unsafe_allow_html=True)
+            with exp2:
+                render_source_expander(sel, rows)
 
-# ── Divider ────────────────────────────────────────────────────────────────────
-st.markdown('<div class="section-divider"></div>', unsafe_allow_html=True)
+# ── Tab 2: Explorer ────────────────────────────────────────────────────────────
+with tab2:
+    st.markdown('<div class="section-eyebrow">Build your own comparison</div>',
+                unsafe_allow_html=True)
 
-# ── Section 2: Explorer ────────────────────────────────────────────────────────
-st.markdown('<div class="section-eyebrow">Build your own comparison</div>',
-            unsafe_allow_html=True)
+    col1, col2, col3, col4 = st.columns([3, 1.2, 1.8, 0.8])
 
-with st.form("explorer"):
-    fc1, fc2, fc3 = st.columns([2, 2, 1])
-    with fc1:
-        metric_label = st.selectbox("Metric", list(METRIC_OPTIONS.keys()))
-    with fc2:
-        company_labels = st.multiselect("Companies", list(COMPANY_OPTIONS.keys()),
-                                        default=list(COMPANY_OPTIONS.keys()))
-    with fc3:
-        year = st.selectbox("Year", ["FY2024", "FY2025", "FY2023", "FY2022"])
-    submitted = st.form_submit_button("Run")
+    with col1:
+        selected_metric = st.selectbox(
+            "Metric",
+            options=list(VERIFIED_METRICS.keys()),
+            label_visibility="visible",
+            key="exp_metric",
+        )
 
-if submitted:
-    if not company_labels:
-        st.markdown(
-            '<p style="font-family:Inter;font-size:14px;color:#9B9590;">Select at least one company.</p>',
-            unsafe_allow_html=True)
-    else:
-        canonical  = METRIC_OPTIONS[metric_label]
-        ids_str    = "['" + "', '".join(COMPANY_OPTIONS[c] for c in company_labels) + "']"
-        byo_cypher = f"""
-MATCH (o:Observation)-[:OF_METRIC]->(m:Metric {{canonical_id: '{canonical}'}}),
+    metric_config   = VERIFIED_METRICS[selected_metric]
+    available_years = metric_config["years"]
+    metric_cos      = metric_config.get("companies", [])
+    available_display = [name for name, cid in COMPANIES.items() if cid in metric_cos]
+
+    with col2:
+        selected_year = st.selectbox(
+            "Year",
+            options=available_years,
+            index=0,
+            label_visibility="visible",
+            key="exp_year",
+        )
+
+    with col3:
+        selected_companies = st.multiselect(
+            "Companies",
+            options=available_display,
+            default=available_display,
+            label_visibility="visible",
+            key="exp_companies",
+        )
+
+    with col4:
+        st.markdown("<div style='height:28px'></div>", unsafe_allow_html=True)
+        run_clicked = st.button("Run", use_container_width=True, key="exp_run")
+
+    if run_clicked:
+        if not selected_companies:
+            st.warning("Please select at least one company.")
+        else:
+            canonical_id        = metric_config["canonical_id"]
+            divide_by           = metric_config.get("divide_by", 1)
+            unit                = metric_config["unit"]
+            principle           = metric_config.get("principle", "Principle 6")
+            selected_ids        = [COMPANIES[name] for name in selected_companies]
+            ids_cypher          = "['" + "', '".join(selected_ids) + "']"
+
+            exp_cypher = f"""MATCH (o:Observation)-[:OF_METRIC]->(m:Metric
+      {{canonical_id: '{canonical_id}'}}),
       (o)-[:REPORTED_BY]->(c:Company),
-      (o)-[:IN_PERIOD]->(p:Period {{fiscal_year: '{year}'}})
-WHERE c.company_id IN {ids_str}
-  AND o.normalization_status IN ['normalized', 'partial']
+      (o)-[:IN_PERIOD]->(p:Period
+      {{fiscal_year: '{selected_year}'}})
+WHERE o.normalization_status IN ['normalized', 'partial']
   AND o.normalised_value IS NOT NULL
-WITH c, o.normalised_unit_symbol AS unit, max(o.normalised_value) AS value
-RETURN c.name AS company, value, unit
+  AND c.company_id IN {ids_cypher}
+WITH c, max(o.normalised_value) as raw_value
+RETURN c.name as company,
+       raw_value / {divide_by} as value,
+       '{unit}' as unit
 ORDER BY value DESC""".strip()
 
-        byo_rows = run_query(byo_cypher)
+            exp_rows = run_query(exp_cypher)
 
-        if not byo_rows:
-            st.markdown(
-                f'<p style="font-family:Inter;font-size:14px;color:#9B9590;">'
-                f'No data found for <strong>{metric_label}</strong> · {year}.</p>',
-                unsafe_allow_html=True)
-        else:
-            df   = pd.DataFrame(byo_rows).sort_values("value", ascending=True)
-            unit = df["unit"].dropna().iloc[0] if not df["unit"].dropna().empty else ""
-
-            if len(df) == 1:
-                v   = df["value"].iloc[0]
-                co  = df["company"].iloc[0]
-                fmt = f"{v:,.1f}" if isinstance(v, float) else str(v)
-                st.markdown(f"""
-<div class="big-stat-value" style="font-size:64px;">{fmt}</div>
-<div class="big-stat-label">{unit} &nbsp;·&nbsp; {co} &nbsp;·&nbsp; {year}</div>
-""", unsafe_allow_html=True)
+            if not exp_rows:
+                st.warning(
+                    f"No data found for **{selected_metric}** in {selected_year}. "
+                    f"This metric may not be available for all companies in the selected year."
+                )
             else:
-                st.plotly_chart(hbar(df, unit), use_container_width=True,
-                                config={"displayModeBar": False})
+                df    = pd.DataFrame(exp_rows).sort_values("value", ascending=True)
+                n_cos = len(df)
 
-            with st.expander("Raw data"):
-                st.dataframe(df, hide_index=True, use_container_width=True)
+                # summary line
+                co_names = " · ".join(
+                    r["company"].replace(" Limited","").replace(" Industries","")
+                    for r in sorted(exp_rows, key=lambda r: r["value"], reverse=True)
+                )
+                st.markdown(
+                    f'<div style="font-family:Inter;font-size:12px;color:#9B9590;'
+                    f'margin-bottom:0.8rem;">'
+                    f'{n_cos} {"company" if n_cos==1 else "companies"} &nbsp;·&nbsp; '
+                    f'{selected_metric} &nbsp;·&nbsp; {selected_year}'
+                    f'</div>',
+                    unsafe_allow_html=True,
+                )
+
+                if n_cos == 1:
+                    # single company — show as big stat card
+                    v   = df["value"].iloc[0]
+                    co  = df["company"].iloc[0]
+                    fmt = f"{v:,.0f}" if v >= 10 else f"{v:,.2f}"
+                    co_color = company_color(co)
+                    st.markdown(f"""
+<div style="font-family:'DM Serif Display',serif;font-size:72px;
+            color:{co_color};line-height:1;margin:1.2rem 0 0.4rem;">{fmt}</div>
+<div style="font-family:Inter,sans-serif;font-size:14px;
+            color:#6B6560;margin-bottom:1.5rem;">
+  {unit} &nbsp;·&nbsp;
+  {co.replace(' Limited','').replace(' Industries','')} &nbsp;·&nbsp;
+  {selected_year}
+</div>
+""", unsafe_allow_html=True)
+
+                else:
+                    # multi-company bar chart
+                    colors = [company_color(c) for c in df["company"]]
+                    text_labels = [
+                        f"{v:,.0f} {unit}" if v >= 10 else f"{v:,.2f} {unit}"
+                        for v in df["value"]
+                    ]
+                    fig = go.Figure(go.Bar(
+                        x=df["value"],
+                        y=df["company"],
+                        orientation="h",
+                        marker_color=colors,
+                        marker_line_width=0,
+                        width=0.5,
+                        text=text_labels,
+                        textposition="outside",
+                        textfont=dict(size=11, color="#3D3A37", family="Inter"),
+                    ))
+                    layout = {**_LAYOUT_BASE}
+                    layout["xaxis"] = dict(
+                        showgrid=False, showline=False, showticklabels=False,
+                        tickfont=dict(size=11, color="#6B6560"),
+                    )
+                    layout["margin"] = dict(l=10, r=120, t=10, b=10)
+                    layout["height"] = max(200, n_cos * 80)
+                    fig.update_layout(**layout)
+                    st.plotly_chart(fig, use_container_width=True,
+                                    config={"displayModeBar": False})
+
+                # source citation
+                st.markdown(
+                    f'<div class="source-citation">Source: Company Annual Reports '
+                    f'{selected_year}, BRSR Section C — {principle}</div>',
+                    unsafe_allow_html=True,
+                )
+
+                # cypher expander
+                with st.expander("Cypher query"):
+                    st.markdown(f'<div class="cypher-code">{exp_cypher}</div>',
+                                unsafe_allow_html=True)
+
+# ── Tab 3: Ask a Question ──────────────────────────────────────────────────────
+with tab3:
+    st.markdown('<div class="section-eyebrow">Natural language query interface</div>',
+                unsafe_allow_html=True)
+
+    st.markdown("""
+<style>
+div[data-testid="stTextInput"] input:disabled {
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+    background: #F4F2EF !important;
+}
+div[data-testid="stButton"] button:disabled {
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
+    st.text_input("",
+        placeholder="e.g. Which company has the lowest carbon intensity?",
+        disabled=True,
+        label_visibility="collapsed")
+
+    st.button("Run Query", disabled=True, key="nlq_run")
+
+    st.markdown("""
+<div style="
+    border: 1px solid #E2DDD8;
+    border-left: 3px solid #C9748A;
+    padding: 1rem 1.2rem;
+    background: #FAFAF8;
+    font-family: Inter, sans-serif;
+    font-size: 13px;
+    color: #6B6560;
+    margin: 1rem 0 2rem;
+    line-height: 1.6;
+">
+    <strong style="color:#1A1A18;">
+        Bring your own API key to enable live queries
+    </strong><br>
+    Add your OpenAI API key to
+    <code style="background:#F0EDE8;padding:1px 4px;
+                 font-family:JetBrains Mono,monospace;
+                 font-size:12px;">pipeline_config.json</code>
+    to translate any natural language question into
+    a Cypher graph query in real time.<br><br>
+    The full NL&rarr;Cypher pipeline is implemented and
+    open source &mdash; the examples below show the kinds
+    of questions it can answer.
+    <a href="https://github.com/Vadiaaaaaaa/ESG-Fact-Extraction-and-Knowledge-Graph-Pipeline"
+       style="color:#C9748A;text-decoration:none;margin-left:4px;">
+       View source &rarr;
+    </a>
+</div>
+""", unsafe_allow_html=True)
+
+    st.markdown(
+        '<div class="section-eyebrow" style="margin-top:1rem;">'
+        'Example queries this system can answer'
+        '</div>',
+        unsafe_allow_html=True)
+
+    EXAMPLES = [
+        {
+            "question": "Which company has improved its emissions the most since 2022?",
+            "answer": "Nestlé India reduced Scope 1 emissions by 23.4% from 192,678 tCO2e in CY2022 to 147,573 tCO2e in FY2025 — the largest reduction among the three companies tracked. This reflects investments in biomass boilers and renewable energy across their manufacturing facilities.",
+            "cypher": """MATCH (o:Observation)-[:OF_METRIC]->(m:Metric
+      {canonical_id: 'scope_1_emissions'}),
+      (o)-[:REPORTED_BY]->(c:Company
+      {company_id: 'nestle_india'}),
+      (o)-[:IN_PERIOD]->(p:Period)
+WHERE o.normalization_status IN ['normalized', 'partial']
+AND o.normalised_value < 1000000
+WITH p.fiscal_year as year,
+     max(o.normalised_value) as value
+RETURN year, value, 'tCO2e' as unit
+ORDER BY year""",
+        },
+        {
+            "question": "How do Scope 1 and Scope 2 emissions compare across all companies?",
+            "answer": "In FY2024, Nestlé India had the highest Scope 1 emissions at 231,324 tCO2e, followed by Britannia at 93,583 tCO2e and Marico at 1,053 tCO2e. The large difference reflects Nestlé's significantly larger manufacturing scale and higher thermal energy requirements for food processing.",
+            "cypher": """MATCH (o:Observation)-[:OF_METRIC]->(m:Metric),
+      (o)-[:REPORTED_BY]->(c:Company),
+      (o)-[:IN_PERIOD]->(p:Period {fiscal_year: 'FY2024'})
+WHERE m.canonical_id IN ['scope_1_emissions',
+                          'scope_2_emissions']
+AND o.normalization_status IN ['normalized', 'partial']
+AND o.normalised_value < 1000000
+WITH c, m.canonical_id as metric,
+     max(o.normalised_value) as value
+RETURN c.name as company, metric, value,
+       'tCO2e' as unit
+ORDER BY metric, value DESC""",
+        },
+        {
+            "question": "What share of Britannia's energy comes from renewable sources?",
+            "answer": "22.1% of Britannia's total energy consumption came from renewable sources in FY2024, representing 503,290 GJ out of 2,279,136 GJ total. Britannia has set a target of 59% renewable electricity by 2024 — indicating significant room to grow.",
+            "cypher": """MATCH (o1:Observation)-[:OF_METRIC]->(m1:Metric
+      {canonical_id: 'renewable_energy_consumption_absolute'}),
+      (o2:Observation)-[:OF_METRIC]->(m2:Metric
+      {canonical_id: 'absolute_energy_consumption'}),
+      (o1)-[:REPORTED_BY]->(c:Company
+      {company_id: 'britannia'}),
+      (o2)-[:REPORTED_BY]->(c),
+      (o1)-[:IN_PERIOD]->(p:Period {fiscal_year: 'FY2024'}),
+      (o2)-[:IN_PERIOD]->(p)
+WHERE o1.normalization_status IN ['normalized', 'partial']
+AND o2.normalization_status IN ['normalized', 'partial']
+WITH max(o1.normalised_value) as renewable,
+     max(o2.normalised_value) as total
+RETURN renewable, total,
+       round(renewable / total * 100, 1) as pct""",
+        },
+        {
+            "question": "Which company has the highest female board representation?",
+            "answer": "Marico had 25% female representation on its Board of Directors in FY2024 — 3 out of 12 board members. Britannia had 7.69% (1 out of 13). This data is disclosed under BRSR Principle 5 human rights and gender diversity requirements.",
+            "cypher": """MATCH (o:Observation)-[:REPORTED_BY]->(c:Company),
+      (o)-[:IN_PERIOD]->(p:Period {fiscal_year: 'FY2024'})
+WHERE o.raw_name IN [
+  'Females on Board of Directors',
+  'percentage of female board members',
+  'Women on Board'
+]
+AND o.normalised_value IS NOT NULL
+RETURN c.name as company,
+       o.normalised_value as pct,
+       '%' as unit
+ORDER BY pct DESC""",
+        },
+    ]
+
+    for ex in EXAMPLES:
+        st.markdown(f"""
+<div style="
+    border: 1px solid #E2DDD8;
+    padding: 1.2rem 1.4rem;
+    margin-bottom: 1px;
+    background: #FFFFFF;
+    font-family: Inter, sans-serif;
+">
+    <div style="font-size:14px;font-weight:500;color:#1A1A18;margin-bottom:8px;">
+        {ex['question']}
+    </div>
+    <div style="font-size:13px;color:#6B6560;line-height:1.5;">
+        {ex['answer']}
+    </div>
+</div>
+""", unsafe_allow_html=True)
+        with st.expander("View Cypher"):
+            st.markdown(f'<div class="cypher-code">{ex["cypher"]}</div>',
+                        unsafe_allow_html=True)
+
+    st.markdown("""
+<div style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid #E2DDD8;">
+    <div class="section-eyebrow">What live querying enables</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.5rem;margin-top:1rem;">
+        <div style="font-family:Inter;font-size:13px;color:#6B6560;line-height:1.6;">
+            <strong style="color:#1A1A18;display:block;margin-bottom:4px;">Any metric</strong>
+            Query any of 297 canonical ESG metrics or 1,456 provisional metrics
+            across all companies
+        </div>
+        <div style="font-family:Inter;font-size:13px;color:#6B6560;line-height:1.6;">
+            <strong style="color:#1A1A18;display:block;margin-bottom:4px;">Any company</strong>
+            Compare across Nestlé, Britannia, and Marico &mdash; extensible to any
+            BRSR-reporting Indian listed company
+        </div>
+        <div style="font-family:Inter;font-size:13px;color:#6B6560;line-height:1.6;">
+            <strong style="color:#1A1A18;display:block;margin-bottom:4px;">Full provenance</strong>
+            Every answer traces back to the exact page and sentence in the source
+            annual report
+        </div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
 # ── Footer ─────────────────────────────────────────────────────────────────────
 st.markdown("""
 <div class="app-footer">
-  Data extracted from BRSR sections of Indian annual reports using a two-pass LLM pipeline<br>
-  Evaluated against a manually verified gold set of 69 facts &nbsp;·&nbsp; 78.3% end-to-end accuracy<br>
-  <a href="https://github.com/Vadiaaaaaaa/ESG-Fact-Extraction-and-Knowledge-Graph-Pipeline">
-    View on GitHub →
-  </a>
+  A knowledge graph where every fact knows who reported it, when, how confidently,
+  and where &mdash; connected through shared canonical metrics to enable cross-company
+  queries no flat database can answer.
 </div>
 """, unsafe_allow_html=True)

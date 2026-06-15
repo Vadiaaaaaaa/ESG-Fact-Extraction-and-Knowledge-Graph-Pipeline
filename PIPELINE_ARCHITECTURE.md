@@ -1,8 +1,8 @@
 # ESG Fact Extraction Pipeline — Architecture
 
 **Project:** Consumer company ESG & operational KPI extraction from annual reports  
-**Stack:** Python · OpenAI GPT · Neo4j · Node.js (Word docs)  
-**Benchmark companies:** Nestle India, Tata Consumer, GCPL, ITC
+**Stack:** Python · OpenAI GPT-4.1-mini · Neo4j 5.x · Streamlit · Plotly  
+**Companies in KG:** Nestlé India, Britannia Industries, Marico Limited
 
 ---
 
@@ -16,15 +16,12 @@
    - [Stage 2 — Pass 2: Normalization & Registry Matching](#stage-2--pass-2-normalization--registry-matching)
    - [Stage 3 — Knowledge Graph Loading](#stage-3--knowledge-graph-loading)
 4. [Data Models](#4-data-models)
-   - [Chunk](#chunk)
-   - [Pass 1 Fact (EDC)](#pass-1-fact-edc)
-   - [Pass 2 Fact (Enriched)](#pass-2-fact-enriched)
 5. [Registry System](#5-registry-system)
 6. [Unit Normalisation](#6-unit-normalisation)
 7. [Financial Classifier](#7-financial-classifier)
 8. [Knowledge Graph Schema](#8-knowledge-graph-schema)
-9. [Verification & Quality Gates](#9-verification--quality-gates)
-10. [Benchmark Run System](#10-benchmark-run-system)
+9. [Demo & Query Applications](#9-demo--query-applications)
+10. [Evaluation & Quality Gates](#10-evaluation--quality-gates)
 11. [Known Issues & Current Status](#11-known-issues--current-status)
 12. [Cost & Token Profile](#12-cost--token-profile)
 
@@ -35,26 +32,41 @@
 The pipeline converts raw PDF annual reports into a structured Neo4j knowledge graph of ESG and operational metrics. It does this in two LLM passes separated by a deterministic normalisation layer.
 
 ```
-PDF
+PDF Annual Report
  │
  ▼
-[Stage 0] fast_pdf_text_ingest.py
+[Stage 0] pipeline/fast_pdf_text_ingest.py
  │  Page selection → text extraction → chunking → prev/next linking
  │
- ▼  nestle_india_rerun_fast_chunks.json
-[Stage 1] extractor.py  (LLM: gpt-4.1-mini)
+ ▼  {prefix}_fast_chunks.json
+[Stage 1] pipeline/extractor.py  (LLM: gpt-4.1-mini)
  │  Per-chunk fact extraction → validation → dedup → rescue pass
  │
- ▼  nestle_india_pass1_rerun.json
-[Stage 2] normalizer.py  (fuzzy match + LLM tiebreaker: gpt-4.1-mini)
+ ▼  {prefix}_pass1.json
+[Stage 2] pipeline/normalizer.py  (fuzzy match + optional LLM tiebreaker)
  │  Registry matching → unit normalisation → financial filtering → enrichment
  │
- ▼  nestle_india_pass2_rerun.json
-[Stage 3] kg_loader_nestle.py  (Neo4j)
- │  Node creation → relationship wiring → provenance chain
+ ▼  {prefix}_pass2.json
+[Stage 3] pipeline/run_pipeline.py → Neo4j
+ │  MERGE nodes/relationships (idempotent)
+ │  Cross-document deduplication
+ │  MetricCategory hierarchy seeding
  │
- ▼  Neo4j KG
+ ▼  Neo4j KG (2,431 Observations across 4 documents)
+ │
+ ├──▶ graph/demo_app.py          port 8502  — 6 ESG questions, Explorer, provenance
+ └──▶ graph/kg_query_app.py      port 8501  — NL→Cypher query interface
 ```
+
+### Documents processed
+
+| Document | Pages Selected | Chunks | KG Observations |
+|---|---|---|---|
+| Nestlé India FY2024 | 52 / 287 | 149 | 536 |
+| Nestlé India FY2025 | 210 / 259 | 276 | 775 |
+| Britannia FY2024 | 52 / 132 | 115 | 433 |
+| Marico FY2024 | 98 / 259 | 201 | 687 |
+| **Total** | | **741** | **2,431** |
 
 ---
 
@@ -63,50 +75,48 @@ PDF
 ```
 test/
 │
-├── PIPELINE ENTRY POINTS
-│   ├── fast_pdf_text_ingest.py       Stage 0 — PDF → chunks
-│   ├── extractor.py                  Stage 1 — chunks → Pass 1 facts
-│   ├── normalizer.py                 Stage 2 — Pass 1 → Pass 2 facts
-│   ├── kg_loader_nestle.py           Stage 3 — Pass 2 → Neo4j
-│   └── benchmark_rerun.py           Orchestrates Stages 0–2 for all companies
+├── pipeline/                        PIPELINE ENTRY POINTS
+│   ├── run_pipeline.py              Unified orchestrator (CLI entry point, Stages 0–3)
+│   ├── fast_pdf_text_ingest.py      Stage 0 — PDF → chunks
+│   ├── section_finder.py            Page selection logic
+│   ├── extractor.py                 Stage 1 — chunks → Pass 1 facts
+│   ├── normalizer.py                Stage 2 — Pass 1 → Pass 2 facts
+│   ├── models.py                    Chunk, ExtractedFact, NormalizedFact dataclasses
+│   ├── unit_normaliser.py           Unit conversion + confidence
+│   ├── normalizer_guardrails.py     Dimension/unit validators
+│   └── pass1_*.py                   Prompt templates and schemas
 │
-├── PROMPTS & SCHEMA
-│   ├── pass1_prompt_lean.py          Primary extraction prompt (gpt-4.1-mini)
-│   ├── pass1_prompt_balanced.py      Secondary extraction prompt (fallback)
-│   ├── pass1_lean_schema.py          JSON schema for Pass 1 output fields
-│   └── pass1_validate.py             Period normalisation, fact type inference
+├── registry/                        CANONICAL METRIC REGISTRY
+│   ├── consumer_master_registry_v1.json   240 base canonical metric definitions
+│   ├── registry_additions_approved.json   9+ BRSR-specific additions
+│   ├── registry_aliases.json              289 raw_name → canonical_id aliases
+│   ├── registry_semantic_overrides.json   Semantic typing corrections
+│   └── metric_registry_seed.py            REGISTRY builder + alias index
 │
-├── REGISTRY
-│   ├── consumer_master_registry_v1.json    51 canonical metric definitions
-│   ├── registry_additions_approved.json   42 approved additions
-│   ├── registry_aliases.json              229 raw-name → canonical_id aliases
-│   └── registry_semantic_overrides.json   Semantic typing overrides
+├── audit/                           QUALITY CHECKS
+│   ├── audit_selected_pages.py      Stage 2: Coverage audit
+│   ├── new_metric_distance_audit.py Stage 5: Proximity audit
+│   └── review_memory.json           Manual override decisions
 │
-├── NORMALISATION
-│   ├── unit_normaliser.py            Unit conversion + confidence scoring
-│   ├── metric_registry_seed.py       Registry seed + alias index builder
-│   ├── gold_set.py                   Fuzzy match scoring (cosine + alias)
-│   ├── semantic_registry.py          Semantic typing, alias gate
-│   └── definitions.py               Metric definition matching
+├── graph/                           APPLICATIONS
+│   ├── demo_app.py                  Portfolio demo (3 tabs, 6 questions, Explorer)
+│   ├── kg_query_app.py              NL→Cypher query interface
+│   ├── kg_loader_nestle.py          Legacy Nestlé FY2024 loader (superseded by run_pipeline.py)
+│   ├── kg_loader_nestle_2021.py     Historical loaders
+│   ├── kg_loader_nestle_2022.py
+│   └── pipeline_ui.py               Pipeline run UI
 │
-├── QUALITY & VERIFICATION
-│   ├── verify_unit_normalisation.py  Checks exact/inferred confidence vs null value
-│   ├── verify_provenance_fields.py   Checks all 5 provenance fields present
-│   ├── check_confidence_fields.py    Confidence enrichment helper
-│   ├── check_provenance_fields.py    Provenance backfill helper
-│   └── test_pre_kg_pipeline_fixes.py 41 regression tests
+├── eval/                            EVALUATION
+│   ├── eval_pipeline.py             Precision/recall vs gold set
+│   ├── eval_gold_set.py             69 gold fact annotations (Nestlé FY2024)
+│   └── eval_review_app.py           Interactive label review app
 │
-├── SUPPORT
-│   ├── models.py                     Chunk, Fact, TemporalContext dataclasses
-│   ├── section_finder.py             PDF section detection
-│   ├── audit_selected_pages.py       Page selection coverage audit
-│   ├── provisional_dedup.py          Cross-company new_metric clustering
-│   ├── export_readable_facts.py      Pass1+Pass2 → readable CSV
-│   ├── normalizer_guardrails.py      Value extraction guardrails
-│   ├── provisional_review.py         Review file writer
-│   └── review_memory.py / .json      Human review decisions (persisted)
+├── tools/
+│   └── registry_gap_analysis.py     Suggest new canonical metrics from new_metric clusters
 │
-└── workspace_test_outputs/           All pipeline artifacts
+├── gold_set.py                      Fuzzy scoring, match signals
+├── pipeline_config.json             Runtime config (credentials, paths)
+└── workspace_test_outputs/          All pipeline artifacts
 ```
 
 ---
@@ -115,23 +125,23 @@ test/
 
 ### Stage 0 — PDF Ingestion & Chunking
 
-**File:** `fast_pdf_text_ingest.py`  
+**File:** `pipeline/fast_pdf_text_ingest.py`  
 **Input:** Annual report PDF  
-**Output:** `{company}_rerun_fast_chunks.json`
+**Output:** `{prefix}_fast_chunks.json`, `{prefix}_selected_pages.json`
 
 #### What it does
 
-1. **Page selection** — scans all PDF pages and scores each for operational/ESG content using keyword weights from `section_finder.py`. Pages below the threshold are excluded. Produces `{company}_rerun_selected_pages.json`.
+1. **Page selection** — scans all PDF pages and scores each for ESG/BRSR content using keyword weights from `section_finder.py`. Pages below the threshold are excluded.
 
-2. **Section detection** — groups selected pages into logical sections (Board's Report, BRSR, Cash Flow, Notes, etc.).
+2. **TOC detection** — pages with ≥5 standalone 2–3 digit numbers are identified as table-of-contents pages and skipped when searching for the BRSR section heading. Prevents the range heuristic from selecting the wrong block of pages.
 
-3. **Text extraction** — uses PyMuPDF (`fitz`) to extract raw text from selected pages, preserving table structure where possible.
+3. **Section detection** — groups selected pages into logical sections (Board's Report, BRSR, Cash Flow, Notes, etc.).
 
-4. **Chunking** — splits section text into overlapping chunks with a max word limit (default ~500 words), 5-word overlap. Large table chunks are split further by `_split_large_table_chunk`.
+4. **Text extraction** — uses PyMuPDF (`fitz`) to extract raw text from selected pages.
 
-5. **Prev/next linking** — after all chunks are built, iterates the list and sets `prev_chunk_id` / `next_chunk_id` on each chunk. This is the provenance chain used by the KG.
+5. **Chunking** — splits section text into ~600-token passages with 5-word overlap. Chunks store `prev_chunk_id` / `next_chunk_id` for provenance.
 
-6. **Historical reprint detection** — chunks from reprinted prior-year data (identified by temporal context patterns) are flagged `is_historical_reprint=True` and excluded from extraction.
+6. **Historical reprint detection** — prior-year comparative rows are flagged `is_historical_reprint=True` and excluded from extraction.
 
 #### Chunk structure
 
@@ -160,50 +170,31 @@ test/
 
 #### Coverage audit
 
-`audit_selected_pages.py` re-scans the PDF after page selection and flags any high-signal pages that were not selected (`high_signal_unselected`). Acts as a recall check on the page selector.
+`audit/audit_selected_pages.py` re-scans the PDF after page selection and flags high-signal pages that were not selected. Acts as a recall check on the page selector.
 
 ---
 
 ### Stage 1 — Pass 1: Fact Extraction (LLM)
 
-**File:** `extractor.py`  
-**Model:** `gpt-4.1-mini` (was `gpt-4o-mini`)  
-**Input:** `{company}_rerun_fast_chunks.json`  
-**Output:** `{company}_pass1_rerun.json`
+**File:** `pipeline/extractor.py`  
+**Model:** `gpt-4.1-mini`  
+**Input:** `{prefix}_fast_chunks.json`  
+**Output:** `{prefix}_pass1.json`, `{prefix}_pass1_partial.jsonl`, `{prefix}_pass1_telemetry.json`
 
 #### What it does
 
-For each chunk, sends a structured extraction prompt to the LLM asking it to return all quantitative business facts as JSON. The lean prompt (`pass1_prompt_lean.py`) instructs the model to:
+Each chunk is sent to GPT-4.1-mini with a high-recall extraction prompt. The model outputs a JSON array of all quantitative ESG facts found in the chunk.
 
-- Extract every metric-value pair with raw unit, period, scope, dimension
-- Never normalise values or resolve canonical names — downstream does that
-- Tag `graph_fact_type` (operational_metric, financial_metric, mix_share_metric, etc.)
-- Tag `fact_type` (measurement, target, baseline, ratio, count, boolean)
-- Follow explicit rules for absolute-vs-relative values, sustainability targets, and biographical noise
+- `max_tokens=16000` to handle dense BRSR tables without truncation (raised from 3,000)
+- Truncation recovery: if JSON is cut off, scans backwards for last complete fact object
+- Incremental JSONL (`{prefix}_pass1_partial.jsonl`): one line per completed chunk — enables crash recovery without re-extracting
+- Rescue pass: facts with missing context are re-sent with neighboring chunks prepended
 
 #### Extraction rules (key prompt additions)
 
-- **Absolute value rule** — when a sentence has both an absolute figure and a fold-increase ("4 million outlets, a two-fold increase"), extract the absolute as primary. Never extract the multiplier as the count value.
-- **Sustainability targets** — explicitly extract future commitments as `fact_type=target` with the target year as `period_end`. Do not drop targets because they lack a current measured value.
-- **Anti-noise** — exclude tenure years, award counts, committee seat numbers, page/section references.
-
-#### Validation & dedup (`pass1_validate.py`)
-
-After LLM response:
-
-1. **Schema enforcement** — checks all required fields present, fills defaults
-2. **Period resolution** — resolves `raw_period` strings ("FY2022", "last two years", etc.) to `period_start`/`period_end` ISO dates
-3. **Fact type inference** — infers measurement/target/baseline/count/boolean from context when LLM omits it
-4. **Anchor dedup** — removes facts that are structural anchors (table headers, section labels) with no real numeric content
-5. **Duplicate removal** — deduplicates on (metric_core, raw_value, period) key
-
-#### Rescue pass (neighbor context)
-
-After initial extraction, facts that were dropped or uncertain are re-sent with neighboring chunk text prepended for context. The model sees prev_chunk → current_chunk → next_chunk. This recovers facts where the column header or unit is on a different page.
-
-```
-Rescue stats (Nestle FY2024): sent=11, confirmed=10, corrected=1, rejected=0
-```
+- **Absolute value rule** — when a sentence has both an absolute figure and a multiplier, extract the absolute as primary
+- **Sustainability targets** — extract future commitments as `fact_type=target` with `period_end` as the target year
+- **Anti-noise** — exclude tenure years, award counts, page/section references
 
 #### Pass 1 output per fact
 
@@ -211,46 +202,35 @@ Rescue stats (Nestle FY2024): sent=11, confirmed=10, corrected=1, rejected=0
 {
   "fact_id": "nestle_india_p209_1_fact_1",
   "chunk_id": "nestle_india_p209_1",
-  "section_id": "nestle_india_page_209",
-  "doc_id": "nestle_india",
-  "prev_chunk_id": "nestle_india_p203_2",
-  "next_chunk_id": "nestle_india_p210_1",
-  "metric": "total volume of water withdrawal",
-  "value": "3,232,635",
-  "unit": "kiloliters",
-  "period": "FY2024",
-  "period_start": "2023-04-01",
-  "period_end": "2024-03-31",
-  "period_type": "full_year",
-  "period_confidence": "inferred",
-  "fact_type": "measurement",
-  "evidence": "Total volume of water withdrawal [in kiloliters] 3,232,635 2,800,232",
-  "decision": "keep",
-  "confidence": "high",
-  "raw": {
-    "raw_name": "total volume of water withdrawal",
-    "metric_core": "water_withdrawal",
-    "raw_value": "3,232,635",
-    "raw_unit": "kiloliters",
-    "graph_fact_type": "operational_metric",
-    "fact_class": "scalar_kpi",
-    "source_sentence": "..."
-  }
+  "raw_name": "total volume of water withdrawal",
+  "metric_core": "water_withdrawal",
+  "raw_value": "3,232,635",
+  "raw_unit": "kiloliters",
+  "raw_period": "FY2024",
+  "fact_class": "scalar_kpi",
+  "source_sentence": "Total volume of water withdrawal [in kiloliters] 3,232,635",
+  "period_confidence": "high",
+  "decision": "keep"
 }
 ```
+
+**Typical costs** (gpt-4.1-mini at $0.40/$1.60 per M tokens):
+
+| Document | Prompt tokens | Completion tokens | Cost |
+|---|---|---|---|
+| Nestlé FY2024 | ~400K | ~150K | ~$0.40 |
+| Nestlé FY2025 | ~700K | ~280K | ~$0.73 |
+| Britannia FY2024 | ~440K | ~165K | ~$0.44 |
+| Marico FY2024 | ~520K | ~195K | ~$0.52 |
 
 ---
 
 ### Stage 2 — Pass 2: Normalization & Registry Matching
 
-**File:** `normalizer.py`  
+**File:** `pipeline/normalizer.py`  
 **Model:** `gpt-4.1-mini` (tiebreaker calls only)  
-**Input:** `{company}_pass1_rerun.json`  
-**Output:** `{company}_pass2_rerun.json`
-
-#### What it does
-
-Takes Pass 1 facts and maps each to a canonical metric in the registry, then runs unit normalisation. No new LLM extraction happens — the LLM is only used for tiebreaking ambiguous registry matches.
+**Input:** `{prefix}_pass1.json`  
+**Output:** `{prefix}_pass2.json`
 
 #### Processing flow (per fact)
 
@@ -259,19 +239,19 @@ Pass 1 fact
      │
      ▼
 [Financial classifier]
-     │  Is this a financial metric? → out_of_scope_financial (skip to output)
-     │  Checked BEFORE alias lookup so financial facts can't bypass it
+     │  Is this a P&L/financial metric? → out_of_scope_financial (skip)
+     │  Runs BEFORE alias lookup — blocks financial aliases bypassing filter
      │
      ▼
-[Alias lookup]  registry_aliases.json (229 entries)
-     │  Exact raw_name match → canonical_id, normalization_decision=normalized
+[Alias lookup]  registry_aliases.json (289 entries)
+     │  Exact raw_name match → canonical_id, decision=normalized
      │
      ▼ (if no alias match)
 [Fuzzy registry match]  gold_set.py
-     │  Cosine similarity on metric_core + alias_score + definition_score
-     │  Score > threshold + margin → accept
-     │  Score in margin band → provisional (needs tiebreaker)
-     │  Score too low → new_metric
+     │  Cosine similarity: raw_name vs 249 canonical display names
+     │  score > SCORE_FLOOR + SCORE_MARGIN → normalized
+     │  score in margin band → provisional (tiebreaker)
+     │  score < SCORE_FLOOR → new_metric
      │
      ▼ (if provisional)
 [Semantic tiebreaker]  LLM call
@@ -279,12 +259,9 @@ Pass 1 fact
      │  Returns accept/reject with reasoning
      │
      ▼
-[_enrich_normalized_fact]
-     │  Unit normalisation via unit_normaliser.py
-     │  Adds: normalised_value, normalised_unit_symbol, normalisation_confidence
-     │  Adds: raw_value, raw_unit (promoted from raw sub-object)
-     │  Adds: period_label (alias of period field)
-     │  Adds: canonical_name, canonical_category, canonical_definition
+[Unit normalisation]  unit_normaliser.py
+     │  raw_unit → canonical symbol + conversion factor
+     │  Confidence: exact / inferred / needs_context / failed
      │
      ▼
 Pass 2 enriched fact
@@ -294,73 +271,77 @@ Pass 2 enriched fact
 
 | Decision | Meaning |
 |---|---|
-| `normalized` | Matched to a canonical_id with high confidence |
-| `partial` | Matched but with caveats (rescue fact, medium confidence) |
-| `new_metric` | No registry match — proposed as a new canonical candidate |
-| `out_of_scope_financial` | Financial/P&L metric — excluded from ESG KG |
+| `normalized` | High-confidence canonical match |
+| `partial` | Plausible match, lower confidence |
+| `new_metric` | No registry match — stored as Provisional node |
+| `out_of_scope_financial` | P&L metric — excluded from ESG KG |
+| `quarantine` | Implausible value (e.g. Scope 3 < 1% of Scope 1) |
 | `drop` | Pass 1 already dropped, carried through |
-| `quarantine` | Flagged for human review (e.g. implausible Scope 3 magnitude) |
 
-#### Nestle benchmark results (gpt-4o-mini, full run)
+#### Typical normalization breakdown (Nestlé FY2024)
 
-| Decision | Count |
-|---|---|
-| normalized | 15 |
-| partial | 23 |
-| new_metric | 45 |
-| out_of_scope_financial | 56 |
-| drop | 49 |
-| **Total** | **188** |
+| Status | Count | % |
+|---|---|---|
+| new_metric | 782 | 72% |
+| normalized | 97 | 9% |
+| partial | 73 | 7% |
+| drop / quarantine | 147 | 14% |
 
 ---
 
 ### Stage 3 — Knowledge Graph Loading
 
-**File:** `kg_loader_nestle.py`  
-**Database:** Neo4j 5.x, `neo4j://127.0.0.1:7687`  
-**Input:** `{company}_pass2_rerun.json` + `{company}_rerun_fast_chunks.json`
+**File:** `pipeline/run_pipeline.py` → `load_observations_to_graph()`  
+**Database:** Neo4j 5.x, `neo4j://127.0.0.1:7687`
 
-#### Node types created
+#### What it does
 
-| Label | Count (Nestle) | Description |
-|---|---|---|
-| Company | 1 | Top-level company node |
-| Document | 1 | Annual report filing |
-| Section | 28 | PDF sections |
-| Chunk | 40 | Text chunks with full content |
-| Observation | 83 | One per extracted fact (normalized/partial/new_metric only) |
-| Metric:Canonical | 93 | Registry metric definitions |
-| Metric:Provisional | ~45 | New metric candidates |
-| Period | 15 | FY2018–FY2030 + CY2022 + FY2023_15M |
-| Unit | 18 | With CONVERTS_TO edges |
-| MetricCategory | 41 | 3-level hierarchy |
-| Evidence | 83 | Source sentences |
-| ConfidenceRecord | 83 | Normalisation confidence metadata |
+Creates all nodes and relationships using MERGE (idempotent). Runs three operations before loading facts:
 
-#### Relationship types
+**1. Cross-document deduplication**  
+BRSR tables always include current + prior year comparative figures. Without dedup, loading FY2025 would create duplicate FY2024 Observations. The dedup logic queries Neo4j for matching (canonical_id, value ±1%, period) and keeps the Observation from the document whose year is closest to the reported period.
 
-```
-(Company)-[:FILED]->(Document)
-(Section)-[:IN_DOCUMENT]->(Document)
-(Chunk)-[:IN_SECTION]->(Section)
-(Chunk)-[:NEXT]->(Chunk)                     ← provenance chain
-(Observation)-[:REPORTED_BY]->(Company)
-(Observation)-[:IN_PERIOD]->(Period)
-(Observation)-[:EXTRACTED_FROM]->(Chunk)     ← source traceability
-(Observation)-[:MEASURED_IN]->(Unit)
-(Observation)-[:OF_METRIC]->(Metric)
-(Observation)-[:SUPPORTED_BY]->(Evidence)
-(Observation)-[:HAS_CONFIDENCE]->(ConfidenceRecord)
-(Evidence)-[:FOUND_IN]->(Chunk)
-(Metric)-[:BELONGS_TO]->(MetricCategory)
-(MetricCategory)-[:SUBCATEGORY_OF]->(MetricCategory)
-(Unit)-[:CONVERTS_TO {factor}]->(Unit)
-(Period)-[:NEXT_YEAR]->(Period)
+```python
+facts = deduplicate_cross_document(session, facts, company_id, doc_id)
 ```
 
-#### Facts loaded vs skipped
+**2. MetricCategory hierarchy seeding**  
+41 category nodes, 38 SUBCATEGORY_OF edges — seeded once per load:
 
-Only `normalized`, `partial`, and `new_metric` facts are loaded. `out_of_scope_financial`, `drop`, and `quarantine` are excluded entirely. This keeps the KG clean — no P&L contamination.
+```
+Environmental → Water, Energy, Emissions, Waste, Packaging
+Social        → Workforce, Community
+Governance    → Compliance
+```
+
+**3. Observation load**  
+```cypher
+MERGE (o:Observation {obs_id: $id}) SET o += $props
+MERGE (o)-[:REPORTED_BY]->(c:Company)
+MERGE (o)-[:IN_PERIOD]->(p:Period)
+MERGE (o)-[:OF_METRIC]->(m:Metric)
+MERGE (o)-[:EXTRACTED_FROM]->(ch:Chunk)
+MERGE (o)-[:SUPPORTED_BY]->(ev:Evidence)
+MERGE (o)-[:HAS_CONFIDENCE]->(cr:ConfidenceRecord)
+```
+
+Only `normalized`, `partial`, and `new_metric` facts are loaded. `out_of_scope_financial`, `drop`, and `quarantine` are excluded.
+
+#### The 4 production commands
+
+```powershell
+python pipeline/run_pipeline.py --pdf "...\Annual-Report-2023-24-nestle-india.pdf" `
+  --company nestle_india --company-name "Nestlé India Limited" --year 2024 --calendar-type indian_fiscal
+
+python pipeline/run_pipeline.py --pdf "...\Annual-Report-2024-25-nestle-india.pdf" `
+  --company nestle_india --company-name "Nestlé India Limited" --year 2025 --calendar-type indian_fiscal
+
+python pipeline/run_pipeline.py --pdf "...\BRITANNIA_Annual_Report_2023_24.pdf" `
+  --company britannia --company-name "Britannia Industries Limited" --year 2024 --calendar-type indian_fiscal
+
+python pipeline/run_pipeline.py --pdf "...\Marico_Annual_Report_FY24.pdf" `
+  --company marico --company-name "Marico Limited" --year 2024 --calendar-type indian_fiscal
+```
 
 ---
 
@@ -368,7 +349,7 @@ Only `normalized`, `partial`, and `new_metric` facts are loaded. `out_of_scope_f
 
 ### Chunk
 
-Defined in `models.py` as a dataclass.
+Defined in `pipeline/models.py`.
 
 | Field | Type | Description |
 |---|---|---|
@@ -384,7 +365,7 @@ Defined in `models.py` as a dataclass.
 | `is_historical_reprint` | bool | Skip flag for reprinted prior-year data |
 | `temporal_context` | TemporalContext | Filing year, fiscal year end, periods |
 
-### Pass 1 Fact (EDC)
+### Pass 1 Fact
 
 Schema version: `edc_v1`. Key fields:
 
@@ -392,17 +373,14 @@ Schema version: `edc_v1`. Key fields:
 |---|---|
 | `fact_id` | Unique, derived from chunk_id + sequence |
 | `chunk_id`, `section_id`, `doc_id` | Provenance chain |
-| `prev_chunk_id`, `next_chunk_id` | Chunk navigation (required for KG) |
-| `metric` | Raw metric name as extracted |
-| `value` | Raw numeric value as string |
-| `unit` | Raw unit string |
-| `period` | Resolved period label (FY2024, CY2022, etc.) |
-| `period_start` / `period_end` | ISO dates |
-| `period_type` | full_year / partial / point_in_time / target / baseline |
-| `fact_type` | measurement / target / baseline / ratio / count / boolean |
-| `evidence` | Source sentence from PDF |
+| `prev_chunk_id`, `next_chunk_id` | Chunk navigation |
+| `raw_name` | Raw metric name as extracted |
+| `raw_value` | Raw numeric value as string |
+| `raw_unit` | Raw unit string |
+| `raw_period` | Resolved period label (FY2024, CY2022, etc.) |
+| `fact_class` | scalar_kpi / ratio / percentage / count / target |
+| `source_sentence` | Exact PDF sentence |
 | `decision` | keep / drop / rescue |
-| `raw` | Full LLM output sub-object (raw_name, metric_core, graph_fact_type, etc.) |
 
 ### Pass 2 Fact (Enriched)
 
@@ -412,45 +390,44 @@ All Pass 1 fields plus:
 |---|---|
 | `canonical_id` | Matched registry ID, null for new_metric |
 | `canonical_name` | Human-readable registry name |
-| `canonical_category` | e.g. `water`, `emissions`, `workforce` |
-| `normalization_decision` | normalized / partial / new_metric / out_of_scope_financial / drop |
+| `normalization_status` | normalized / partial / new_metric / out_of_scope_financial / drop / quarantine |
 | `normalised_value` | Float, unit-converted value |
 | `normalised_unit_symbol` | Canonical unit (kL, tCO2e, %, count, etc.) |
 | `normalisation_confidence` | exact / inferred / needs_context / failed |
-| `raw_value` | Promoted from raw sub-object |
-| `raw_unit` | Promoted from raw sub-object |
-| `raw_unit_string` | Original unit string |
-| `period_label` | Alias of `period` field (for KG compatibility) |
 | `mapping_confidence` | high / medium / low / no_match |
 | `tiebreaker_used` | bool — whether LLM tiebreaker was called |
 | `final_confidence` | Float 0–1 |
+| `source_doc_id` | Source document identifier |
+| `page` | PDF page number |
 
 ---
 
 ## 5. Registry System
 
-Three files are merged at runtime to form the active registry:
+Three files are merged at runtime by `registry/metric_registry_seed.py`:
 
 | File | Entries | Description |
 |---|---|---|
-| `consumer_master_registry_v1.json` | 51 | Core canonical metrics |
-| `registry_additions_approved.json` | 42 | Human-reviewed additions from new_metric analysis |
-| `registry_semantic_overrides.json` | — | Typing corrections for specific canonical IDs |
-| `registry_aliases.json` | 229 | raw_name → canonical_id fast lookup |
+| `consumer_master_registry_v1.json` | 240 | Core canonical metrics |
+| `registry_additions_approved.json` | 9+ | BRSR-specific additions |
+| `registry_semantic_overrides.json` | — | Typing corrections |
+| `registry_aliases.json` | 289 | raw_name → canonical_id fast lookup |
 
-Each canonical metric entry contains:
+Each canonical metric entry:
 
 ```json
 {
-  "canonical_id": "water_consumption_absolute",
-  "display_name": "Water Consumption (Absolute)",
-  "category": "water",
-  "unit_family": "volume",
-  "metric_subject": "water",
-  "metric_role": "consumption",
+  "canonical_id": "scope_1_emissions",
+  "display_name": "Scope 1 GHG Emissions (Absolute)",
+  "category": "environmental",
+  "unit_family": "mass_equivalent",
+  "metric_subject": "company",
+  "metric_role": "total",
   "comparable": true,
-  "canonical_definition": "Total volume of water consumed...",
-  "external_refs": {"GRI": "303-5", "BRSR": "P6-E1"}
+  "aliases": ["scope 1 emissions", "direct ghg emissions", "scope-1"],
+  "external_refs": [{"standard": "BRSR", "id": "Principle 6 Essential"}],
+  "canonical_definition": "Total direct GHG emissions from company operations.",
+  "review_status": "approved"
 }
 ```
 
@@ -459,216 +436,221 @@ Each canonical metric entry contains:
 Score = weighted combination of:
 - `alias_score` — BM25/cosine match between raw_name and registry aliases
 - `metric_core_score` — snake_case metric_core similarity
-- `definition_score` — semantic similarity between metric_definition and canonical_definition
+- `definition_score` — semantic similarity against canonical_definition
 
-If `score > SCORE_FLOOR + SCORE_MARGIN` → accept  
-If `score > SCORE_FLOOR` → provisional (tiebreaker)  
-If `score < SCORE_FLOOR` → new_metric
+```
+score > SCORE_FLOOR + SCORE_MARGIN  → normalized
+score > SCORE_FLOOR                 → provisional (tiebreaker)
+score < SCORE_FLOOR                 → new_metric
+```
+
+`SCORE_FLOOR = 0.65`, `SCORE_MARGIN = 0.20`
 
 #### Semantic alias gate
 
 Before accepting a fuzzy match, `semantic_alias_gate` checks that the metric subject (water, emissions, energy, etc.) is compatible between the input fact and the candidate canonical. Blocks subject mismatches even when surface similarity is high.
 
+#### BRSR-specific additions in registry_additions_approved.json
+
+- `ltifr_workers` — Lost Time Injury Frequency Rate (Workers)
+- `total_recordable_injuries_workers` / `_employees`
+- `worker_union_membership`
+- `energy_intensity_physical_output`
+- `non_renewable_fuel_consumption` / `renewable_fuel_consumption`
+- `water_discharge_third_party_treated`
+- `high_consequence_injuries_employees`
+
 ---
 
 ## 6. Unit Normalisation
 
-**File:** `unit_normaliser.py`
+**File:** `pipeline/unit_normaliser.py`
 
-Called inside `_enrich_normalized_fact` for every fact that passes the financial filter. Converts raw units to canonical symbols and produces a confidence score.
+Called inside `_enrich_normalized_fact` for every fact that passes the financial filter.
 
 #### Confidence levels
 
 | Level | Meaning |
 |---|---|
-| `exact` | Unit found directly in UNIT_MAP, no inference needed |
-| `inferred` | Unit inferred from context (count hint, compound unit decomposed) |
-| `needs_context` | Unit present but ambiguous — value set to null |
-| `failed` | Unit not recognised — value set to null |
+| `exact` | Unit found directly in UNIT_MAP |
+| `inferred` | Unit inferred from context |
+| `needs_context` | Unit ambiguous — `normalised_value` set to null |
+| `failed` | Unit not recognised — `normalised_value` set to null |
 
-#### Key invariant (enforced by bug fix)
+#### Key invariant
 
 If `normalised_value is None` and confidence would be `exact` or `inferred`, confidence is downgraded to `needs_context`. A confident label with a null value is an error.
 
-#### Verification script
+#### Critical unit fix: MTCO2E
 
-`verify_unit_normalisation.py` checks:
-- **ERROR:** any fact where `normalisation_confidence IN (exact, inferred)` AND `normalised_value IS NULL`
-- Reports total facts, null facts by confidence level, PASS/FAIL verdict per company
+Indian BRSR reports use "MT CO2e" to mean *metric tonnes*, not *megatonnes*. Earlier code applied a ×1,000,000 factor. Fixed to factor=1 for all `mt co2e`, `mtco2e`, `mt co2 equivalent` variants. 6 Marico observations were patched directly in Neo4j.
 
-Current status: **all 4 benchmark companies PASS** (0 exact/inferred but null errors).
+#### Unit conversions in the demo app
+
+The Explorer tab in `graph/demo_app.py` applies `divide_by` per metric for display (e.g. water: ÷1000 to convert L → kL). This is display-only — the KG stores the raw normalised value.
 
 ---
 
 ## 7. Financial Classifier
 
-**Function:** `_is_financial_fact()` in `normalizer.py`
+**Function:** `_is_financial_fact()` in `pipeline/normalizer.py`
 
-Runs before alias lookup and fuzzy matching. If a fact is classified as financial, it goes directly to `out_of_scope_financial` and is never sent to the registry matcher.
+Runs as a **pre-filter in `run_pass2`** before facts reach the alias/fuzzy loop. This is a critical placement — previously alias lookup ran first, letting `sales → total_revenue` and `operating cash flow → operating_cash_flow` through as `normalized`.
 
 #### Detection layers (in order)
 
 1. `graph_fact_type == "financial_metric"` from Pass 1 LLM output
-2. Fact's own `metric` field matches `_FINANCIAL_METRIC_NAMES` set (exact lowercased match)
-3. Fact's own `metric` field matches `_FINANCIAL_KEYWORD_RE` regex
-4. Fact's own `metric` field matches `_GROWTH_RATE_RE` regex (YoY, CAGR, year-on-year)
+2. `metric` field matches `_FINANCIAL_METRIC_NAMES` set
+3. `metric` field matches `_FINANCIAL_KEYWORD_RE` regex
+4. `metric` field matches `_GROWTH_RATE_RE` (YoY, CAGR, year-on-year)
 5. Registry match's `raw_name`/`metric_core` matches `_FINANCIAL_KEYWORD_RE`
 
 #### Key patterns blocked
 
-EBITDA, EBIT, revenue, turnover, profit (all variants), EPS, earnings per share, cash and cash equivalents, operating/investing/financing cash flow, CAPEX, capital expenditure, return on equity/net worth/capital employed, ROCE, margins (operating/net/gross/profit), CAGR, retained earnings, shareholders fund, tax expense, working capital ratios.
-
-#### Critical implementation note
-
-The classifier runs as a **pre-filter in `run_pass2`** before facts reach the batch/alias/fuzzy loop. This was a bug fix — previously alias lookup ran first, so facts like `sales → total_revenue` and `operating cash flow → operating_cash_flow` bypassed the classifier via the alias index.
-
-#### Regression tests
-
-41 regression tests in `test_pre_kg_pipeline_fixes.py` including:
-- EBITDA, EBITDA margin, revenue growth, cash equivalents, operating cash flow, EPS, CAGR, ROCE → all classified as financial
-- water intensity, GHG emissions, outlet count, number of employees (from operational context) → not classified as financial
+EBITDA, EBIT, revenue, turnover, profit (all variants), EPS, earnings per share, cash equivalents, operating/investing/financing cash flow, CAPEX, ROCE, margins (operating/net/gross), CAGR, retained earnings, shareholders fund, tax expense, working capital ratios.
 
 ---
 
 ## 8. Knowledge Graph Schema
 
-### Neo4j node labels and properties
+### Node types and counts (current, all 4 documents)
 
-```
-(:Company)
-  company_id, name, sector, country
+| Label | Count | Key Properties |
+|---|---|---|
+| Observation | 2,431 | obs_id, raw_name, normalised_value, normalised_unit_symbol, normalization_status, canonical_id, source_doc_id, page |
+| Metric:Canonical | 249 | canonical_id, display_name, category, unit_family, metric_subject, metric_role |
+| Metric:Provisional | 1,456 | canonical_id (provisional), raw_name, owner_company |
+| Chunk | 741 | chunk_id, page, text, char_count |
+| Section | 470 | section_id, title |
+| Evidence | 2,431 | evidence_id, text (exact PDF sentence) |
+| ConfidenceRecord | 2,431 | normalization_status, normalisation_confidence, final_confidence |
+| Company | 3 | company_id, name, sector, country |
+| Document | 4 | doc_id, fiscal_year, report_type |
+| Period | 3 | fiscal_year (CY2023, FY2024, FY2025) |
+| MetricCategory | 41 | category_id, name, level (0=top, 1=mid, 2=leaf) |
 
-(:Document)
-  doc_id, fiscal_year, report_type, page_count,
-  has_brsr, has_third_party_assurance, assurance_provider, assurance_level
+### Relationships
 
-(:Section)
-  section_id, title
+| Relationship | Direction | Count | Meaning |
+|---|---|---|---|
+| REPORTED_BY | Observation → Company | 2,431 | Which company |
+| IN_PERIOD | Observation → Period | 2,431 | Which fiscal year |
+| OF_METRIC | Observation → Metric | 2,401 | Canonical or Provisional |
+| EXTRACTED_FROM | Observation → Chunk | 2,431 | Source chunk |
+| SUPPORTED_BY | Observation → Evidence | 2,431 | Exact source sentence |
+| HAS_CONFIDENCE | Observation → ConfidenceRecord | 2,431 | Normalization metadata |
+| IN_SECTION | Chunk → Section | 741 | Document structure |
+| IN_DOCUMENT | Section → Document | 470 | Document structure |
+| FILED | Company → Document | 4 | Company–document link |
+| BELONGS_TO | Metric → MetricCategory | 1,705 | Category taxonomy |
+| SUBCATEGORY_OF | MetricCategory → MetricCategory | 38 | Category hierarchy |
+| NEXT_YEAR | Period → Period | 2 | CY2023→FY2024→FY2025 |
 
-(:Chunk)
-  chunk_id, page, text, char_count, token_count
+### Observation normalization_status breakdown
 
-(:Observation)
-  obs_id, raw_name, raw_value, raw_unit_string,
-  normalised_value, normalised_unit_symbol, normalisation_confidence,
-  period_label, period_start, period_end, period_type, period_confidence,
-  fact_type, normalization_status, page, chunk_id, canonical_id
+| Status | Count | KG linked to canonical? |
+|---|---|---|
+| new_metric | 1,872 | No (Provisional node) |
+| partial | 310 | Yes |
+| normalized | 249 | Yes |
 
-(:Metric:Canonical)
-  canonical_id, display_name, category, unit_family,
-  metric_subject, metric_role, comparable, external_refs
+### Important property notes
 
-(:Metric:Provisional)
-  provisional_id, raw_name, owner_company
+- `c.name` — use this for company display names (`c.display_name` is NULL on all nodes)
+- `ev.text` — use this for evidence text (`ev.evidence_text` property does not exist)
+- Periods: `CY2023` (Nestlé 12-month), `FY2024` (Nestlé 15-month Jan 2023–Mar 2024), `FY2025` (Nestlé 12-month)
 
-(:Period)
-  fiscal_year, year_start, year_end, calendar
+### Standard cross-company query pattern
 
-(:Unit)
-  symbol, label, unit_family
-
-(:MetricCategory)
-  category_id, name, level
-
-(:Evidence)
-  evidence_id, text
-
-(:ConfidenceRecord)
-  conf_id, normalization_status, normalisation_confidence, final_confidence
+```cypher
+MATCH (o:Observation)-[:OF_METRIC]->(m:Metric {canonical_id: 'scope_1_emissions'}),
+      (o)-[:REPORTED_BY]->(c:Company),
+      (o)-[:IN_PERIOD]->(p:Period {fiscal_year: 'FY2024'})
+WHERE o.normalization_status IN ['normalized', 'partial']
+  AND o.normalised_value IS NOT NULL
+WITH c, max(o.normalised_value) AS value   -- dedup comparative/sub-segment rows
+RETURN c.name AS company, value
+ORDER BY value DESC
 ```
 
 ### Category hierarchy (3 levels)
 
 ```
-Environmental → Water → Water Consumption/Withdrawal/Discharge/Recharge/Conservation
-             → Energy → Energy Consumption/Intensity/Renewable/Conservation
-             → Emissions → Scope 1/2/3/GHG Intensity/Air Emissions
-             → Waste → Generation/Recovery/Disposal/Intensity/Plastic
-             → Packaging → Plastic Packaging/Recyclable/EPR
-Social       → Workforce → Headcount/Safety/Training/Diversity
+Environmental → Water → Water Consumption/Withdrawal/Discharge/Recharge
+             → Energy → Renewable/Non-Renewable/Intensity
+             → Emissions → Scope 1/2/3/GHG Intensity
+             → Waste → Generation/Recovery/Disposal/Plastic
+             → Packaging → Plastic/Recyclable/EPR
+Social        → Workforce → Headcount/Safety/Training/Diversity
              → Community → CSR/Complaints
-Governance   → Compliance → BRSR/EPR Compliance
-```
-
-### Fulltext indexes
-
-```cypher
-chunk_text_index    ON Chunk(text)
-evidence_text_index ON Evidence(text)
+Governance    → Compliance → BRSR/EPR
 ```
 
 ---
 
-## 9. Verification & Quality Gates
+## 9. Demo & Query Applications
 
-Two verification scripts run after every Pass 2 output:
+### graph/demo_app.py — Portfolio demo (port 8502)
 
-### verify_unit_normalisation.py
+Three-tab Streamlit app for non-technical audiences.
 
-Checks: no fact has `normalisation_confidence IN (exact, inferred)` with `normalised_value = null`.
+**Tab 1 — Questions**: 6 pre-answered ESG questions with live Neo4j queries, dynamic worded summaries, and source text expanders (PDF sentence + page number).
 
-```
-python verify_unit_normalisation.py --root .
-```
+| # | Question | Category | Chart |
+|---|---|---|---|
+| Q1 | Permanent employee headcount across companies | Social | Horizontal bar |
+| Q2 | Scope 1 emissions comparison FY2024 | Environmental | Horizontal bar |
+| Q3 | Fossil fuel % of Britannia's energy | Environmental | Stat card |
+| Q4 | Female wage share across companies | Social | % bar |
+| Q5 | Nestlé Scope 1 emissions trend CY2023–FY2025 | Environmental | Line chart |
+| Q6 | Confidence provenance for Nestlé water withdrawal | Provenance | Confidence card |
 
-### verify_provenance_fields.py
+**Tab 2 — Explorer**: 13 verified metrics, dynamic year/company filters, horizontal bar with unit labels. Falls back to stat card for single-company results.
 
-Checks: all 5 provenance fields present on every fact — `chunk_id`, `section_id`, `doc_id`, `prev_chunk_id`, `next_chunk_id`.
+**Tab 3 — Ask a Question**: Disabled NL interface placeholder with 4 example cards and capability grid.
 
-```
-python verify_provenance_fields.py --root .
-```
+Key implementation: `max(o.normalised_value)` dedup pattern, `ev.text` for evidence, `c.name` for company names, `clean_evidence()` for ≤200-char PDF snippets.
 
-### Current benchmark status
+### graph/kg_query_app.py — NL query interface (port 8501)
 
-| Company | Unit Normalisation | Provenance | Pass 1 Facts | Pass 2 Facts |
-|---|---|---|---|---|
-| nestle_india | PASS | PASS | 188 | 188 |
-| tata_consumer | PASS | PASS | 783 | 783 |
-| gcpl | PASS | PASS | 920 | 920 |
-| itc | PASS | PASS | 906 | 906 |
-
-*Note: GCPL and ITC pass2_rerun.json were deleted during the alias-bypass fix rerun. Their current pass2 outputs are the pre-fix versions (`gcpl_pass2.json`, `itc_pass2.json`). They need to be regenerated with the fixed normalizer.*
-
-### Regression test suite
-
-```
-python -m pytest test_pre_kg_pipeline_fixes.py -v
-```
-
-41 tests covering: financial classifier, tiebreaker conflicts, period resolution, unit normalisation, chunk prev/next wiring, new_metric dedup.
+Template-based Cypher generation for common query patterns (cross-company comparison, time series). Falls back to LLM generation for unrecognised patterns.
 
 ---
 
-## 10. Benchmark Run System
+## 10. Evaluation & Quality Gates
 
-**File:** `benchmark_rerun.py`
+### eval/eval_pipeline.py
 
-Orchestrates a full pipeline run for any of the 4 benchmark companies with resume logic — each step is skipped if its output file already exists.
+Measures pipeline quality against 69 hand-annotated Nestlé FY2024 gold facts. Checks value (±1% tolerance), unit (with aliases), period, and canonical_id.
 
+**Current scores:**
+
+| Metric | Score |
+|---|---|
+| Graph coverage (fact found in KG) | **97.1%** (67/69) |
+| Value correct | 95.7% (66/69) |
+| Unit correct | 85.5% (59/69) |
+| Period correct | 97.1% (67/69) |
+| **Fully correct** (all four dimensions) | **78.3%** (54/69) |
+
+2 facts not in graph: g006, g014 (not present in ingested chunks).  
+13 found but partial: canonical mismatches (g026, g033, g052), unit symbol issues (g003, g007, g010, g015, g028, g035, g044, g045), value rounding (g004).
+
+```powershell
+python eval/eval_pipeline.py
 ```
-python benchmark_rerun.py --company nestle_india
-python benchmark_rerun.py --company nestle_india --company tata_consumer
-python benchmark_rerun.py --no-resume  # force full rerun
-```
 
-#### Resume logic
+### Unit normalisation verification
 
-| Step | Output file | Skipped if exists? |
-|---|---|---|
-| fast_pdf_text_ingest | `{company}_rerun_fast_chunks.json` | Yes |
-| audit_selected_pages | `{company}_rerun_section_coverage_audit.csv` | Yes |
-| extractor (Pass 1) | `{company}_pass1_rerun.json` | Yes |
-| normalizer (Pass 2) | `{company}_pass2_rerun.json` | Yes |
-| export_readable_facts | `{company}_pass2_rerun_readable.csv` | Yes |
+`verify_unit_normalisation.py` checks: no fact has `normalisation_confidence IN (exact, inferred)` with `normalised_value = null`.
 
-#### Benchmark diff report
+Current status: **all 4 documents PASS** (0 errors).
 
-After each run, `benchmark_diff_report.txt` is written with before/after normalized/partial/new_metric/financial counts, period coverage, fact_type distribution, unit normalisation stats, and provenance field coverage.
+### tools/registry_gap_analysis.py
 
-#### Important: Pass 2 checkpoint
-
-The normalizer uses the existing `pass2_rerun.json` as a checkpoint — facts already in the file are skipped. **Always delete the pass2 output before rerunning if the normalizer code has changed**, otherwise old results are reused.
+Queries Neo4j for all `new_metric` Observations, clusters by cosine similarity (threshold 0.85), and scores each cluster against the existing registry. Outputs:
+- `registry_gap_report.csv` — cluster representative, companies, frequency, suggested canonical, action
+- `registry_gap_aliases.json` — ready-to-merge alias suggestions (score > 0.75)
 
 ---
 
@@ -676,56 +658,45 @@ The normalizer uses the existing `pass2_rerun.json` as a checkpoint — facts al
 
 ### Fixed
 
-- **unit_normaliser.py — exact/inferred confidence with null value** — when a unit was recognised but raw_value was null, confidence was left as `exact`/`inferred`. Fixed: downgrade to `needs_context`.
-- **normalizer.py — LLM confidence overwrote unit_norm confidence** — `enriched = dict(fact)` copied LLM's `normalisation_confidence` into the enriched dict, and the `or` chain preferred it over `unit_norm`. Fixed: use `unit_norm.get("normalisation_confidence")` exclusively.
-- **normalizer.py — alias lookup bypassed financial classifier** — `_resolve_batch_by_alias` ran before `_is_financial_fact`, letting `sales → total_revenue`, `operating cash flow → operating_cash_flow` etc. through as `normalized`. Fixed: pre-filter financial facts in `run_pass2` before batching.
-- **Tata Consumer / GCPL / ITC chunks missing prev/next fields** — chunks were generated before the prev/next linking code was added. Fixed: backfilled from chunk ordering.
-- **GCPL / ITC pass1 missing section_id / doc_id** — old pass1_edc schema didn't include these. Fixed: backfilled from chunk lookup.
-- **raw_value / raw_unit not in pass2 output** — `_enrich_normalized_fact` read them into local variables but never wrote them to the enriched dict. Fixed.
-- **period_label missing from pass2 output** — the field is called `period` in pass1 but `period_label` in the KG schema. Fixed: added `enriched["period_label"] = enriched.get("period")`.
-- **benchmark_rerun.py period_stats NameError** — generator expression variable leaked. Fixed.
-- **benchmark_rerun.py crash on missing before-file** — `nestle_india_pass2.json` archived during cleanup. Fixed: graceful fallback to empty list.
+- **`c.display_name` NULL** — all Company nodes have NULL `display_name`. All queries use `c.name`.
+- **`ev.evidence_text` missing** — property is `ev.text`. All queries updated.
+- **MTCO2E unit** — Indian BRSR "MT CO2e" = metric tonnes, not megatonnes. Factor corrected to 1.0. 6 Marico observations patched in Neo4j.
+- **Financial classifier alias bypass** — `_is_financial_fact()` now runs as a pre-filter before alias lookup.
+- **Cross-document dedup** — `deduplicate_cross_document()` prevents FY2025 report's comparative FY2024 rows from creating duplicate Observations.
+- **CypherSyntaxError in q4 source expander** — `WITH` clause dropped `c` from scope; fixed to `WITH o, ev, ch, c ORDER BY ...`.
+- **TOC page detection** — BRSR heading in a TOC page triggered wrong page range. Fixed by detecting pages with ≥5 standalone 2–3 digit numbers.
 
 ### Outstanding
 
-- **GCPL / ITC need full Pass 2 rerun** — their current `pass2_rerun.json` files were deleted. `gcpl_pass2.json` and `itc_pass2.json` (pre-fix) are the only pass2 outputs for these companies.
-- **GCPL / ITC period_type / fact_type all unknown** — their pass1_edc.json was generated with an older extractor schema that didn't include these fields. Needs fresh Pass 1 extraction to populate.
-- **gpt-4.1-mini API timeouts on dense table chunks** — 4.1-mini is slower than 4o-mini on large structured text. `API_TIMEOUT_SECONDS = 300` is too low. Fix: increase to 600, or implement streaming to make timeouts based on inter-token silence rather than total response time.
-- **`Number of employees` from financial ratios page classified as financial** — LLM tags it `graph_fact_type: financial_metric` because it appears on the same page as Sales/EPS. The HR section correctly extracts `total employees` as headcount. Low priority.
+- **g006, g014** — 2 gold facts not found in graph (not present in ingested chunks; would require expanding page selection or manual chunk addition).
+- **Unit symbol mismatches (13 facts)** — mostly `count` vs `""` and `%` handling edge cases in the eval matcher. Low impact on actual KG values.
+- **canonical_id gaps** — `water_withdrawal` vs `water_consumption_absolute` disambiguation (g033); `employee_headcount` coverage for non-BRSR headcount rows (g026).
+- **gpt-4.1-mini API timeouts** — can occur on dense 50K+ character table chunks. Workaround: increase `API_TIMEOUT_SECONDS` from 300 to 600 in `extractor.py`.
 
 ---
 
 ## 12. Cost & Token Profile
 
-Based on Nestle India FY2024 (40 chunks, 188 facts):
+### Actual costs (all 4 documents, gpt-4.1-mini at $0.40/$1.60 per M tokens)
 
-### Token breakdown (one full run)
-
-| Stage | Input tokens | Output tokens |
-|---|---|---|
-| Pass 1 (40 chunks × ~5,000) | ~201,000 | ~80,000 |
-| Pass 2 tiebreaker (23 calls × 400/100) | ~9,200 | ~2,300 |
-| **Total** | **~210,000** | **~82,000** |
-
-System prompt dominates: 4,433 tokens × 40 chunks = 177,320 tokens of input.
-
-### Cost per run (Nestle only)
-
-| Model | Per run | 4 companies | 10 companies |
+| Document | Pass 1 cost | Pass 2 tiebreaker | Total |
 |---|---|---|---|
-| gpt-4o-mini (old) | $0.08 | $0.28 | $0.71 |
-| gpt-4.1-mini (current) | $0.22 | $0.76 | $1.89 |
-| gpt-4.1-nano | $0.05 | $0.19 | $0.47 |
-| gpt-5-mini ($0.25/$0.025c/$2.00) | $0.22 | $0.76 | $1.90 |
-
-*4 companies uses 3.5x Nestle multiplier (others average ~400 pages vs Nestle's 244).*
+| Nestlé FY2024 (149 chunks) | ~$0.40 | ~$0.02 | **~$0.42** |
+| Nestlé FY2025 (276 chunks) | ~$0.73 | ~$0.03 | **~$0.76** |
+| Britannia FY2024 (115 chunks) | ~$0.44 | ~$0.02 | **~$0.46** |
+| Marico FY2024 (201 chunks) | ~$0.52 | ~$0.02 | **~$0.54** |
+| **Total (4 documents)** | | | **~$2.18** |
 
 ### API calls
 
-- Pass 1: 40 calls (1 per chunk)
-- Pass 2: ~23 calls (tiebreaker only)
-- **Total: ~63 calls per company**
+- Pass 1: ~1 call per chunk
+- Pass 2: tiebreaker only (~5–10% of facts)
+- **~741 Pass 1 calls total** across all 4 documents
 
-### Timeout issue
+### Scale projections
 
-`API_TIMEOUT_SECONDS = 300` in `extractor.py`. gpt-4.1-mini exceeded this on 13/40 chunks (dense ESG tables). Fix: increase to 600 or implement streaming.
+| Scope | Documents | Est. cost |
+|---|---|---|
+| Current (4 docs) | 4 | ~$2.18 |
+| +2 companies FY2024 | 6 | ~$3.40 |
+| 10 companies × 3 years | 30 | ~$16–18 |

@@ -12,7 +12,8 @@
 8. [How to Run](#how-to-run)
 9. [Output Files](#output-files)
 10. [Tools and Utilities](#tools-and-utilities)
-11. [Configuration](#configuration)
+11. [Demo Application](#demo-application)
+12. [Configuration](#configuration)
 
 ---
 
@@ -71,9 +72,12 @@ Stage 6: KG Load
         ▼
       Neo4j Knowledge Graph
         │
-        ▼
-Streamlit Query App (kg_query_app.py)
-        NL → Cypher (template + LLM) → graph results
+        ├──▶ Demo App (graph/demo_app.py)         port 8502
+        │       6 pre-answered ESG questions, Graph Explorer,
+        │       brand-styled Plotly charts, provenance traces
+        │
+        └──▶ Query App (graph/kg_query_app.py)    port 8501
+                NL → Cypher (template + LLM) → graph results
 ```
 
 ### Tech Stack
@@ -114,13 +118,22 @@ test/
 │   ├── new_metric_distance_audit.py      # Stage 5: Proximity audit
 │   └── review_memory.json               # Manual override decisions
 │
-├── tools/
-│   └── registry_gap_analysis.py          # Suggest new canonical metrics
+├── graph/
+│   ├── demo_app.py              # Portfolio demo (3 tabs, 6 questions, Explorer)
+│   ├── kg_query_app.py          # NL→Cypher query interface
+│   ├── kg_loader_nestle.py      # Nestlé FY2024 graph loader
+│   ├── kg_loader_nestle_2021.py # Nestlé historical loaders
+│   ├── kg_loader_nestle_2022.py
+│   └── pipeline_ui.py           # Pipeline run UI
 │
-├── kg_query_app.py              # Streamlit NL→Cypher query interface
-├── eval_pipeline.py             # Precision/recall vs gold set
-├── eval_gold_set.py             # 69 gold fact annotations (Nestlé FY2024)
-├── export_readable_facts.py     # Pass 1 facts → Word/CSV export
+├── eval/
+│   ├── eval_pipeline.py         # Precision/recall vs gold set
+│   ├── eval_gold_set.py         # 69 gold fact annotations (Nestlé FY2024)
+│   └── eval_review_app.py       # Interactive label review app
+│
+├── tools/
+│   └── registry_gap_analysis.py # Suggest new canonical metrics
+│
 ├── gold_set.py                  # Fuzzy scoring, match signals
 ├── pipeline_config.json         # Runtime config (credentials, paths)
 └── workspace_test_outputs/      # All pipeline outputs
@@ -398,7 +411,17 @@ ORDER BY company
 | Marico FY2024 | 98 / 259 | 201 | 1,517 keep | 168 | 687 |
 | **Total** | | **741** | | | **2,431** |
 
-**Eval score**: 78.3% (54/69 gold facts fully correct) on Nestlé FY2024 gold set.
+**Eval scores** (Nestlé FY2024 gold set, 69 facts):
+
+| Metric | Score |
+|---|---|
+| Graph coverage (fact found in KG) | **97.1%** (67/69) |
+| Value correct (±1% tolerance) | 95.7% (66/69) |
+| Unit correct | 85.5% (59/69) |
+| Period correct | 97.1% (67/69) |
+| Fully correct (value + unit + period + canonical) | **78.3%** (54/69) |
+
+2 facts not found: g006, g014 (not present in the ingested chunks). 13 facts found but with partial issues (unit symbol mismatches, canonical_id gaps).
 
 ---
 
@@ -456,16 +479,22 @@ Remove-Item workspace_test_outputs\nestle_india_fy2024_pass2.json
 python pipeline/run_pipeline.py --pdf "..." --company nestle_india --company-name "..." --year 2024 --no-kg
 ```
 
-### Run Streamlit app
+### Run Demo App (portfolio)
 
 ```powershell
-python -m streamlit run kg_query_app.py --server.port 8501
+python -m streamlit run graph/demo_app.py --server.port 8502
+```
+
+### Run Query App (NL→Cypher)
+
+```powershell
+python -m streamlit run graph/kg_query_app.py --server.port 8501
 ```
 
 ### Run eval
 
 ```powershell
-python eval_pipeline.py
+python eval/eval_pipeline.py
 ```
 
 ### Run registry gap analysis
@@ -541,16 +570,19 @@ Output 2: registry_gap_aliases.json
 Console: Top 20 clusters, cross-company count, action breakdown
 ```
 
-### `eval_pipeline.py`
+### `eval/eval_pipeline.py`
 
 Measures pipeline quality against a hand-annotated gold set of 69 Nestlé FY2024 facts. Checks value (within 1% tolerance), unit (with aliases), period, and canonical_id match.
 
-Current score: **78.3% (54/69 fully correct)**
+**Graph coverage: 97.1% (67/69 facts found)**  
+**Fully correct: 78.3% (54/69)** — all four dimensions matching
 
-Known misses:
-- g006, g014: facts not found in graph
-- g026: employee_headcount canonical mismatch
-- g052: energy intensity canon empty in graph
+Known misses and partial failures:
+- g006, g014: facts not found in graph (chunks not ingested)
+- g026: `employee_headcount` canonical_id mismatch
+- g033: `water_withdrawal` vs `water_consumption_absolute` canonical mismatch
+- g052: energy intensity canonical empty in graph
+- g003, g007, g015, g028, g035, g044, g045: unit symbol mismatches (count/% handling)
 
 ### `export_readable_facts.py`
 
@@ -562,7 +594,47 @@ Contains `GOLD_FACTS` — 69 annotated Nestlé FY2024 facts with expected canoni
 
 ---
 
-## Configuration
+## Demo Application
+
+**File**: `graph/demo_app.py` — Streamlit app on port 8502
+
+A portfolio-quality interactive demo surfacing the knowledge graph to a non-technical audience. Uses brand colors, Plotly charts, and provenance traces from the graph.
+
+### Three tabs
+
+**Tab 1 — Questions**  
+Six pre-answered ESG questions with live Neo4j queries, dynamic worded summaries, and source text expanders showing the exact PDF sentence and page number.
+
+| # | Question | Type | Chart |
+|---|---|---|---|
+| Q1 | How many permanent employees do these companies have? | Social | Horizontal bar |
+| Q2 | How do Scope 1 emissions compare across companies? | Environmental | Horizontal bar |
+| Q3 | What % of Britannia's energy is still from fossil fuels? | Environmental | Stat card (dark) |
+| Q4 | What share of total wages goes to female employees? | Social | % bar |
+| Q5 | How have Nestlé's Scope 1 emissions changed over time? | Environmental | Line trend (CY2023–FY2025) |
+| Q6 | How confident are we in Nestlé's water withdrawal figure? | Provenance | Confidence card |
+
+**Tab 2 — Graph Explorer**  
+13 verified metrics selectable via dropbox. Dynamic year/company filters per metric. Horizontal bar chart with value+unit labels outside bars. Single-company results fall back to a stat card.
+
+Verified metrics include: Scope 1/2 Emissions, Water Withdrawal/Consumption (kL), Total Energy Renewable/Non-Renewable, Plastic Waste Generated/Collected, Employee Headcount, Recordable Injuries (Workers/Employees), Worker Union Membership, Waste Generated.
+
+**Tab 3 — Ask a Question**  
+Disabled NL interface (placeholder for future LLM→Cypher integration). Shows 4 example question cards and a capability summary grid.
+
+### Key implementation details
+
+- **Colors**: Nestlé `#009EDB`, Britannia `#C41E3A`, Marico `#E8832A`  
+- **Deduplication**: `max(o.normalised_value)` within `WITH c, ...` groups removes comparative sub-segment rows  
+- **Evidence**: `ev.text` property; `clean_evidence()` extracts ≤200-char keyword-anchored snippet  
+- **Q3 (fossil %)**: Two-query Python computation — non_renewable ÷ total energy × 100 for Britannia  
+- **Q5 (trend)**: Filters `normalised_value < 1,000,000` to exclude erroneous scale readings; note shown about 15-month FY2024 transition period  
+- **Q6 (provenance)**: Traverses `HAS_CONFIDENCE → ConfidenceRecord` for `final_confidence` score  
+- **Company name**: All nodes use `c.name` (not `c.display_name`, which is NULL in all nodes)
+
+---
+
+
 
 ### pipeline_config.json
 
