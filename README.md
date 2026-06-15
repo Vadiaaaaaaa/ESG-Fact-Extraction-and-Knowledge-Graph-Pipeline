@@ -1,125 +1,178 @@
 # ESG Knowledge Graph
 
-> A knowledge graph where every fact knows who reported it, what period it covers, how confidently it was extracted, and the exact sentence it came from — and where facts connect to each other through shared canonical metrics, enabling cross-company queries no flat database can answer.
-
-**From unstructured data to queryable graph.**
+Every major ESG data vendor — Bloomberg, MSCI, Sustainalytics — wants structured operational ESG data. Analysts are still extracting it by hand from hundreds of pages of annual reports. This pipeline automates that — it reads Indian FMCG annual reports, finds every ESG metric regardless of where it's disclosed or how it's named, normalizes it against a canonical registry, and loads it into a knowledge graph where every fact is queryable and traceable to its source. Built to scale across any BRSR-reporting company, it has the potential to become a dataset that doesn't exist anywhere: benchmark companies against each other, track how sustainability commitments translate into actual numbers, and find patterns across hundreds of disclosures in seconds rather than weeks.
 
 ![Demo App](docs/images/demo_header.png)
 
 ---
 
-## What This Project Does
+## Table of Contents
 
-Indian listed companies are required to publish a Business Responsibility and Sustainability Report (BRSR) as part of their annual reports. These reports contain hundreds of ESG metrics — emissions, water consumption, employee safety, board diversity — but they're buried in unstructured PDFs with inconsistent naming, mixed units, and multi-year comparative tables.
+- [Overview](#overview)
+- [Demo](#demo)
+- [Architecture](#architecture)
+- [Knowledge Graph](#knowledge-graph)
+- [Evaluation](#evaluation)
+- [Quick Start](#quick-start)
+- [Project Structure](#project-structure)
+- [Known Limitations](#known-limitations)
+- [Roadmap](#roadmap)
 
-This pipeline extracts every quantified ESG claim from those PDFs, normalizes them against a canonical metric registry, loads them into a Neo4j knowledge graph with full provenance, and exposes them through an interactive Streamlit dashboard.
+---
 
-**Current graph:** 2,462 observations · 3 companies · 4 annual reports · 297 canonical metrics
+## Overview
 
-**Accuracy:** 97.1% extraction recall · 78.3% fully correct (value + unit + period + canonical all matching)
+Indian listed companies are required to publish a Business Responsibility and Sustainability Report (BRSR) as part of their annual report. These reports contain hundreds of operational ESG metrics — emissions, water consumption, employee safety, board diversity — but extracting them is not a parsing problem. It's a reasoning problem.
+
+Operational KPIs in structured tables are the easy part. What's hard is that not every company structures their report the same way — metrics appear in narrative text, sections aren't consistently labelled, and the same disclosure might be a table in one company's report and a paragraph in another's. The same metric is named differently by every company, measured in inconsistent units, and reported across multi-year comparative tables where the wrong column attribution means the right number lands in the wrong year.
+
+This pipeline solves all of it.
+
+**Current graph**
+
+| Stat | Value |
+|---|---|
+| Companies | 3 (Nestlé India, Britannia, Marico) |
+| Documents | 4 annual reports |
+| Observations | 2,462 |
+| Canonical metrics | 297 |
+| Extraction recall | 97.1% |
+| End-to-end accuracy | 78.3% |
+| Avg pipeline cost | ~$0.55 / document |
 
 ---
 
 ## Demo
 
-![Questions Tab](docs/images/demo_questions.png)
-
 ![Scope 1 Comparison](docs/images/demo_scope1.png)
 
 ![Emissions Trend](docs/images/demo_trend.png)
 
-**[→ Live demo](YOUR_STREAMLIT_URL)**
-**[→ View source](https://github.com/Vadiaaaaaaa/ESG-Fact-Extraction-and-Knowledge-Graph-Pipeline)**
+**[→ Live demo](YOUR_STREAMLIT_URL)** · **[→ Source](https://github.com/Vadiaaaaaaa/ESG-Fact-Extraction-and-Knowledge-Graph-Pipeline)**
+
+The demo app has three tabs:
+
+- **Questions** — 6 pre-verified queries with charts, worded answers, source text, and Cypher
+- **Explorer** — build your own cross-company comparison with dropdowns
+- **Ask a Question** — natural language interface (requires OpenAI API key)
 
 ---
 
-## Pipeline Architecture
+## Architecture
 
 ```mermaid
 flowchart TD
-    A[📄 Annual Report PDF] --> B[Page Selector]
-    B --> |BRSR heuristic + keyword scoring| C[Selected Pages\n80-120 per doc]
+    A([📄 Annual Report PDF]) --> B[Page Selector\nBRSR heuristic + keyword scoring]
+    B --> C[80–120 pages selected\nout of 200–300]
     C --> D[Chunker\n~600 tokens per chunk]
-    D --> E[Pass 1: LLM Extraction\nGPT-4.1-mini parallel]
-    E --> |Raw facts with unit + period| F[Pass 2: Normalizer]
-    F --> G{Match type}
-    G --> |Exact alias| H[normalized ✅]
-    G --> |Fuzzy semantic| I[partial ⚠️]
-    G --> |No match| J[new_metric 🔵]
-    G --> |Financial metric| K[out_of_scope 🚫]
-    H --> L[Neo4j KG Loader]
-    I --> L
-    J --> L
-    L --> M[(Neo4j Graph\n2,462 observations)]
-    M --> N[Streamlit Demo App]
-    M --> O[Eval Framework\n69-fact gold set]
+    D --> E[Pass 1 — LLM Extraction\nGPT-4.1-mini · parallel chunks]
+    E --> F[Pass 2 — Neighbor Rescue\nfetch adjacent chunks for split facts]
+    F --> G[Pass 3 — Normalization\nno API calls · pure local]
+    G --> H{Match type}
+    H --> |Exact alias match| I([normalized ✅])
+    H --> |Fuzzy semantic match| J([partial ⚠️])
+    H --> |LLM tiebreaker| K([normalized or partial])
+    H --> |No match| L([new_metric 🔵])
+    H --> |Financial metric| M([out_of_scope 🚫])
+    I --> N[Neo4j KG Loader]
+    J --> N
+    K --> N
+    L --> N
+    N --> O[(Neo4j Graph\n2,462 observations)]
+    O --> P[Streamlit Demo App]
+    O --> Q[Eval Framework\n69-fact gold set]
 
     style A fill:#C9748A,color:#fff
-    style M fill:#1A1A18,color:#fff
-    style N fill:#009EDB,color:#fff
-    style H fill:#2D6A4F,color:#fff
-    style K fill:#6B6560,color:#fff
+    style O fill:#1A1A18,color:#fff
+    style P fill:#009EDB,color:#fff
+    style I fill:#2D6A4F,color:#fff
+    style M fill:#6B6560,color:#fff
 ```
 
 ### Stage 0 — Page Selection
-The BRSR section of an Indian annual report spans 50-80 pages inside a 200-300 page document. A multi-tier selector identifies them:
 
-- **Tier 1:** PDF bookmark/TOC matching against BRSR heading patterns
-- **Tier 2:** BRSR range heuristic — detects the section heading and selects the following 70 pages
-- **Tier 3:** Keyword scoring fallback with financial page exclusion
+The BRSR section spans 50-80 pages inside a 200-300 page document with no consistent location. A three-tier selector finds it:
+
+- **Tier 1 — TOC matching:** Reads PDF bookmarks and matches against known BRSR heading patterns (`"Section C"`, `"Principle-wise Performance"`, `"Business Responsibility and Sustainability Report"`)
+- **Tier 2 — BRSR range heuristic:** When TOC matching fails, scans for BRSR section headings in the top half of each page and selects the following 70 pages as a block. Skips TOC pages detected by high density of page number references
+- **Tier 3 — Keyword scoring fallback:** Scores every page by weighted keyword hits; excludes financial statement pages by regex pattern matching
 
 ### Stage 1 — LLM Extraction (Pass 1)
-Each selected page is chunked into ~600-token segments and sent to GPT-4.1-mini in parallel via ThreadPoolExecutor. The prompt extracts structured facts with:
-- Raw metric name, value, unit, period
-- Source sentence (verbatim)
-- Fact class, scope, dimension
 
-Incremental checkpoint writing means interrupted runs resume without re-calling the API.
+Each page is split into ~600-token chunks and processed in parallel via `ThreadPoolExecutor`. GPT-4.1-mini extracts structured facts including raw metric name, value, unit, period, verbatim source sentence, fact class, scope, and dimension type.
 
-### Stage 2 — Normalization (Pass 2)
-No API calls — pure local computation:
+**Incremental checkpointing** — each completed chunk is written to a `.jsonl` partial file immediately. Interrupted runs resume from the last completed chunk without re-calling the API.
 
-1. **Exact alias lookup** against 289 manually curated aliases → `normalized`
-2. **Fuzzy semantic matching** using sentence-transformers cosine similarity → `partial`
-3. **LLM tiebreaker** for tied candidates within 0.20 score margin → resolves to `normalized` or stays `partial`
-4. **Financial metric filter** — revenue, EPS, profit → `out_of_scope_financial`
+**max_tokens = 16,000** — dense BRSR tables generate large JSON outputs. Earlier runs with 3,000 tokens caused silent chunk failures on the most data-rich pages.
 
-**Average Pass 2 time:** ~5 seconds per document
-**Average Pass 1 cost:** ~$0.55 per document
+### Stage 2 — Neighbor Rescue
+
+After all chunks complete, the pipeline identifies low-confidence extractions and facts at chunk boundaries. For each flagged fact, it fetches the previous and next chunk and re-sends all three to the LLM with additional context. Recovers facts split across page breaks — a common occurrence in BRSR tables that span pages.
+
+### Stage 3 — Normalization (Pass 3)
+
+No API calls. Pure local computation averaging ~5 seconds per document.
+
+| Step | Method | Outcome |
+|---|---|---|
+| Exact alias lookup | 289 manually curated aliases in `registry_aliases.json` | `normalized` |
+| Fuzzy semantic matching | sentence-transformers cosine similarity + semantic compatibility gate | `normalized` or `partial` |
+| LLM tiebreaker | Deterministic token matching → GPT disambiguation for tied candidates | `normalized` or `partial` |
+| Financial filter | Regex blocklist — revenue, EPS, profit, market cap | `out_of_scope_financial` |
+| No match | Provisional node created under raw metric name | `new_metric` |
 
 ---
 
-## The Knowledge Graph
+## Knowledge Graph
 
-Every ESG observation in the graph is not just a number — it's a node with 8 connections:
+Every ESG observation is a node connected to 8 other nodes — not a row in a table, but a first-class entity with relationships encoding who reported it, when, how confidently, and where.
 
 ![Single Observation](docs/images/graph_single_observation.png)
 
-| Relationship | Target Node | What it stores |
+### Observation Node Properties
+
+```
+obs_id                    nestle_india_fy2024_p208_1_fact_3
+raw_name                  Total electricity consumption from renewable sources
+raw_value                 955852
+raw_unit_string           GJ
+normalised_value          955852.0
+normalised_unit_symbol    GJ
+normalization_status      normalized
+canonical_id              renewable_energy_consumption_absolute
+period_label              FY2024
+period_start              2023-01-01
+period_end                2024-03-31
+source_doc_id             nestle_india_fy2024
+page                      208
+is_comparative            false
+```
+
+### Relationships
+
+| Relationship | Target | Stores |
 |---|---|---|
-| `REPORTED_BY` | Company | Which company disclosed this |
-| `IN_PERIOD` | Period | Fiscal year, start/end dates |
-| `OF_METRIC` | Metric:Canonical | Normalized metric identity |
-| `EXTRACTED_FROM` | Chunk | Source text passage |
-| `SUPPORTED_BY` | Evidence | Verbatim source sentence |
-| `HAS_CONFIDENCE` | ConfidenceRecord | Normalization status + score |
-| `MEASURED_IN` | Unit | Normalized unit symbol |
-| via Chunk | Section → Document | Full document provenance |
+| `REPORTED_BY` | `Company` | Which company disclosed this |
+| `IN_PERIOD` | `Period` | Fiscal year, calendar type, start/end dates |
+| `OF_METRIC` | `Metric:Canonical` | Stable metric identity across companies |
+| `EXTRACTED_FROM` | `Chunk` | The ~600-token text passage it came from |
+| `SUPPORTED_BY` | `Evidence` | The verbatim sentence from the PDF |
+| `HAS_CONFIDENCE` | `ConfidenceRecord` | normalization_status, confidence score, tiebreaker flag |
+| `MEASURED_IN` | `Unit` | Normalized unit with `CONVERTS_TO` edges |
+| via Chunk | `Section → Document` | Full document provenance chain |
 
 ### Three Observations — Full Provenance Chain
 
-![Three Observations](docs/images/graph_three_observations.png)
+![Three observations](docs/images/graph_three_observations.png)
 
-### Canonical Metrics Link Companies
+### Canonical Metrics — Cross-Company Bridge
 
-The same `Metric` node connects observations from different companies — this is what enables cross-company queries without manual ETL:
+The same `Metric:Canonical` node links observations from different companies. Nestlé's `"Total Scope 1 GHG emissions"`, Britannia's `"Total Scope 1 emissions (Break-up of the GHG)"`, and Marico's `"1,052.6 MTCO2E"` all resolve to `scope_1_emissions` — enabling cross-company queries without any manual ETL.
 
-![Canonical Metrics](docs/images/graph_canonical_metrics.png)
+![Canonical metrics](docs/images/graph_canonical_metrics.png)
 
 ```cypher
-// Compare Scope 1 emissions across all companies
-MATCH (o:Observation)-[:OF_METRIC]->(m:Metric
-      {canonical_id: 'scope_1_emissions'}),
+MATCH (o:Observation)-[:OF_METRIC]->(m:Metric {canonical_id: 'scope_1_emissions'}),
       (o)-[:REPORTED_BY]->(c:Company),
       (o)-[:IN_PERIOD]->(p:Period {fiscal_year: 'FY2024'})
 WHERE o.normalization_status IN ['normalized', 'partial']
@@ -128,28 +181,34 @@ RETURN c.display_name, value, 'tCO2e' as unit
 ORDER BY value DESC
 ```
 
-### Graph Schema
+### Schema
 
 ```
-Node types (11):     Observation, Company, Document,
-                     Section, Chunk, Evidence,
-                     ConfidenceRecord, Metric:Canonical,
-                     Metric:Provisional, Period, Unit,
-                     MetricCategory
+Node types (11)
+  Observation          Core fact node — one per extracted ESG measurement
+  Company              nestle_india · britannia · marico
+  Document             4 annual reports with fiscal year metadata
+  Section              PDF sections linked to documents
+  Chunk                ~600-token text passages with prev/next links
+  Evidence             Verbatim source sentence from the PDF
+  ConfidenceRecord     normalization_status, confidence score, tiebreaker flag
+  Metric:Canonical     297 registry-defined metrics with stable IDs
+  Metric:Provisional   1,456 auto-generated nodes for unmatched metrics
+  Period               Fiscal years with NEXT_YEAR chain (FY2024 → FY2025)
+  MetricCategory       Environmental / Social / Governance hierarchy
 
-Relationship types:  REPORTED_BY, IN_PERIOD, OF_METRIC,
-                     EXTRACTED_FROM, SUPPORTED_BY,
-                     HAS_CONFIDENCE, MEASURED_IN,
-                     IN_DOCUMENT, IN_SECTION, NEXT,
-                     FILED, BELONGS_TO, SUBCATEGORY_OF,
-                     NEXT_YEAR, FOUND_IN
+Relationship types (15)
+  REPORTED_BY · IN_PERIOD · OF_METRIC · EXTRACTED_FROM
+  SUPPORTED_BY · HAS_CONFIDENCE · MEASURED_IN · IN_SECTION
+  IN_DOCUMENT · FILED · NEXT · NEXT_YEAR
+  BELONGS_TO · SUBCATEGORY_OF · FOUND_IN
 ```
 
 ---
 
 ## Evaluation
 
-Accuracy was measured against a manually verified gold set of 69 facts from the Nestlé India FY2024 BRSR — the most data-dense document in the corpus.
+A 69-fact gold set was built by manually reading the Nestlé India FY2024 BRSR and recording the expected value, unit, period, and canonical for each fact. Facts were classified by difficulty — easy (structured table), medium (multi-year table or non-standard unit), hard (narrative text or compound unit).
 
 ```
 Total facts in gold set : 69
@@ -168,27 +227,23 @@ By difficulty:
   hard   :  7/15  (46.7%)
 ```
 
-**Primary failure modes:**
-- Period attribution errors from multi-year comparative tables (same value, wrong year column)
-- Chart-embedded values unreachable by text extraction
-- Compound unit normalization gaps (e.g. kgSOxe)
+**Failure modes**
 
----
-
-## Companies in Graph
-
-| Company | Documents | Observations |
+| Type | Count | Cause |
 |---|---|---|
-| Nestlé India | FY2024 (15-month), FY2025 | 1,347 |
-| Britannia Industries | FY2024 | 433 |
-| Marico Limited | FY2024 | 687 |
-| **Total** | **4 documents** | **2,462** |
+| Period attribution | 2 | Multi-year table — right value, wrong column |
+| Unit normalization | 3 | Compound units (kgSOxe) not in registry |
+| Canonical mismatch | 4 | Alias missing from registry |
+| Not extracted | 2 | Chart-embedded values, unreachable by text layer |
+| Value ambiguity | 2 | Two facts with similar values in same document |
+
+> The eval script itself had a bug — an early version matched facts by value proximity across all documents, causing CY2021 facts to match against FY2024 gold entries. Fixed by adding hard document and period constraints to the matching query.
 
 ---
 
 ## Registry
 
-The canonical metric registry is the backbone of cross-company normalization:
+The canonical registry is the backbone of cross-company normalization. Without it, `"Total Scope 1 GHG emissions"`, `"Scope 1 emissions (tCO2e)"`, and `"MTCO2E Direct emissions"` are three different metrics. With it, they're all `scope_1_emissions`.
 
 | File | Contents |
 |---|---|
@@ -196,21 +251,27 @@ The canonical metric registry is the backbone of cross-company normalization:
 | `registry_additions_approved.json` | BRSR-specific additions |
 | `registry_aliases.json` | 289 raw_name → canonical_id mappings |
 
-Each canonical has: `canonical_id`, `display_name`, `category` (environmental/social/governance), `unit_family`, `metric_role`, `metric_subject`.
+Each canonical defines `unit_family` and `metric_role` — fields that power the semantic compatibility gate in Pass 3. A metric with `unit_family: mass_co2e` won't match a canonical with `unit_family: volume` even if their names are similar.
 
-New companies introduce `new_metric` provisional nodes. Run `tools/registry_gap_analysis.py` after processing a new company to identify which provisional metrics should be promoted to canonicals.
+Run `tools/registry_gap_analysis.py` after processing a new company to cluster provisional metrics and identify candidates for promotion.
 
 ---
 
 ## Quick Start
 
-### 1. Install dependencies
+### Prerequisites
+
+- Python 3.10+
+- Neo4j Desktop or AuraDB
+- OpenAI API key
+
+### Install
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 2. Configure
+### Configure
 
 ```json
 // pipeline_config.json
@@ -222,79 +283,90 @@ pip install -r requirements.txt
 }
 ```
 
-### 3. Run the pipeline
+### Run
 
-```powershell
-python pipeline/run_pipeline.py `
-  --pdf /path/to/annual_report.pdf `
-  --company nestle_india `
-  --company-name "Nestlé India Limited" `
-  --year 2024 `
+```bash
+python pipeline/run_pipeline.py \
+  --pdf /path/to/annual_report.pdf \
+  --company nestle_india \
+  --company-name "Nestlé India Limited" \
+  --year 2024 \
   --calendar-type indian_fiscal
 ```
 
-Stages skip automatically if output files exist. Use `--no-kg` to stop before loading. Use `--force` to rerun all stages.
+| Flag | Description |
+|---|---|
+| `--no-kg` | Stop after Pass 3, don't load to Neo4j |
+| `--force` | Rerun all stages even if outputs exist |
+| `--pass1-only` | Run page selection and extraction only |
 
-### 4. Launch the demo
+Stages skip automatically if output files already exist.
 
-```powershell
+### Launch demo
+
+```bash
 streamlit run graph/demo_app.py --server.port 8502
 ```
 
-### 5. Run evaluation
+### Evaluate
 
-```powershell
+```bash
 python eval/eval_pipeline.py
 ```
 
 ---
 
-## Directory Structure
+## Project Structure
 
 ```
 ├── pipeline/
-│   ├── run_pipeline.py          Orchestrator (CLI entry point)
-│   ├── fast_pdf_text_ingest.py  Page selection + chunking
-│   ├── section_finder.py        BRSR section detection
-│   ├── extractor.py             Pass 1 LLM extraction
-│   ├── normalizer.py            Pass 2 canonical matching
-│   └── unit_normaliser.py       Unit conversion
+│   ├── run_pipeline.py            Orchestrator — CLI entry point
+│   ├── fast_pdf_text_ingest.py    Page selection + chunking
+│   ├── section_finder.py          BRSR section detection heuristics
+│   ├── extractor.py               Pass 1 LLM extraction + neighbor rescue
+│   ├── normalizer.py              Pass 3 canonical matching + tiebreaker
+│   └── unit_normaliser.py         Unit conversion + confidence scoring
 ├── registry/
 │   ├── consumer_master_registry_v1.json
 │   ├── registry_additions_approved.json
 │   └── registry_aliases.json
 ├── graph/
-│   ├── demo_app.py              Portfolio demo (port 8502)
-│   └── kg_query_app.py          NL→Cypher interface (port 8501)
+│   ├── demo_app.py                Portfolio demo — 3 tabs, port 8502
+│   └── kg_query_app.py            NL→Cypher query interface, port 8501
 ├── eval/
-│   ├── eval_pipeline.py         Evaluation runner
-│   └── eval_gold_set.py         69-fact gold set
-├── audit/                       Coverage + distance audits
+│   ├── eval_pipeline.py           Evaluation runner
+│   └── eval_gold_set.py           69-fact manually verified gold set
+├── audit/                         Coverage and distance audit scripts
 ├── tools/
-│   └── registry_gap_analysis.py Cross-company metric clustering
-└── workspace_test_outputs/      Pipeline artifacts (gitignored)
+│   └── registry_gap_analysis.py   Cross-company provisional metric clustering
+└── workspace_test_outputs/        All pipeline artifacts — gitignored
 ```
 
 ---
 
 ## Known Limitations
 
-- **Chart-embedded values** — PyMuPDF reads the text layer only; values embedded in charts or images are not extracted
-- **Multi-year comparative tables** — period attribution occasionally picks the wrong column in tables showing current and prior year side by side
-- **New company coverage** — canonical match rate is ~8% on first run for a new company; improves significantly after alias additions
-- **Cross-document duplicates** — comparative rows from one document can create duplicate observations for a prior period
+- **Chart-embedded values** — PyMuPDF reads the text layer only. Values in charts or infographics are not extractable. 2 of 69 gold set facts fall into this category.
+- **Multi-year comparative tables** — period attribution occasionally picks the wrong column, producing the right value in the wrong year.
+- **New company canonical coverage** — canonical match rate is ~8% on first run. Adding aliases to `registry_aliases.json` and rerunning Pass 3 (free, ~5 seconds) significantly improves this.
+- **Cross-document duplicates** — comparative rows in a newer report can create duplicate observations for a prior period. Use `max()` aggregation or filter by `source_doc_id` to get the authoritative value.
 
 ---
 
-## What's Next
+## Roadmap
 
-- **LLM canonicalization layer** — a third normalization step using GPT to resolve `new_metric` facts against the registry, expected to push match rates from ~8% to 40-50% on new companies
-- **Hybrid architecture** — PostgreSQL for analytics + Neo4j for provenance only
-- **Vision model extraction** — for chart-embedded values
-- **10+ companies** — expand registry coverage across Indian FMCG, pharma, and consumer sectors
+- [ ] **LLM canonicalization layer** — resolve `new_metric` facts using GPT, expected to push coverage from ~8% to 40-50% on new companies without manual alias work
+- [ ] **Hybrid architecture** — PostgreSQL for analytics + Neo4j for provenance only
+- [ ] **Vision model extraction** — extract values from charts and infographics
+- [ ] **Expanded company coverage** — registry expansion across Indian FMCG, pharma, and consumer sectors
 
 ---
 
 ## Tech Stack
+
+![Python](https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=white)
+![Neo4j](https://img.shields.io/badge/Neo4j-008CC1?style=flat&logo=neo4j&logoColor=white)
+![OpenAI](https://img.shields.io/badge/OpenAI-412991?style=flat&logo=openai&logoColor=white)
+![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=flat&logo=streamlit&logoColor=white)
 
 `Python` · `Neo4j` · `GPT-4.1-mini` · `sentence-transformers` · `Streamlit` · `Plotly` · `PyMuPDF` · `pandas` · `ThreadPoolExecutor`
