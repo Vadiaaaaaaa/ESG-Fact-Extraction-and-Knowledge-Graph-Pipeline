@@ -1,3 +1,4 @@
+.streamlit/secrets.toml
 workspace_test_outputs/
 _archive/
 .env

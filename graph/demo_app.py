@@ -23,12 +23,19 @@ _CONFIG = _ROOT / "pipeline_config.json"
 
 @st.cache_resource
 def get_driver():
-    cfg: dict[str, Any] = {}
-    if _CONFIG.exists():
-        cfg = json.loads(_CONFIG.read_text())
-    uri  = cfg.get("neo4j_uri",  os.getenv("NEO4J_URI",  "neo4j://127.0.0.1:7687"))
-    user = cfg.get("neo4j_user", os.getenv("NEO4J_USER", "neo4j"))
-    pwd  = cfg.get("neo4j_pass", cfg.get("neo4j_password", os.getenv("NEO4J_PASS", "Watermelon@123")))
+    # 1. Streamlit Cloud secrets (production)
+    try:
+        uri  = st.secrets["NEO4J_URI"]
+        user = st.secrets["NEO4J_USER"]
+        pwd  = st.secrets["NEO4J_PASS"]
+    except Exception:
+        # 2. Local pipeline_config.json
+        cfg: dict[str, Any] = {}
+        if _CONFIG.exists():
+            cfg = json.loads(_CONFIG.read_text())
+        uri  = cfg.get("neo4j_uri",  os.getenv("NEO4J_URI",  "neo4j://127.0.0.1:7687"))
+        user = cfg.get("neo4j_user", os.getenv("NEO4J_USER", "neo4j"))
+        pwd  = cfg.get("neo4j_pass", cfg.get("neo4j_password", os.getenv("NEO4J_PASS", "")))
     drv = GraphDatabase.driver(uri, auth=(user, pwd))
     drv.verify_connectivity()
     return drv
