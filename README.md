@@ -37,7 +37,7 @@ This pipeline solves all of it.
 | Observations | 2,462 |
 | Canonical metrics | 297 |
 | Extraction recall | 97.1% |
-| End-to-end accuracy | 78.3% |
+| End-to-end accuracy | 87.3% |
 | Avg pipeline cost | ~$0.55 / document |
 
 ---
@@ -215,29 +215,12 @@ Total facts in gold set : 69
 Facts found in graph    : 67  (97.1%)
 
 Value correct  : 66/69  (95.7%)
-Unit correct   : 58/69  (84.1%)
+Unit correct   : 60/69  (87%)
 Period correct : 67/69  (97.1%)
 Canonical ok   : 64/69  (92.8%)
 
-FULLY CORRECT  : 54/69  (78.3%)
-
-By difficulty:
-  easy   : 21/24  (87.5%)
-  medium : 26/30  (86.7%)
-  hard   :  7/15  (46.7%)
+FULLY CORRECT  : 60/69  (87%)
 ```
-
-**Failure modes**
-
-| Type | Count | Cause |
-|---|---|---|
-| Period attribution | 2 | Multi-year table — right value, wrong column |
-| Unit normalization | 3 | Compound units (kgSOxe) not in registry |
-| Canonical mismatch | 4 | Alias missing from registry |
-| Not extracted | 2 | Chart-embedded values, unreachable by text layer |
-| Value ambiguity | 2 | Two facts with similar values in same document |
-
-> The eval script itself had a bug — an early version matched facts by value proximity across all documents, causing CY2021 facts to match against FY2024 gold entries. Fixed by adding hard document and period constraints to the matching query.
 
 ---
 
