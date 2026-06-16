@@ -1,7 +1,8 @@
 {
-    "neo4j_uri": "neo4j://127.0.0.1:7687",
-    "neo4j_user": "neo4j",
-    "neo4j_pass": "Watermelon@123",
+    "neo4j_uri": "neo4j+ssc://933ec285.databases.neo4j.io",
+    "neo4j_user": "933ec285",
+    "neo4j_pass": "8dTkWLy9RvxVtp5RTJEP5EGFgvG1pO6H38Pw5NdjgT8",
+    "neo4j_database": "933ec285",
     "output_dir": "workspace_test_outputs",
     "default_sector": "FMCG",
     "default_country": "India",

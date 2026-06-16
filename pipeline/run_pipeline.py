@@ -629,7 +629,7 @@ def run_upsert_canonicals(args: argparse.Namespace) -> None:
 
     driver = GraphDatabase.driver(args.neo4j_uri, auth=(args.neo4j_user, args.neo4j_pass))
     try:
-        with driver.session(database="neo4j") as session:
+        with driver.session(database=args.neo4j_database) as session:
             seed_metric_categories(session)
             session.run(
                 "UNWIND $rows AS r "
@@ -672,7 +672,7 @@ def run_kg_load(args: argparse.Namespace, prefix: str, outdir: Path) -> None:
     doc_id = get_doc_id(args.company, args.year, args.calendar_type)
 
     driver = GraphDatabase.driver(args.neo4j_uri, auth=(args.neo4j_user, args.neo4j_pass))
-    with driver.session(database="neo4j") as session:
+    with driver.session(database=args.neo4j_database) as session:
         fiscal_year = ensure_period_node(session, args.year, args.calendar_type)
         print(f"  Period node: {fiscal_year}")
 
@@ -717,7 +717,7 @@ def verify_load(args: argparse.Namespace, doc_id: str) -> None:
     from neo4j import GraphDatabase
 
     driver = GraphDatabase.driver(args.neo4j_uri, auth=(args.neo4j_user, args.neo4j_pass))
-    with driver.session(database="neo4j") as session:
+    with driver.session(database=args.neo4j_database) as session:
         result = session.run(
             "MATCH (d:Document {doc_id: $did})"
             "<-[:IN_DOCUMENT]-(s:Section)"
@@ -775,7 +775,7 @@ def run_dry_run(args: argparse.Namespace) -> None:
         try:
             from neo4j import GraphDatabase
             driver = GraphDatabase.driver(args.neo4j_uri, auth=(args.neo4j_user, args.neo4j_pass))
-            with driver.session(database="neo4j") as session:
+            with driver.session(database=args.neo4j_database) as session:
                 result = session.run(
                     "MATCH (p:Period {fiscal_year: $fy}) RETURN p.fiscal_year as fy",
                     fy=fy_label,
@@ -886,6 +886,7 @@ def build_parser(config: dict) -> argparse.ArgumentParser:
     parser.add_argument("--neo4j-uri",       default=config.get("neo4j_uri",  "neo4j://127.0.0.1:7687"))
     parser.add_argument("--neo4j-user",      default=config.get("neo4j_user", "neo4j"))
     parser.add_argument("--neo4j-pass",      default=config.get("neo4j_pass", "Watermelon@123"))
+    parser.add_argument("--neo4j-database",  default=config.get("neo4j_database", "neo4j"))
     return parser
 
 
